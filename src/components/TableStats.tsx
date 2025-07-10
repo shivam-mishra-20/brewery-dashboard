@@ -66,32 +66,32 @@ const TableStats: React.FC<TableStatsProps> = ({ tables }) => {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
       {statsItems.map((stat, index) => (
         <div
           key={index}
           className={
             index === 0
-              ? 'gap-5 bg-gradient-to-bl from-primary to-secondary text-white p-5 rounded-2xl shadow-inner shadow-white/[.4] flex flex-col items-start justify-center border-2 border-primary/30 overflow-hidden'
-              : 'gap-5 bg-white p-5 rounded-2xl flex flex-col items-start justify-center'
+              ? 'gap-3 sm:gap-5 bg-gradient-to-bl from-primary to-secondary text-white p-3 sm:p-5 rounded-2xl shadow-inner shadow-white/[.4] flex flex-col items-start justify-center border-2 border-primary/30 overflow-hidden col-span-2 sm:col-span-1'
+              : 'gap-3 sm:gap-5 bg-white p-3 sm:p-5 rounded-2xl flex flex-col items-start justify-center'
           }
         >
           <p
-            className={`${index === 0 ? 'text-white/90' : 'text-black'} flex items-center justify-between w-full text-md md:text-lg`}
+            className={`${index === 0 ? 'text-white/90' : 'text-black'} flex items-center justify-between w-full text-sm sm:text-md md:text-lg`}
           >
-            {stat.header}
+            <span className="text-xs sm:text-sm md:text-base">{stat.header}</span>
             {index === 0 ? (
-              <BsArrowUpRightCircleFill className="text-3xl" />
+              <BsArrowUpRightCircleFill className="text-xl sm:text-2xl md:text-3xl" />
             ) : (
-              <BsArrowUpRightCircle className="text-3xl" />
+              <BsArrowUpRightCircle className="text-xl sm:text-2xl md:text-3xl" />
             )}
           </p>
-          <h2 className="lg:text-5xl text-2xl md:text-4xl font-bold">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold">
             {stat.value}
           </h2>
           <span
             className={
-              index === 0 ? 'text-sm text-white/80' : 'text-sm text-[#ffc300]'
+              index === 0 ? 'text-xs sm:text-sm text-white/80' : 'text-xs sm:text-sm text-[#ffc300]'
             }
           >
             {stat.description}
