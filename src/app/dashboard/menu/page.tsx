@@ -86,7 +86,7 @@ export default function MenuPage() {
   // Handle category change
   useEffect(() => {
     loadMenuItemsByCategory(selectedCategory)
-  }, [selectedCategory, loadMenuItemsByCategory])
+  }, [selectedCategory])
 
   // Filter items based on search
   const filteredItems = menuItems.filter(
