@@ -1,0 +1,15 @@
+{
+    "semi": false,
+    "singleQuote": true,
+    "plugins": [
+        "prettier-plugin-tailwindcss",
+        "@ianvs/prettier-plugin-sort-imports"
+    ],
+    "tailwindConfig": "./tailwind.config.ts",
+    "importOrder": [
+        "^@/(.*)$",
+        "^[./]"
+    ],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true
+}

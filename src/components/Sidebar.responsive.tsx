@@ -1,0 +1,263 @@
+'use client'
+
+import {
+  CoffeeOutlined,
+  DashboardOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  ShoppingCartOutlined,
+} from '@ant-design/icons'
+import { AnimatePresence, motion } from 'framer-motion'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import React, { useState } from 'react'
+import { BiHelpCircle } from 'react-icons/bi'
+import { MdOutlineTableBar } from 'react-icons/md'
+import { SlBadge } from 'react-icons/sl'
+
+const menuSections = [
+  {
+    title: 'MENU',
+    items: [
+      { label: 'Dashboard', href: '/dashboard', icon: <DashboardOutlined /> },
+      {
+        label: 'Orders',
+        href: '/dashboard/orders',
+        icon: <ShoppingCartOutlined />,
+      },
+      { label: 'Menu', href: '/dashboard/menu', icon: <CoffeeOutlined /> },
+      {
+        label: 'Tables',
+        href: '/dashboard/tables',
+        icon: <MdOutlineTableBar />,
+      },
+    ],
+  },
+  {
+    title: 'GENERAL',
+    items: [
+      {
+        label: 'Settings',
+        href: '/dashboard/settings',
+        icon: <SettingOutlined />,
+      },
+      { label: 'Help', href: '/dashboard/help', icon: <BiHelpCircle /> },
+      { label: 'Logout', href: '/dashboard/logout', icon: <LogoutOutlined /> },
+    ],
+  },
+]
+
+const sidebarVariants = {
+  open: {
+    x: 0,
+    transition: { type: 'spring' as const, stiffness: 300, damping: 30 },
+  },
+  closed: {
+    x: '-100%',
+    transition: { type: 'spring' as const, stiffness: 300, damping: 30 },
+  },
+}
+
+const Sidebar: React.FC = () => {
+  const pathname = usePathname()
+  const [open, setOpen] = useState(false)
+
+  // Listen for custom event from Navbar to open sidebar
+  React.useEffect(() => {
+    const handler = () => setOpen(true)
+    window.addEventListener('openSidebar', handler)
+    return () => window.removeEventListener('openSidebar', handler)
+  }, [])
+
+  return (
+    <>
+      {/* Hamburger for mobile is now controlled from Navbar */}
+      {/* Desktop sidebar */}
+      <aside className="hidden  lg:flex h-[95vh] relative mt-5 rounded-2xl w-64 mx-5 bg-[#f7f7f7] borderborder-gray-600/[0.1] flex-col p-4 overflow-hidden">
+        <div className="flex flex-col items-center justify-center w-full mb-8">
+          <div className="flex items-center justify-start gap-3 w-full">
+            <Image
+              src="/workbrewLogo.jpg"
+              alt="logo"
+              className="rounded-xl border border-black/[0.5] bg-primary p-1"
+              unoptimized
+              height={50}
+              width={50}
+            />
+            <h2 className="text-xl tracking-tighter font-inter-semibold pt-1">
+              Work Brew
+            </h2>
+          </div>
+        </div>
+        {menuSections.map((section) => (
+          <nav
+            key={section.title}
+            className={`flex flex-col ${section.title === 'GENERAL' ? 'pt-10' : 'pt-7'} gap-2`}
+          >
+            <h1 className="text-sm font-inter text-gray-500">
+              {section.title}
+            </h1>
+            {section.items.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold
+                  hover:bg-gray-100 
+                  ${pathname === item.href ? 'text-black' : 'text-gray-400'}
+                `}
+              >
+                {pathname === item.href && (
+                  <p className="h-[35px] absolute left-0 rounded-tr-lg rounded-br-lg w-[6px] shadow-inner shadow-white/[0.5] border-[#ffc300]/[0.1] border-r  border-t border-b bg-[#ffc300]"></p>
+                )}
+                <span
+                  className={`text-xl ${pathname === item.href ? 'text-[#ffc300]' : 'text-gray-400'} ${section.title === 'MENU' && pathname === item.href ? 'font-bold' : ''}`}
+                >
+                  {item.icon}
+                </span>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        ))}
+        <div className="w-full h-[250px] px-5 py-5 absolute bottom-3 left-0 flex items-center justify-center">
+          <div
+            className="flex flex-col items-center justify-between h-full w-full rounded-3xl overflow-hidden shadow-lg"
+            style={{
+              backgroundImage:
+                "url('https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrBYl1cBdZnCt1-V9e75Klm4Xy3s-m92VY3IXzOzB5pDKW1-jZhCvD0juPWM7dr9xeYysKaL6Vj_UP4woA8Uw2523MpdrojIzisb-b23-7fTjZmz3_gzzQFwmaDQOqqVX4HnHc=s680-w680-h510-rw')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            <div className="flex flex-col items-start w-full h-full bg-black/[0.6] rounded-3xl p-4">
+              <div className="bg-white rounded-full p-2 mb-2 w-fit">
+                <SlBadge className="text-yellow-600" style={{ fontSize: 20 }} />
+              </div>
+              <h1 className="text-white text-lg font-inter mb-1">
+                Powered By <br />{' '}
+                <span className="text-white/80 mb-1">Okay Bills</span>
+              </h1>
+              <p className="text-white pt-1 text-xs font-inter-regular font-light mb-4">
+                Get easy in another way
+              </p>
+              <div className="flex w-full justify-center items-end ">
+                <button className="text-white text-sm bg-gradient-to-tr from-primary via-secondary to-primary shadow-white/[.4] border border-primary/[0.1] shadow-inner  py-2.5 rounded-2xl w-full">
+                  Visit Us
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      {/* Mobile sidebar with framer-motion */}
+      <AnimatePresence>
+        {open && (
+          <motion.aside
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={sidebarVariants}
+            className="fixed top-0 left-0 z-50 h-screen w-64 bg-[#f7f7f7] borderborder-gray-600/[0.1] flex flex-col p-4 shadow-2xl lg:hidden"
+          >
+            <button
+              className="absolute top-4 right-4 bg-white rounded-full p-2 shadow border border-gray-200"
+              onClick={() => setOpen(false)}
+              aria-label="Close sidebar"
+            >
+              <svg
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M6 6l12 12M6 18L18 6" />
+              </svg>
+            </button>
+            <div className="flex flex-col items-center justify-center w-full mb-8 mt-8">
+              <div className="flex items-center justify-start gap-3 w-full">
+                <Image
+                  src="/workbrewLogo.jpg"
+                  alt="logo"
+                  className="rounded-xl border border-black/[0.5] bg-primary p-1"
+                  unoptimized
+                  height={50}
+                  width={50}
+                />
+                <h2 className="text-xl tracking-tighter font-inter-semibold pt-1">
+                  Work Brew
+                </h2>
+              </div>
+            </div>
+            {menuSections.map((section) => (
+              <nav
+                key={section.title}
+                className={`flex flex-col ${section.title === 'GENERAL' ? 'pt-10' : 'pt-7'} gap-2`}
+              >
+                <h1 className="text-sm font-inter text-gray-500">
+                  {section.title}
+                </h1>
+                {section.items.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold
+                      hover:bg-gray-100 
+                      ${pathname === item.href ? 'text-black' : 'text-gray-400'}
+                    `}
+                    onClick={() => setOpen(false)}
+                  >
+                    {pathname === item.href && (
+                      <p className="h-[35px] absolute left-0 rounded-tr-lg rounded-br-lg w-[6px] shadow-inner shadow-white/[0.5] border-[#ffc300]/[0.1] border-r  border-t border-b bg-[#ffc300]"></p>
+                    )}
+                    <span
+                      className={`text-xl ${pathname === item.href ? 'text-[#ffc300]' : 'text-gray-400'} ${section.title === 'MENU' && pathname === item.href ? 'font-bold' : ''}`}
+                    >
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            ))}
+            <div className="w-full h-[220px] px-2 py-2 mt-5 flex items-center justify-center">
+              <div
+                className="flex flex-col items-center justify-between h-full w-full rounded-3xl overflow-hidden shadow-lg"
+                style={{
+                  backgroundImage:
+                    "url('https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrBYl1cBdZnCt1-V9e75Klm4Xy3s-m92VY3IXzOzB5pDKW1-jZhCvD0juPWM7dr9xeYysKaL6Vj_UP4woA8Uw2523MpdrojIzisb-b23-7fTjZmz3_gzzQFwmaDQOqqVX4HnHc=s680-w680-h510-rw')",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              >
+                <div className="flex flex-col items-start w-full h-full bg-black/[0.6] rounded-3xl p-4">
+                  <div className="bg-white rounded-full p-2 mb-2 w-fit">
+                    <SlBadge
+                      className="text-yellow-600"
+                      style={{ fontSize: 20 }}
+                    />
+                  </div>
+                  <h1 className="text-white text-lg font-inter mb-1">
+                    Powered By <br />{' '}
+                    <span className="text-white/80 mb-1">Okay Bills</span>
+                  </h1>
+                  <p className="text-white pt-1 text-xs font-inter-regular font-light mb-4">
+                    Get easy in another way
+                  </p>
+                  <div className="flex w-full justify-center items-end ">
+                    <button className="text-white text-sm bg-primary/[0.8] shadow-white/[.4] border border-primary/[0.1] shadow-inner  py-2.5 rounded-2xl w-full">
+                      Visit Us
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
+export default Sidebar

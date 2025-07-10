@@ -1,0 +1,241 @@
+import mongoose from 'mongoose'
+import { NextRequest, NextResponse } from 'next/server'
+import { connectDB, disconnectDB } from '@/lib/mongodb'
+import { Reservation } from '@/models/Reservation'
+
+// Get Table model
+const Table = mongoose.models.Table
+
+// Define correct params type
+interface Params {
+  id: string;
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
+  try {
+    const id = params.id
+
+    await connectDB()
+
+    const reservation = await Reservation.findById(id).populate(
+      'tableId',
+      'tableNumber capacity location',
+    )
+
+    if (!reservation) {
+      return NextResponse.json(
+        { success: false, error: 'Reservation not found' },
+        { status: 404 },
+      )
+    }
+
+    return NextResponse.json(
+      { success: true, data: reservation },
+      { status: 200 },
+    )
+  } catch (error) {
+    console.error(`Error fetching reservation ${params.id}:`, error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch reservation' },
+      { status: 500 },
+    )
+  } finally {
+    await disconnectDB()
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
+  try {
+    const id = params.id
+    const body = await request.json()
+
+    await connectDB()
+
+    // Check if reservation exists
+    const existingReservation = await Reservation.findById(id)
+    if (!existingReservation) {
+      return NextResponse.json(
+        { success: false, error: 'Reservation not found' },
+        { status: 404 },
+      )
+    }
+
+    // If updating the table, check capacity
+    if (
+      body.tableId &&
+      body.tableId !== existingReservation.tableId.toString()
+    ) {
+      const newTable = await Table.findById(body.tableId)
+      if (!newTable) {
+        return NextResponse.json(
+          { success: false, error: 'New table not found' },
+          { status: 404 },
+        )
+      }
+
+      const partySize = body.partySize || existingReservation.partySize
+      if (partySize > newTable.capacity) {
+        return NextResponse.json(
+          { success: false, error: 'Party size exceeds new table capacity' },
+          { status: 400 },
+        )
+      }
+    }
+
+    // Check for conflicting reservations if time/table is changed
+    if (
+      (body.reservationDate || body.duration || body.tableId) &&
+      body.status !== 'cancelled' &&
+      existingReservation.status !== 'cancelled'
+    ) {
+      const tableId = body.tableId || existingReservation.tableId
+      const reservationDateObj = body.reservationDate
+        ? new Date(body.reservationDate)
+        : existingReservation.reservationDate
+      const duration = body.duration || existingReservation.duration
+      const endTime = new Date(reservationDateObj.getTime() + duration * 60000)
+
+      const conflictingReservation = await Reservation.findOne({
+        _id: { $ne: id },
+        tableId: tableId,
+        status: { $in: ['confirmed', 'pending'] },
+        $or: [
+          // New reservation starts during an existing reservation
+          {
+            reservationDate: { $lte: reservationDateObj },
+            $expr: {
+              $gte: [
+                {
+                  $add: [
+                    '$reservationDate',
+                    { $multiply: ['$duration', 60000] },
+                  ],
+                },
+                reservationDateObj.getTime(),
+              ],
+            },
+          },
+          // New reservation ends during an existing reservation
+          {
+            reservationDate: { $lte: endTime },
+            $expr: {
+              $gte: [
+                {
+                  $add: [
+                    '$reservationDate',
+                    { $multiply: ['$duration', 60000] },
+                  ],
+                },
+                endTime.getTime(),
+              ],
+            },
+          },
+        ],
+      })
+
+      if (conflictingReservation) {
+        return NextResponse.json(
+          { success: false, error: 'Table is already reserved for this time' },
+          { status: 400 },
+        )
+      }
+    }
+
+    // Handle status changes
+    if (body.status && body.status !== existingReservation.status) {
+      // If cancelling, free up the table
+      if (
+        body.status === 'cancelled' &&
+        existingReservation.status !== 'cancelled'
+      ) {
+        await Table.findByIdAndUpdate(existingReservation.tableId, {
+          status: 'available',
+          lastOccupied: 'Reservation cancelled',
+          updatedAt: new Date(),
+        })
+      }
+      // If marking as confirmed from cancelled, mark the table as reserved
+      else if (
+        body.status === 'confirmed' &&
+        existingReservation.status === 'cancelled'
+      ) {
+        await Table.findByIdAndUpdate(existingReservation.tableId, {
+          status: 'reserved',
+          lastOccupied: `Reserved for ${existingReservation.reservationDate.toLocaleTimeString()}`,
+          updatedAt: new Date(),
+        })
+      }
+    }
+
+    // Update the reservation
+    const updatedReservation = await Reservation.findByIdAndUpdate(
+      id,
+      { $set: body },
+      { new: true, runValidators: true },
+    )
+
+    return NextResponse.json(
+      { success: true, data: updatedReservation },
+      { status: 200 },
+    )
+  } catch (error) {
+    console.error(`Error updating reservation ${params.id}:`, error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to update reservation' },
+      { status: 500 },
+    )
+  } finally {
+    await disconnectDB()
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
+  try {
+    const id = params.id
+
+    await connectDB()
+
+    // Check if reservation exists
+    const existingReservation = await Reservation.findById(id)
+    if (!existingReservation) {
+      return NextResponse.json(
+        { success: false, error: 'Reservation not found' },
+        { status: 404 },
+      )
+    }
+
+    // If reservation is active (confirmed/pending), update the table status
+    if (['confirmed', 'pending'].includes(existingReservation.status)) {
+      await Table.findByIdAndUpdate(existingReservation.tableId, {
+        status: 'available',
+        lastOccupied: 'Reservation removed',
+        updatedAt: new Date(),
+      })
+    }
+
+    // Delete the reservation
+    await Reservation.findByIdAndDelete(id)
+
+    return NextResponse.json(
+      { success: true, message: 'Reservation deleted successfully' },
+      { status: 200 },
+    )
+  } catch (error) {
+    console.error(`Error deleting reservation ${params.id}:`, error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete reservation' },
+      { status: 500 },
+    )
+  } finally {
+    await disconnectDB()
+  }
+}

@@ -1,0 +1,157 @@
+/* Custom styles for the menu item carousel */
+
+/* Small card view in menu list */
+.menu-item-carousel {
+  height: 100%;
+  width: 100%;
+}
+
+.menu-item-carousel .carousel .slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.menu-item-carousel .carousel .control-dots {
+  position: absolute;
+  bottom: -6px;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-item-carousel .carousel .control-dots .dot {
+  width: 4px;
+  height: 4px;
+  margin: 0 2px;
+  background: #ffd700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.menu-item-carousel .carousel .control-dots .dot.selected {
+  opacity: 1;
+  transform: scale(1.2);
+  background: #ffb700;
+}
+
+.menu-item-carousel .carousel .carousel-status {
+  display: none;
+}
+
+/* Large view in modal/edit form */
+.menu-item-modal-carousel {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.menu-item-modal-carousel .carousel .slide {
+  background: linear-gradient(to bottom, #fffbeb, #fff8e1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.menu-item-modal-carousel .carousel .slide img {
+  object-fit: contain;
+  width: 100%;
+  height: 220px;
+  transition: transform 0.5s ease;
+}
+
+.menu-item-modal-carousel .carousel .slide img:hover {
+  transform: scale(1.05);
+}
+
+.menu-item-modal-carousel .carousel .control-dots {
+  position: absolute;
+  bottom: 10px;
+  margin: 0;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  display: inline-flex;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.menu-item-modal-carousel .carousel .control-dots .dot {
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  background: #ffd700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.menu-item-modal-carousel .carousel .control-dots .dot.selected {
+  background: #ff9800;
+  transform: scale(1.2);
+}
+
+.menu-item-modal-carousel .carousel .control-arrow {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.menu-item-modal-carousel .carousel .control-arrow:hover {
+  background: rgba(255, 255, 255, 0.95);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Hide carousel controls if only one image */
+.carousel.single-image .control-dots,
+.carousel.single-image .control-arrow {
+  display: none;
+}
+
+/* Enhanced card effects */
+.menu-item-card-hover-effect {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.menu-item-card-hover-effect:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 14px 28px rgba(255, 193, 7, 0.15), 
+              0 10px 10px rgba(255, 193, 7, 0.12);
+}
+
+/* Image loading animation */
+@keyframes imageFadeIn {
+  from { opacity: 0; filter: blur(10px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+.menu-item-carousel img {
+  animation: imageFadeIn 0.5s ease-out;
+}
+
+/* Price tag animation */
+@keyframes pulsate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.price-highlight {
+  animation: pulsate 2s infinite ease-in-out;
+}
