@@ -243,6 +243,7 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
             </span>
           </div>
           <div
+            className="mt-5"
             style={{
               position: 'absolute',
               top: 32,
@@ -285,7 +286,14 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
                     )
                   }}
                 />
-                <YAxis tick={{ fill: '#64748b' }} />
+                <YAxis
+                  tickFormatter={(value) => {
+                    // Remove any dash, period, or unwanted character
+                    return String(value).replace(/[-.]/g, '')
+                  }}
+                  tick={{ fill: '#64748b' }}
+                  axisLine={false}
+                />
                 <Tooltip
                   content={<CustomTooltip />}
                   cursor={{ fill: '#fffde7', opacity: 0.7 }}

@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import jwt from 'jsonwebtoken'
 import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
+import { SubscriptionPlan } from '@/models/SubscriptionPlan'
 import { User } from '@/models/User'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme'

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { MenuItem, MenuItemFormData } from '@/models/MenuItem'
 import {
   addMenuItem,
-  deleteMenuItem,
+  deleteMenuItem as deleteMenuItems,
   getAllMenuItems,
   getMenuItemsByCategory,
   toggleMenuItemAvailability,
@@ -37,25 +37,28 @@ export const useMenu = () => {
     }
   }
 
-  const loadMenuItemsByCategory = async (category: string) => {
-    try {
-      setLoading(true)
-      setError(null)
+  const loadMenuItemsByCategory = useCallback(
+    async (category: string) => {
+      try {
+        setLoading(true)
+        setError(null)
 
-      if (category === 'All') {
-        await loadMenuItems()
-        return
+        if (category === 'All') {
+          await loadMenuItems()
+          return
+        }
+
+        const items = await getMenuItemsByCategory(category)
+        setMenuItems(items)
+      } catch (err) {
+        setError(`Failed to load ${category} menu items`)
+        console.error('Error loading menu items by category:', err)
+      } finally {
+        setLoading(false)
       }
-
-      const items = await getMenuItemsByCategory(category)
-      setMenuItems(items)
-    } catch (err) {
-      setError(`Failed to load ${category} menu items`)
-      console.error('Error loading menu items by category:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    [], // Empty dependency array since we don't use any external variables
+  )
 
   const addNewMenuItem = async (
     formData: MenuItemFormData,
@@ -101,7 +104,7 @@ export const useMenu = () => {
       setLoading(true)
       setError(null)
 
-      await deleteMenuItem(id)
+      await deleteMenuItems(id)
       await loadMenuItems() // Refresh the list
       return true
     } catch (err) {
@@ -145,11 +148,18 @@ export const useMenu = () => {
     loadMenuItems()
   }, [])
 
+  // Memoize the fetchMenuItems for components that need it
+  const fetchMenuItems = useCallback(() => {
+    return loadMenuItems()
+  }, [])
+
   return {
     menuItems,
     loading,
+    isLoading: loading, // Added alias for consistency with other hooks
     error,
     categories,
+    fetchMenuItems,
     loadMenuItems,
     loadMenuItemsByCategory,
     addMenuItem: addNewMenuItem,

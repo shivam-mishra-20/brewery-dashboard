@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         .lean()
 
       // Map MongoDB documents to the expected format
-      return menuItems.map((item: MenuItemDoc) => ({
+      return menuItems.map((item: MenuItemDoc & { [key: string]: any }) => ({
         id: typeof item._id === 'string' ? item._id : item._id.toString(),
         name: item.name,
         description: item.description,
@@ -47,9 +47,12 @@ export async function GET(request: NextRequest) {
         imageURL: item.imageURL || '',
         images: item.images || [],
         imageURLs: item.imageURLs || [],
+        videoUrl: item.videoUrl || '',
+        videoThumbnailUrl: item.videoThumbnailUrl || '',
         available: item.available,
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
+        ingredients: item.ingredients || [],
+        createdAt: item.createdAt?.toISOString?.() || '',
+        updatedAt: item.updatedAt?.toISOString?.() || '',
       }))
     })
 

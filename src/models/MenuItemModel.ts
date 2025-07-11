@@ -1,4 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
+import { MenuItemIngredient } from './InventoryItem'
 import { DEFAULT_CATEGORIES } from './MenuItem'
 
 export interface IMenuItem extends Document {
@@ -10,7 +11,10 @@ export interface IMenuItem extends Document {
   imageURL: string // legacy: first image URL
   images: string[] // array of image file names - required
   imageURLs: string[] // array of image URLs - required
+  videoUrl?: string // URL to the recipe/promotional video
+  videoThumbnailUrl?: string // URL to video thumbnail
   available: boolean
+  ingredients?: MenuItemIngredient[] // Ingredients from inventory
   createdAt: Date
   updatedAt: Date
 }
@@ -29,7 +33,20 @@ const MenuItemSchema: Schema<IMenuItem> = new Schema(
     imageURL: { type: String, default: '' },
     images: { type: [String], required: true, default: [] },
     imageURLs: { type: [String], required: true, default: [] },
+    videoUrl: { type: String, default: '' },
+    videoThumbnailUrl: { type: String, default: '' },
     available: { type: Boolean, default: true },
+    ingredients: {
+      type: [
+        {
+          inventoryItemId: { type: String, required: true },
+          inventoryItemName: { type: String, required: true },
+          quantity: { type: Number, required: true },
+          unit: { type: String, required: true },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true },
 )

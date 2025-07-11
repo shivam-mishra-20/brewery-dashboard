@@ -4,9 +4,11 @@ import {
   BarChartOutlined,
   CoffeeOutlined,
   DashboardOutlined,
+  InboxOutlined,
   LogoutOutlined,
   SettingOutlined,
   ShoppingCartOutlined,
+  VideoCameraOutlined,
 } from '@ant-design/icons'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -26,9 +28,19 @@ const menuSections = [
       },
       { label: 'Menu', href: '/dashboard/menu', icon: <CoffeeOutlined /> },
       {
+        label: 'Inventory',
+        href: '/dashboard/inventory',
+        icon: <InboxOutlined />,
+      },
+      {
         label: 'Analytics',
         href: '/dashboard/analytics',
         icon: <BarChartOutlined />,
+      },
+      {
+        label: 'Videos',
+        href: '/dashboard/videos',
+        icon: <VideoCameraOutlined />,
       },
     ],
   },

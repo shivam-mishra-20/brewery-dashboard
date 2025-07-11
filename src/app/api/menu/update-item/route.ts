@@ -4,10 +4,13 @@ import {
   ref,
   uploadBytes,
 } from 'firebase/storage'
+import mime from 'mime-types'
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 import { storage } from '@/lib/firebase'
 import { withDBRetry } from '@/lib/mongodb'
+import InventoryItem from '@/models/db/InventoryItem'
+import { MenuItemIngredient } from '@/models/InventoryItem'
 import { MenuItemModel } from '@/models/MenuItemModel'
 
 export async function POST(request: NextRequest) {
@@ -37,6 +40,19 @@ export async function POST(request: NextRequest) {
       const img = formData.get(`image${i}`) as File | null
       if (img && img.size > 0) images.push(img)
     }
+
+    // Get video file and existing video URL
+    const videoFile = formData.get('video') as File | null
+    const existingVideoUrl = formData.get('existingVideoUrl') as string | null
+    const existingVideoThumbnailUrl = formData.get(
+      'existingVideoThumbnailUrl',
+    ) as string | null
+
+    // Get the ingredients if provided
+    const ingredientsStr = formData.get('ingredients') as string | null
+    const ingredients = ingredientsStr
+      ? (JSON.parse(ingredientsStr) as MenuItemIngredient[])
+      : []
 
     // Validate required fields
     if (!id || !name || !description || isNaN(price) || !category) {
@@ -88,6 +104,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Handle video deletion if a new video is uploaded but there was an existing one
+    if (videoFile && videoFile.size > 0 && menuItem.videoUrl) {
+      try {
+        const oldVideoRef = ref(storage, menuItem.videoUrl)
+        await deleteObject(oldVideoRef)
+      } catch (error) {
+        console.error('Error deleting old video (continuing):', error)
+      }
+    }
+
     const imageURLs: string[] = []
     const imageNames: string[] = []
 
@@ -99,7 +125,9 @@ export async function POST(request: NextRequest) {
           const filename = `${uuidv4()}_${imageName}`
           const storageRef = ref(storage, `menu-items/${filename}`)
           const buffer = await image.arrayBuffer()
-          await uploadBytes(storageRef, buffer)
+          const contentType =
+            mime.lookup(imageName) || 'application/octet-stream'
+          await uploadBytes(storageRef, buffer, { contentType })
           const imageURL = await getDownloadURL(storageRef)
           imageURLs.push(imageURL)
           imageNames.push(imageName)
@@ -113,12 +141,44 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Video upload handling
+    let videoUrl = existingVideoUrl || ''
+    let videoThumbnailUrl = existingVideoThumbnailUrl || ''
+
+    if (videoFile && videoFile.size > 0) {
+      try {
+        // Upload video to Firebase Storage
+        const videoName = videoFile.name
+        const videoFilename = `${uuidv4()}_${videoName}`
+        const videoStorageRef = ref(storage, `menu-videos/${videoFilename}`)
+        const videoBuffer = await videoFile.arrayBuffer()
+        const videoContentType = mime.lookup(videoName) || 'video/mp4'
+
+        await uploadBytes(videoStorageRef, videoBuffer, {
+          contentType: videoContentType,
+        })
+        videoUrl = await getDownloadURL(videoStorageRef)
+
+        // Generate a thumbnail URL (using the video URL for now)
+        // In a production system, you might want to generate an actual thumbnail
+        videoThumbnailUrl = videoUrl
+      } catch (uploadError) {
+        console.error('Error uploading video:', uploadError)
+        return NextResponse.json(
+          { error: 'Failed to upload video' },
+          { status: 500 },
+        )
+      }
+    }
+
     // Update document in MongoDB
     menuItem.name = name
     menuItem.description = description
     menuItem.price = price
     menuItem.category = category
     menuItem.available = available
+    menuItem.videoUrl = videoUrl
+    menuItem.videoThumbnailUrl = videoThumbnailUrl
 
     if (images.length > 0) {
       // If new images were uploaded
@@ -153,7 +213,41 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Validate that all ingredients exist in inventory
+    if (ingredients.length > 0) {
+      const validationResult = await withDBRetry(async () => {
+        const missingItems = []
+
+        for (const ingredient of ingredients) {
+          const inventoryItem = await InventoryItem.findById(
+            ingredient.inventoryItemId,
+          )
+
+          if (!inventoryItem) {
+            missingItems.push({
+              name: ingredient.inventoryItemName || 'Unknown item',
+              error: 'Item not found in inventory',
+            })
+          }
+        }
+
+        return missingItems
+      })
+
+      if (validationResult.length > 0) {
+        return NextResponse.json(
+          {
+            error: 'Invalid ingredients',
+            details: validationResult,
+          },
+          { status: 400 },
+        )
+      }
+    }
+
     await withDBRetry(async () => {
+      // Update ingredients without modifying inventory quantities
+      menuItem.ingredients = ingredients
       await menuItem.save()
     })
 

@@ -86,10 +86,13 @@ export default function MenuPage() {
 
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Handle category change
+  // Handle category change - only run on initial mount and when category changes
+  // We use the memoized version to prevent multiple API calls
   useEffect(() => {
-    loadMenuItemsByCategory(selectedCategory)
-  }, [selectedCategory])
+    if (selectedCategory) {
+      loadMenuItemsByCategory(selectedCategory)
+    }
+  }, [selectedCategory, loadMenuItemsByCategory])
 
   // Filter items based on search
   const filteredItems = menuItems.filter(
@@ -159,12 +162,7 @@ export default function MenuPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#f7f7f7] rounded-2xl shadow-inner custom-scrollbar"
-    >
+    <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#f7f7f7] rounded-2xl shadow-inner custom-scrollbar">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-inter-semibold text-black drop-shadow-sm">
@@ -301,10 +299,6 @@ export default function MenuPage() {
         isLoading={isDeleting}
         danger
       />
-    </motion.div>
+    </div>
   )
-}
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function setIsSubmitting(_arg0: boolean) {
-  throw new Error('Function not implemented.')
 }

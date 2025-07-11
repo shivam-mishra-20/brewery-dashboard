@@ -61,11 +61,21 @@ export const addMenuItem = async (
     apiFormData.append('category', formData.category)
     apiFormData.append('available', formData.available.toString())
 
+    // Add ingredients if they exist
+    if (formData.ingredients && formData.ingredients.length > 0) {
+      apiFormData.append('ingredients', JSON.stringify(formData.ingredients))
+    }
+
     // Append up to 3 images as image0, image1, image2
     if (formData.images && formData.images.length > 0) {
       formData.images.slice(0, 3).forEach((file, idx) => {
         apiFormData.append(`image${idx}`, file)
       })
+    }
+
+    // Handle video upload if present
+    if (formData.videoFile) {
+      apiFormData.append('video', formData.videoFile)
     }
 
     // Make API request to add menu item
@@ -103,6 +113,11 @@ export const updateMenuItem = async (
     apiFormData.append('category', formData.category)
     apiFormData.append('available', formData.available.toString())
 
+    // Add ingredients if they exist
+    if (formData.ingredients && formData.ingredients.length > 0) {
+      apiFormData.append('ingredients', JSON.stringify(formData.ingredients))
+    }
+
     // Append existing imageURLs if available
     if (formData.imageURLs && formData.imageURLs.length > 0) {
       apiFormData.append(
@@ -116,6 +131,24 @@ export const updateMenuItem = async (
       formData.images.slice(0, 3).forEach((file, idx) => {
         apiFormData.append(`image${idx}`, file)
       })
+    }
+
+    // Handle video upload if present
+    if (formData.videoFile) {
+      apiFormData.append('video', formData.videoFile)
+    }
+
+    // Add existing video URL if available (and no new video is uploaded)
+    if (!formData.videoFile && formData.videoUrl) {
+      apiFormData.append('existingVideoUrl', formData.videoUrl)
+    }
+
+    // Add existing video thumbnail URL if available
+    if (formData.videoThumbnailUrl) {
+      apiFormData.append(
+        'existingVideoThumbnailUrl',
+        formData.videoThumbnailUrl,
+      )
     }
 
     // Make API request to update menu item

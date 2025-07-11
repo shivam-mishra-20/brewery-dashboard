@@ -1,0 +1,223 @@
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import mime from 'mime-types'
+import { NextRequest, NextResponse } from 'next/server'
+import { v4 as uuidv4 } from 'uuid'
+import { storage } from '@/lib/firebase'
+import { withDBRetry } from '@/lib/mongodb'
+import { MenuItemModel } from '@/models/MenuItemModel'
+import { MenuItemIngredient } from '@/models/InventoryItem'
+import InventoryItem from '@/models/db/InventoryItem'
+import InventoryTransaction from '@/models/db/InventoryTransaction'
+
+// This handler accepts form data with a file
+export async function POST(request: NextRequest) {
+  try {
+    // Get form data (multipart/form-data)
+    const formData = await request.formData()
+
+    // Extract fields from form data
+    const name = formData.get('name') as string
+    const description = formData.get('description') as string
+    const price = parseFloat(formData.get('price') as string)
+    const category = formData.get('category') as string
+    const available = formData.get('available') === 'true'
+    // Support up to 3 images
+    const images: File[] = []
+    for (let i = 0; i < 3; i++) {
+      const img = formData.get(`image${i}`) as File | null
+      if (img && img.size > 0) images.push(img)
+    }
+
+    // Get the video file if provided
+    const videoFile = formData.get('video') as File | null
+
+    // Get the ingredients if provided
+    const ingredientsStr = formData.get('ingredients') as string | null
+    const ingredients: MenuItemIngredient[] = ingredientsStr 
+      ? JSON.parse(ingredientsStr)
+      : []
+
+    // Validate required fields
+    if (!name || !description || isNaN(price) || !category) {
+      return NextResponse.json(
+        {
+          error: 'Missing required fields',
+          details: {
+            name: !name ? 'Name is required' : null,
+            description: !description ? 'Description is required' : null,
+            price: isNaN(price) ? 'Valid price is required' : null,
+            category: !category ? 'Category is required' : null,
+          },
+        },
+        { status: 400 },
+      )
+    }
+
+    const imageURLs: string[] = []
+    const imageNames: string[] = []
+
+    // Upload images to Firebase Storage if they exist
+    if (images.length > 0) {
+      try {
+        for (const image of images) {
+          const imageName = image.name
+          const filename = `${uuidv4()}_${imageName}`
+          const storageRef = ref(storage, `menu-items/${filename}`)
+          const buffer = await image.arrayBuffer()
+          // Detect content-type from file name
+          const contentType =
+            mime.lookup(imageName) || 'application/octet-stream'
+          await uploadBytes(storageRef, buffer, { contentType })
+          const imageURL = await getDownloadURL(storageRef)
+          imageURLs.push(imageURL)
+          imageNames.push(imageName)
+        }
+      } catch (uploadError) {
+        console.error('Error uploading image:', uploadError)
+        return NextResponse.json(
+          { error: 'Failed to upload image' },
+          { status: 500 },
+        )
+      }
+    }
+
+    // Video upload handling
+    let videoUrl = ''
+    let videoThumbnailUrl = ''
+
+    if (videoFile && videoFile.size > 0) {
+      try {
+        // Upload video to Firebase Storage
+        const videoName = videoFile.name
+        const videoFilename = `${uuidv4()}_${videoName}`
+        const videoStorageRef = ref(storage, `menu-videos/${videoFilename}`)
+        const videoBuffer = await videoFile.arrayBuffer()
+        const videoContentType = mime.lookup(videoName) || 'video/mp4'
+
+        await uploadBytes(videoStorageRef, videoBuffer, {
+          contentType: videoContentType,
+        })
+        videoUrl = await getDownloadURL(videoStorageRef)
+
+        // Generate a thumbnail URL (using the video URL for now)
+        // In a production system, you might want to generate an actual thumbnail
+        videoThumbnailUrl = videoUrl
+      } catch (uploadError) {
+        console.error('Error uploading video:', uploadError)
+        return NextResponse.json(
+          { error: 'Failed to upload video' },
+          { status: 500 },
+        )
+      }
+    }
+
+    // Check if we have sufficient inventory for all ingredients
+    if (ingredients.length > 0) {
+      // Verify all ingredients have sufficient stock
+      const inventoryCheck = await withDBRetry(async () => {
+        const insufficientItems = []
+        
+        for (const ingredient of ingredients) {
+          const inventoryItem = await InventoryItem.findById(
+            ingredient.inventoryItemId
+          )
+          
+          if (!inventoryItem) {
+            insufficientItems.push({
+              name: ingredient.inventoryItemName,
+              error: 'Item not found in inventory'
+            })
+            continue
+          }
+          
+          if (inventoryItem.quantity < ingredient.quantity) {
+            insufficientItems.push({
+              name: ingredient.inventoryItemName,
+              available: inventoryItem.quantity,
+              requested: ingredient.quantity,
+              unit: inventoryItem.unit
+            })
+          }
+        }
+        
+        return insufficientItems
+      })
+
+      if (inventoryCheck.length > 0) {
+        return NextResponse.json(
+          {
+            error: 'Insufficient inventory',
+            details: inventoryCheck
+          },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Use withDBRetry for reliable database operations
+    const menuItem = await withDBRetry(async () => {
+      // Add document to MongoDB
+      const newMenuItem = await MenuItemModel.create({
+        name,
+        description,
+        price,
+        category,
+        image: imageNames.length > 0 ? imageNames[0] : '',
+        imageURL: imageURLs.length > 0 ? imageURLs[0] : '',
+        // Ensure these are always arrays even if empty
+        images: imageNames.length > 0 ? imageNames : [],
+        imageURLs: imageURLs.length > 0 ? imageURLs : [],
+        videoUrl,
+        videoThumbnailUrl,
+        available,
+        ingredients: ingredients.length > 0 ? ingredients : [],
+      })
+
+      // If we have ingredients, update the inventory
+      if (ingredients.length > 0) {
+        for (const ingredient of ingredients) {
+          const inventoryItem = await InventoryItem.findById(
+            ingredient.inventoryItemId
+          )
+          
+          if (inventoryItem) {
+            const previousQuantity = inventoryItem.quantity
+            const newQuantity = Math.max(0, previousQuantity - ingredient.quantity)
+            
+            // Update inventory item quantity
+            inventoryItem.quantity = newQuantity
+            await inventoryItem.save()
+            
+            // Create inventory transaction record
+            await InventoryTransaction.create({
+              inventoryItem: ingredient.inventoryItemId,
+              type: 'usage',
+              quantity: ingredient.quantity,
+              previousQuantity,
+              newQuantity,
+              unitCost: inventoryItem.costPerUnit,
+              totalCost: ingredient.quantity * inventoryItem.costPerUnit,
+              notes: `Used in menu item: ${name}`,
+              performedBy: 'System',
+              menuItemId: newMenuItem._id
+            })
+          }
+        }
+      }
+
+      return newMenuItem
+    })
+
+    return NextResponse.json({
+      success: true,
+      id: menuItem._id,
+      message: 'Menu item created successfully',
+    })
+  } catch (error) {
+    console.error('Error adding menu item:', error)
+    return NextResponse.json(
+      { error: 'Failed to add menu item', details: (error as Error).message },
+      { status: 500 },
+    )
+  }
+}

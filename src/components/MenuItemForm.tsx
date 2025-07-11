@@ -3,11 +3,13 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 import { BsImage, BsLightningChargeFill, BsX } from 'react-icons/bs'
+import { useInventory } from '@/hooks/useInventory'
 import {
   DEFAULT_CATEGORIES,
   MenuItem,
   MenuItemFormData,
 } from '@/models/MenuItem'
+import IngredientsManager from './IngredientsManager'
 
 interface MenuItemFormProps {
   onSubmit: (formData: MenuItemFormData) => Promise<void>
@@ -22,17 +24,24 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
   item,
   categories = DEFAULT_CATEGORIES,
 }) => {
+  // Get inventory items for ingredients
+  const { inventoryItems, loading: loadingInventory } = useInventory()
+
   const [formData, setFormData] = useState<MenuItemFormData>({
     name: '',
     description: '',
     price: '',
     category: categories[0],
     images: [], // Array of File
+    ingredients: [], // Array of MenuItemIngredient
     imageURLs: [], // Array of string (for preview)
+    videoFile: null, // Recipe/promotional video
+    videoUrl: undefined, // For existing video
     available: true,
   })
 
   const [previewURLs, setPreviewURLs] = useState<string[]>([])
+  const [videoPreview, setVideoPreview] = useState<string>('')
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
   const [additionalInfo, setAdditionalInfo] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -56,9 +65,16 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         category: item.category,
         images: [],
         imageURLs: urls,
+        videoFile: null,
+        videoUrl: item.videoUrl,
+        videoThumbnailUrl: item.videoThumbnailUrl,
+        ingredients: item.ingredients || [],
         available: item.available,
       })
       setPreviewURLs(urls)
+      if (item.videoUrl) {
+        setVideoPreview(item.videoUrl)
+      }
     }
   }, [item])
 
@@ -96,6 +112,26 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
       images: prev.images.filter((_, i) => i !== idx),
     }))
     setPreviewURLs((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0]
+    if (file) {
+      setFormData((prev) => ({ ...prev, videoFile: file }))
+
+      // Create preview URL
+      const url = URL.createObjectURL(file)
+      setVideoPreview(url)
+    }
+  }
+
+  const removeVideo = () => {
+    setFormData((prev) => ({
+      ...prev,
+      videoFile: null,
+      videoUrl: undefined,
+    }))
+    setVideoPreview('')
   }
 
   const generateDescription = async () => {
@@ -173,7 +209,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex custom-scrollbar items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
     >
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
@@ -387,6 +423,46 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
               <div className="col-span-full">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Recipe Video (optional)
+                </label>
+                <div className="mt-1">
+                  {videoPreview ? (
+                    <div className="relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden mb-3">
+                      <video
+                        src={videoPreview}
+                        className="w-full h-full object-contain"
+                        controls
+                      />
+                      <button
+                        type="button"
+                        onClick={removeVideo}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                      >
+                        <BsX size={20} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center cursor-pointer w-full h-40 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+                      <BsImage size={32} className="text-gray-400 mb-2" />
+                      <p className="text-gray-500 text-center">
+                        Click to upload recipe video
+                      </p>
+                      <p className="text-xs text-gray-400 text-center mt-1">
+                        MP4, WebM or MOV (max 100MB)
+                      </p>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={handleVideoChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-span-full">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description*
                 </label>
                 <div className="relative">
@@ -421,6 +497,28 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Ingredients Manager */}
+            <div className="col-span-full mt-4">
+              <h3 className="text-lg font-medium mb-2">Recipe Ingredients</h3>
+              {loadingInventory ? (
+                <div className="p-4 text-center text-gray-500">
+                  Loading inventory items...
+                </div>
+              ) : (
+                <IngredientsManager
+                  inventoryItems={inventoryItems}
+                  ingredients={formData.ingredients || []}
+                  onChange={(ingredients) =>
+                    setFormData((prev) => ({ ...prev, ingredients }))
+                  }
+                />
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Add ingredients from your inventory to keep track of stock
+                usage.
+              </p>
             </div>
 
             {/* Error message */}
