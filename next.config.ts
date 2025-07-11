@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       'images.unsplash.com',
       'lh3.googleusercontent.com',
       'firebasestorage.googleapis.com',
+      'webstring-media.firebasestorage.app',
     ],
   },
 }

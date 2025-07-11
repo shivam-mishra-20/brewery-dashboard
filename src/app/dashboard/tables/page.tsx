@@ -311,55 +311,52 @@ export default function TablesPage() {
           className="sticky top-0 left-0 z-20 w-full bg-[#f7f7f7] py-4"
           style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.03)' }}
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center tracking-tight">
-                <MdTableRestaurant className="mr-2 text-[#ffc300] text-2xl sm:text-3xl" />
-                <span className="hidden sm:inline">Tables Management</span>
-                <span className="sm:hidden">Tables</span>
+              <h1 className="text-3xl font-extrabold flex items-center tracking-tight">
+                <MdTableRestaurant className="mr-2 text-[#ffc300] text-3xl" />
+                Tables Management
               </h1>
-              <p className="text-gray-500 mt-1 text-sm sm:text-base hidden sm:block">
+              <p className="text-gray-500 mt-1">
                 Manage your café tables, QR codes, and table status
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-none">
-                  <input
-                    type="text"
-                    placeholder="Search tables..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="p-2 pl-8 rounded-xl border border-gray-200 bg-white text-sm focus:ring-2 ring-[#ffc300] w-full sm:w-auto shadow-sm"
-                  />
-                  <div className="absolute left-2.5 top-2.5 text-gray-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <Select
-                  value={filterStatus}
-                  onChange={(value) => setFilterStatus(value)}
-                  style={{ minWidth: 140, borderRadius: 12 }}
-                  options={[
-                    { value: 'all', label: 'All Tables' },
-                    { value: 'available', label: 'Available' },
-                    { value: 'occupied', label: 'Occupied' },
-                    { value: 'reserved', label: 'Reserved' },
-                    { value: 'maintenance', label: 'Maintenance' },
-                  ]}
-                  size="large"
-                  className="rounded-xl shadow-sm !h-10 w-full sm:w-auto"
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search tables..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="p-2 pl-8 rounded-xl border border-gray-200 bg-white text-sm focus:ring-2 ring-[#ffc300] w-full shadow-sm"
                 />
+                <div className="absolute left-2.5 top-2.5 text-gray-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                  </svg>
+                </div>
               </div>
-              <button onClick={openCreateModal} className={`${uniformButtonClass} w-full sm:w-auto justify-center`}>
+              <Select
+                value={filterStatus}
+                onChange={(value) => setFilterStatus(value)}
+                style={{ minWidth: 140, borderRadius: 12 }}
+                options={[
+                  { value: 'all', label: 'All Tables' },
+                  { value: 'available', label: 'Available' },
+                  { value: 'occupied', label: 'Occupied' },
+                  { value: 'reserved', label: 'Reserved' },
+                  { value: 'maintenance', label: 'Maintenance' },
+                ]}
+                size="large"
+                className="rounded-xl shadow-sm !h-10"
+              />
+              <button onClick={openCreateModal} className={uniformButtonClass}>
                 <FaPlus size={14} />
                 <span>Add Table</span>
               </button>
@@ -379,9 +376,9 @@ export default function TablesPage() {
           {!loading && <TableStats tables={tables} />}
 
           {/* View Options */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Floor Plan (Left side) */}
-            <div className="w-full order-2 xl:order-1">
+            <div className="w-full">
               {!loading && (
                 <TableFloorPlan
                   tables={tables}
@@ -390,7 +387,7 @@ export default function TablesPage() {
               )}
             </div>
             {/* Occupancy Chart (Right side) */}
-            <div className="w-full order-1 xl:order-2">
+            <div className="w-full">
               <TableOccupancy timeRange="weekly" />
             </div>
           </div>
@@ -401,7 +398,7 @@ export default function TablesPage() {
               <TbLoader3 className="animate-spin text-[#ffc300]" size={40} />
             </div>
           ) : filteredTables.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence>
                 {filteredTables.map((table) => (
                   <motion.div
@@ -410,23 +407,23 @@ export default function TablesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="border border-gray-200 bg-white rounded-2xl p-4 sm:p-5 shadow-inner hover:shadow-lg transition-shadow duration-200 relative overflow-hidden flex flex-col gap-2"
+                    className="border border-gray-200 bg-white rounded-2xl p-5 shadow-inner hover:shadow-lg transition-shadow duration-200 relative overflow-hidden flex flex-col gap-2"
                   >
                     {/* Status Badge */}
-                    <div className="absolute top-0 right-0 w-12 sm:w-16 h-12 sm:h-16 overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden">
                       <div
-                        className={`${statusColors[table.status]} rotate-45 transform origin-bottom-right w-[141%] h-12 sm:h-16 flex items-center justify-center shadow-md`}
+                        className={`${statusColors[table.status]} rotate-45 transform origin-bottom-right w-[141%] h-16 flex items-center justify-center shadow-md`}
                       >
-                        <span className="text-xs font-bold rotate-45 transform origin-center translate-x-3 sm:translate-x-4 translate-y-1.5 sm:translate-y-2">
-                          {table.status.substring(0, 4)}
+                        <span className="text-xs font-bold rotate-45 transform origin-center translate-x-4 translate-y-2">
+                          {table.status}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-start mb-2 pr-8 sm:pr-12">
-                      <h3 className="font-bold text-base sm:text-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-lg">
                         {table.name}
-                        <span className="text-gray-400 ml-1 font-normal text-sm sm:text-base">
+                        <span className="text-gray-400 ml-1 font-normal">
                           #{table.number}
                         </span>
                       </h3>
@@ -434,17 +431,17 @@ export default function TablesPage() {
 
                     <div className="space-y-1 mb-2">
                       <div className="flex items-center text-sm">
-                        <span className="text-gray-400 w-20 sm:w-24">Capacity:</span>
+                        <span className="text-gray-400 w-24">Capacity:</span>
                         <span>{table.capacity} people</span>
                       </div>
                       {table.location && (
                         <div className="flex items-center text-sm">
-                          <span className="text-gray-400 w-20 sm:w-24">Location:</span>
-                          <span className="truncate">{table.location}</span>
+                          <span className="text-gray-400 w-24">Location:</span>
+                          <span>{table.location}</span>
                         </div>
                       )}
                       <div className="flex items-center text-sm">
-                        <span className="text-gray-400 w-20 sm:w-24">QR Code:</span>
+                        <span className="text-gray-400 w-24">QR Code:</span>
                         <span>
                           {table.qrCode ? 'Generated' : 'Not generated'}
                         </span>
@@ -452,8 +449,8 @@ export default function TablesPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-2 gap-3 sm:gap-2">
-                      <div className="flex gap-2 justify-center sm:justify-start">
+                    <div className="flex flex-wrap justify-between items-center mt-2">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => openEditModal(table)}
                           className="p-2 bg-[#f7f7f7] hover:bg-[#fede31] rounded-xl transition-colors duration-200 border border-gray-200"
@@ -490,7 +487,7 @@ export default function TablesPage() {
                           { value: 'maintenance', label: 'Maintenance' },
                         ]}
                         size="large"
-                        className="rounded-xl shadow-sm !h-10 w-full sm:w-auto"
+                        className="rounded-xl shadow-sm !h-10"
                       />
                     </div>
                   </motion.div>
@@ -522,22 +519,21 @@ export default function TablesPage() {
 
         {/* Create/Edit Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4"
             >
-              <div className="p-5 sm:p-7 space-y-5">
-                <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2">
-                  <MdTableRestaurant className="text-[#ffc300] text-xl sm:text-2xl" />
-                  <span className="hidden sm:inline">{editingTable ? 'Edit Table' : 'Add New Table'}</span>
-                  <span className="sm:hidden">{editingTable ? 'Edit' : 'Add'}</span>
+              <div className="p-7 space-y-5">
+                <h2 className="text-2xl font-extrabold flex items-center gap-2">
+                  <MdTableRestaurant className="text-[#ffc300] text-2xl" />
+                  {editingTable ? 'Edit Table' : 'Add New Table'}
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
                       <label
                         htmlFor="name"
                         className="block text-sm font-semibold text-gray-700 mb-1"
@@ -591,7 +587,7 @@ export default function TablesPage() {
                         className="w-full p-2 rounded-xl border border-gray-200 bg-white focus:ring-2 ring-[#ffc300] shadow-sm"
                       />
                     </div>
-                    <div className="sm:col-span-2">
+                    <div className="col-span-2">
                       <label
                         htmlFor="location"
                         className="block text-sm font-semibold text-gray-700 mb-1"
@@ -608,7 +604,7 @@ export default function TablesPage() {
                         className="w-full p-2 rounded-xl border border-gray-200 bg-white focus:ring-2 ring-[#ffc300] shadow-sm"
                       />
                     </div>
-                    <div className="sm:col-span-2">
+                    <div className="col-span-2">
                       <label
                         htmlFor="status"
                         className="block text-sm font-semibold text-gray-700 mb-1"
@@ -635,15 +631,15 @@ export default function TablesPage() {
                       />
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                  <div className="flex justify-end gap-3 pt-4">
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
+                      className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold"
                     >
                       Cancel
                     </button>
-                    <button type="submit" className={`${uniformButtonClass} w-full sm:w-auto justify-center`}>
+                    <button type="submit" className={uniformButtonClass}>
                       {editingTable ? 'Save Changes' : 'Create Table'}
                     </button>
                   </div>
@@ -655,32 +651,32 @@ export default function TablesPage() {
 
         {/* Delete Confirmation Modal */}
         {isDeleteModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4"
             >
-              <div className="p-5 sm:p-7 space-y-5">
-                <h2 className="text-xl sm:text-2xl font-extrabold text-red-500 flex items-center gap-2">
+              <div className="p-7 space-y-5">
+                <h2 className="text-2xl font-extrabold text-red-500 flex items-center gap-2">
                   <FaTrash />
                   Delete Table
                 </h2>
-                <p className="text-gray-700 text-sm sm:text-base">
+                <p className="text-gray-700">
                   Are you sure you want to delete this table? This action cannot
                   be undone.
                 </p>
-                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+                <div className="flex justify-end gap-3 pt-4">
                   <button
                     onClick={() => setIsDeleteModalOpen(false)}
-                    className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
+                    className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors duration-200 font-semibold w-full sm:w-auto"
+                    className="py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors duration-200 font-semibold"
                   >
                     Delete
                   </button>
@@ -692,44 +688,43 @@ export default function TablesPage() {
 
         {/* QR Code Modal */}
         {isQRModalOpen && qrTable && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4"
             >
-              <div className="p-5 sm:p-7 space-y-5">
-                <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2">
-                  <FaQrcode className="text-[#ffc300] text-xl sm:text-2xl" />
-                  <span className="hidden sm:inline">Table QR Code</span>
-                  <span className="sm:hidden">QR Code</span>
+              <div className="p-7 space-y-5">
+                <h2 className="text-2xl font-extrabold flex items-center gap-2">
+                  <FaQrcode className="text-[#ffc300] text-2xl" />
+                  Table QR Code
                 </h2>
-                <div className="flex flex-col items-center justify-center bg-[#f7f7f7] p-4 sm:p-6 rounded-xl">
+                <div className="flex flex-col items-center justify-center bg-[#f7f7f7] p-6 rounded-xl">
                   {/* Simple QR code placeholder - in a real app, you'd use qrcode.react */}
-                  <div className="w-[150px] sm:w-[200px] h-[150px] sm:h-[200px] border-2 border-gray-200 rounded-xl flex items-center justify-center bg-white">
+                  <div className="w-[200px] h-[200px] border-2 border-gray-200 rounded-xl flex items-center justify-center bg-white">
                     <div className="text-center">
                       <FaQrcode
-                        size={60}
-                        className="mx-auto mb-3 text-gray-400 sm:w-20 sm:h-20"
+                        size={80}
+                        className="mx-auto mb-3 text-gray-400"
                       />
-                      <p className="text-xs sm:text-sm text-gray-400">
+                      <p className="text-sm text-gray-400">
                         QR Code for
                         <br />
                         Table #{qrTable.number}
                       </p>
                     </div>
                   </div>
-                  <p className="mt-3 font-semibold text-gray-700 text-sm sm:text-base text-center">
+                  <p className="mt-3 font-semibold text-gray-700">
                     {qrTable.name} - Table #{qrTable.number}
                   </p>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-3 pt-4">
+                <div className="flex justify-between gap-3 pt-4">
                   <button
                     onClick={() => {
                       alert('QR code would be downloaded here')
                     }}
-                    className="py-2 px-4 border border-gray-200 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors duration-200 flex items-center justify-center gap-2 font-semibold w-full sm:w-auto"
+                    className="py-2 px-4 border border-gray-200 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors duration-200 flex items-center gap-2 font-semibold"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -741,22 +736,20 @@ export default function TablesPage() {
                       <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
                       <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
                     </svg>
-                    <span className="hidden sm:inline">Download QR</span>
-                    <span className="sm:hidden">Download</span>
+                    Download QR
                   </button>
-                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <div className="flex gap-2">
                     <button
                       onClick={() => setIsQRModalOpen(false)}
-                      className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
+                      className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold"
                     >
                       Close
                     </button>
                     <button
                       onClick={saveQRCode}
-                      className="py-2 px-4 bg-[#ffc300] hover:bg-[#fede31] text-yellow-900 font-semibold rounded-xl transition-colors duration-200 shadow-sm w-full sm:w-auto"
+                      className="py-2 px-4 bg-[#ffc300] hover:bg-[#fede31] text-yellow-900 font-semibold rounded-xl transition-colors duration-200 shadow-sm"
                     >
-                      <span className="hidden sm:inline">Save QR Code</span>
-                      <span className="sm:hidden">Save</span>
+                      Save QR Code
                     </button>
                   </div>
                 </div>

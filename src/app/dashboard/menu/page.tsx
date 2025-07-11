@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
@@ -14,6 +15,7 @@ import { useMenu } from '@/hooks/useMenu'
 import { MenuItem, MenuItemFormData } from '@/models/MenuItem'
 
 export default function MenuPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   // User/plan state
   const [userBlocked, setUserBlocked] = useState(false)
   const [userChecked, setUserChecked] = useState(false)
@@ -81,6 +83,7 @@ export default function MenuPage() {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | null>(null)
+
   const [isDeleting, setIsDeleting] = useState(false)
 
   // Handle category change
@@ -98,7 +101,7 @@ export default function MenuPage() {
   // Handle form submit for add/edit
   const handleFormSubmit = async (formData: MenuItemFormData) => {
     try {
-      setSubmitLoading(true)
+      setIsSubmitting(true)
       if (editingItem) {
         await updateMenuItem(editingItem.id, formData)
       } else {
@@ -109,7 +112,7 @@ export default function MenuPage() {
     } catch (error) {
       console.error('Error submitting form:', error)
     } finally {
-      setSubmitLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -302,6 +305,6 @@ export default function MenuPage() {
   )
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function setSubmitLoading(_arg0: boolean) {
+function setIsSubmitting(_arg0: boolean) {
   throw new Error('Function not implemented.')
 }

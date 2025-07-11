@@ -1,4 +1,5 @@
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import mime from 'mime-types'
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 import { storage } from '@/lib/firebase'
@@ -51,7 +52,10 @@ export async function POST(request: NextRequest) {
           const filename = `${uuidv4()}_${imageName}`
           const storageRef = ref(storage, `menu-items/${filename}`)
           const buffer = await image.arrayBuffer()
-          await uploadBytes(storageRef, buffer)
+          // Detect content-type from file name
+          const contentType =
+            mime.lookup(imageName) || 'application/octet-stream'
+          await uploadBytes(storageRef, buffer, { contentType })
           const imageURL = await getDownloadURL(storageRef)
           imageURLs.push(imageURL)
           imageNames.push(imageName)
