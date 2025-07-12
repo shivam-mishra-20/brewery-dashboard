@@ -327,33 +327,33 @@ export default function TablesPage() {
   }
 
   // Save QR code data
-  const saveQRCode = async () => {
-    if (!qrTable) return
+  // const saveQRCode = async () => {
+  //   if (!qrTable) return
 
-    try {
-      // Generate a unique identifier for this table's QR code
-      const qrData = JSON.stringify({
-        tableId: qrTable._id,
-        tableNumber: qrTable.number,
-        timestamp: new Date().getTime(),
-      })
+  //   try {
+  //     // Generate a unique identifier for this table's QR code
+  //     const qrData = JSON.stringify({
+  //       tableId: qrTable._id,
+  //       tableNumber: qrTable.number,
+  //       timestamp: new Date().getTime(),
+  //     })
 
-      const res = await fetch(`/api/tables/${qrTable._id}/qr`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ qrCode: qrData }),
-      })
+  //     const res = await fetch(`/api/tables/${qrTable._id}/qr`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ qrCode: qrData }),
+  //     })
 
-      if (!res.ok) throw new Error('Failed to save QR code')
+  //     if (!res.ok) throw new Error('Failed to save QR code')
 
-      // Refresh tables list
-      fetchTables()
-      setIsQRModalOpen(false)
-    } catch (err) {
-      console.error('Error saving QR code:', err)
-      setError('Failed to save QR code')
-    }
-  }
+  //     // Refresh tables list
+  //     fetchTables()
+  //     setIsQRModalOpen(false)
+  //   } catch (err) {
+  //     console.error('Error saving QR code:', err)
+  //     setError('Failed to save QR code')
+  //   }
+  // }
 
   // Update table status
   const updateTableStatus = async (tableId: string, newStatus: string) => {
@@ -551,7 +551,7 @@ export default function TablesPage() {
 
                     <div className="flex justify-between items-start mb-2 pr-8 sm:pr-12">
                       <h3 className="font-bold text-base sm:text-lg">
-                        {table.name}
+                        {table.name}-
                         <span className="text-gray-400 ml-1 font-normal text-sm sm:text-base">
                           #{table.number}
                         </span>
@@ -937,13 +937,13 @@ export default function TablesPage() {
                     >
                       Close
                     </button>
-                    <button
+                    {/* <button
                       onClick={saveQRCode}
                       className="py-2 px-4  whitespace-nowrap bg-[#ffc300] hover:bg-[#fede31] text-yellow-900 font-semibold rounded-xl transition-colors duration-200 shadow-sm w-full sm:w-auto"
                     >
                       <span className="hidden sm:inline">Save QR Code</span>
                       <span className="sm:hidden">Save</span>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
