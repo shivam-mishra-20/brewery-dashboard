@@ -82,40 +82,50 @@ const TableFloorPlan: React.FC<TableFloorPlanProps> = ({
 
   return (
     <div
-      className="w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm min-h-[300px]"
+      className="w-full rounded-xl border border-slate-200 bg-white overflow-auto p-4 shadow-sm min-h-[300px]"
       style={{ height: 350 }}
     >
       <h3 className="text-lg font-bold mb-4">Floor Plan</h3>
 
-      {locations.map((location) => (
-        <div key={location} className="mb-6">
-          <h4 className="text-md font-semibold mb-2 text-slate-700">
-            {location}
-          </h4>
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-            <div className="flex flex-wrap gap-6 p-4">
-              {tablesByLocation[location].map((table) => (
-                <motion.div
-                  key={table._id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => onTableClick(table)}
-                  className={`${getTableSize(table.capacity)} ${getTableShape(table.capacity)} ${getStatusColor(table.status)} flex items-center justify-center cursor-pointer shadow-md hover:shadow-lg transition-shadow`}
-                >
-                  <div className="text-center text-gray-800">
-                    <div className="font-bold">{table.number}</div>
-                    <div className="text-xs">{table.capacity}p</div>
-                  </div>
-                </motion.div>
-              ))}
+      <div
+        className="flex flex-row gap-8 overflow-x-auto pb-2"
+        style={{ scrollbarWidth: 'thin' }}
+      >
+        {locations.map((location) => (
+          <div
+            key={location}
+            className="min-w-[320px] max-w-[400px] flex-shrink-0 mb-2"
+          >
+            <h4 className="text-md font-semibold mb-2 text-slate-700 text-center">
+              {location}
+            </h4>
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="flex flex-row w-full gap-6 p-4 justify-center">
+                {tablesByLocation[location].map((table) => (
+                  <motion.div
+                    key={table._id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => onTableClick(table)}
+                    className={`${getTableSize(table.capacity)} ${getTableShape(table.capacity)} ${getStatusColor(table.status)} flex items-center justify-center cursor-pointer shadow-md hover:shadow-lg transition-shadow`}
+                  >
+                    <div className="text-center text-gray-800">
+                      <div className="font-bold">{table.number}</div>
+                      <div className="text-xs">{table.capacity}p</div>
+                    </div>
+                  </motion.div>
+                ))}
 
-              {tablesByLocation[location].length === 0 && (
-                <p className="text-slate-500 italic">No tables in this area</p>
-              )}
+                {tablesByLocation[location].length === 0 && (
+                  <p className="text-slate-500 italic">
+                    No tables in this area
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {locations.length === 0 && (
         <div className="flex justify-center items-center h-40">

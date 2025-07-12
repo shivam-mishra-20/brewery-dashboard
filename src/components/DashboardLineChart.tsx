@@ -11,22 +11,26 @@ import {
   YAxis,
 } from 'recharts'
 
-const data = [
-  { month: 'Jan', sales: 120 },
-  { month: 'Feb', sales: 150 },
-  { month: 'Mar', sales: 170 },
-  { month: 'Apr', sales: 140 },
-  { month: 'May', sales: 200 },
-  { month: 'Jun', sales: 220 },
-  { month: 'Jul', sales: 210 },
-  { month: 'Aug', sales: 230 },
-  { month: 'Sep', sales: 190 },
-  { month: 'Oct', sales: 175 },
-  { month: 'Nov', sales: 160 },
-  { month: 'Dec', sales: 185 },
-]
+// const data = [
+//   { month: 'Jan', sales: 120 },
+//   { month: 'Feb', sales: 150 },
+//   { month: 'Mar', sales: 170 },
+//   { month: 'Apr', sales: 140 },
+//   { month: 'May', sales: 200 },
+//   { month: 'Jun', sales: 220 },
+//   { month: 'Jul', sales: 210 },
+//   { month: 'Aug', sales: 230 },
+//   { month: 'Sep', sales: 190 },
+//   { month: 'Oct', sales: 175 },
+//   { month: 'Nov', sales: 160 },
+//   { month: 'Dec', sales: 185 },
+// ]
 
-const DashboardLineChart: React.FC = () => (
+type DashboardLineChartProps = {
+  data: Array<{ month: string; sales: number }>
+}
+
+const DashboardLineChart: React.FC<DashboardLineChartProps> = ({ data }) => (
   <div className="w-full h-full flex flex-col items-start justify-center">
     <h1 className="text-lg font-inter-semibold text-black mb-2">
       Monthly Sales Trend

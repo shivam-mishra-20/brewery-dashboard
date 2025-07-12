@@ -1,7 +1,16 @@
 'use client'
 
 import { ConfigProvider, Select } from 'antd'
+import CryptoJS from 'crypto-js'
+import {
+  getDownloadURL,
+  ref as storageRef,
+  uploadString,
+} from 'firebase/storage'
 import { AnimatePresence, motion } from 'framer-motion'
+import html2canvas from 'html2canvas'
+import Image from 'next/image'
+import QRCode from 'qrcode'
 import React, { useEffect, useState } from 'react'
 import { FaEdit, FaPlus, FaQrcode, FaTrash } from 'react-icons/fa'
 import { MdTableRestaurant } from 'react-icons/md'
@@ -9,6 +18,7 @@ import { TbLoader3 } from 'react-icons/tb'
 import TableFloorPlan from '@/components/TableFloorPlan'
 import TableOccupancy from '@/components/TableOccupancy'
 import TableStats from '@/components/TableStats'
+import { storage } from '@/lib/firebase'
 
 // Types
 interface Table {
@@ -31,8 +41,9 @@ interface FormData {
   location: string
 }
 
+const QR_SECRET = process.env.NEXT_PUBLIC_QR_SECRET || 'your-very-secret-key'
 export default function TablesPage() {
-  // ...existing code...
+  // Reference for fancy QR code rendering - not directly used in this implementation
 
   // No theme context, always light mode
   const [tables, setTables] = useState<Table[]>([])
@@ -138,7 +149,7 @@ export default function TablesPage() {
     e.preventDefault()
 
     try {
-      const tableData = {
+      const tableData: any = {
         name: formData.name,
         number: parseInt(formData.number),
         capacity: parseInt(formData.capacity),
@@ -156,7 +167,122 @@ export default function TablesPage() {
           body: JSON.stringify(tableData),
         })
       } else {
-        // Create new table
+        // Create new table with QR code
+        // Prepare table data for QR
+        const qrPayload = {
+          ...tableData,
+          timestamp: new Date().getTime(),
+        }
+        const encrypted = CryptoJS.AES.encrypt(
+          JSON.stringify(qrPayload),
+          QR_SECRET,
+        ).toString()
+        const qrString = encodeURIComponent(encrypted)
+        const qrLink = `${window.location.origin}/menu?tabledata=${qrString}`
+
+        setLoading(true)
+
+        // Create a hidden QR code element with fancy styling
+        const qrElement = document.createElement('div')
+        qrElement.style.padding = '24px'
+        qrElement.style.background = '#ffffff'
+        qrElement.style.width = '400px'
+        qrElement.style.borderRadius = '16px'
+        qrElement.style.boxShadow = '0 4px 24px rgba(0, 0, 0, 0.1)'
+        qrElement.style.textAlign = 'center'
+        qrElement.style.fontFamily = 'Inter, sans-serif'
+
+        // Create header with cafe name
+        const header = document.createElement('div')
+        header.style.marginBottom = '12px'
+        header.innerHTML = `
+          <div style="font-weight: 700; font-size: 22px; color: #000; margin-bottom: 4px;">Work Brew Cafe</div>
+          <div style="font-weight: 600; font-size: 16px; color: #4b5563;">${tableData.name}</div>
+        `
+        qrElement.appendChild(header)
+
+        // Create QR container with styling
+        const qrContainer = document.createElement('div')
+        qrContainer.style.padding = '12px'
+        qrContainer.style.backgroundColor = 'white'
+        qrContainer.style.borderRadius = '12px'
+        qrContainer.style.margin = '0 auto'
+        qrContainer.style.width = '240px'
+        qrContainer.style.height = '240px'
+        qrContainer.style.display = 'flex'
+        qrContainer.style.alignItems = 'center'
+        qrContainer.style.justifyContent = 'center'
+        qrContainer.style.border = '1px solid #ffc30033'
+        qrContainer.style.boxShadow = '0 4px 12px #ffc30022'
+
+        // Add QR code element to container
+        const qrCode = document.createElement('div')
+        qrContainer.appendChild(qrCode)
+        qrElement.appendChild(qrContainer)
+
+        // Add table info
+        const tableInfo = document.createElement('div')
+        tableInfo.style.marginTop = '12px'
+        tableInfo.innerHTML = `
+          <div style="font-weight: 600; font-size: 15px; color: #1f2937; margin-bottom: 4px;">Table #${tableData.number}</div>
+          <div style="font-size: 13px; color: #6b7280;">Capacity: ${tableData.capacity} people</div>
+          <div style="font-size: 12px; color: #9ca3af; margin-top: 12px;">Scan to view menu</div>
+        `
+        qrElement.appendChild(tableInfo)
+
+        document.body.appendChild(qrElement)
+
+        // Render QR code in the container
+        const qrRendered = document.createElement('div')
+        // Use qrcode library to generate SVG markup
+        const qrSvgMarkup = await QRCode.toString(qrLink, {
+          type: 'svg',
+          width: 220,
+          errorCorrectionLevel: 'H',
+          color: {
+            dark: '#1e293b',
+            light: '#ffffff',
+          },
+        })
+        qrRendered.innerHTML = qrSvgMarkup
+        qrCode.appendChild(qrRendered.firstChild!)
+
+        // Capture the QR element as an image
+        try {
+          const canvas = await html2canvas(qrElement, {
+            backgroundColor: '#ffffff',
+            scale: 2, // Higher resolution
+          })
+          document.body.removeChild(qrElement)
+
+          // Get the PNG data URL
+          const qrDataUrl = canvas.toDataURL('image/png')
+
+          // Upload QR image to Firebase Storage
+          const fileName = `table-qr-${tableData.number}-${Date.now()}.png`
+          const firebaseRef = storageRef(storage, `tableQRCodes/${fileName}`)
+          await uploadString(firebaseRef, qrDataUrl, 'data_url')
+          const qrImageUrl = await getDownloadURL(firebaseRef)
+
+          // Add QR image URL to table data
+          tableData.qrCode = qrImageUrl
+        } catch (err) {
+          console.error('Error generating fancy QR:', err)
+          // Fallback to simple QR code if fancy one fails
+          const qrDataUrl = await QRCode.toDataURL(qrLink, { width: 400 })
+
+          // Upload QR image to Firebase Storage
+          const fileName = `table-qr-${tableData.number}-${Date.now()}.png`
+          const firebaseRef = storageRef(storage, `tableQRCodes/${fileName}`)
+          await uploadString(firebaseRef, qrDataUrl, 'data_url')
+          const qrImageUrl = await getDownloadURL(firebaseRef)
+
+          // Add QR image URL to table data
+          tableData.qrCode = qrImageUrl
+        } finally {
+          setLoading(false)
+        }
+
         res = await fetch('/api/tables', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -719,30 +845,77 @@ export default function TablesPage() {
                   <span className="sm:hidden">QR Code</span>
                 </h2>
                 <div className="flex flex-col items-center justify-center bg-[#f7f7f7] p-4 sm:p-6 rounded-xl">
-                  {/* Simple QR code placeholder - in a real app, you'd use qrcode.react */}
-                  <div className="w-[150px] sm:w-[200px] h-[150px] sm:h-[200px] border-2 border-gray-200 rounded-xl flex items-center justify-center bg-white">
-                    <div className="text-center">
-                      <FaQrcode
-                        size={60}
-                        className="mx-auto mb-3 text-gray-400 sm:w-20 sm:h-20"
-                      />
-                      <p className="text-xs sm:text-sm text-gray-400">
-                        QR Code for
-                        <br />
-                        Table #{qrTable.number}
+                  {/* Show fancy QR image if available, else fallback icon */}
+                  {qrTable.qrCode ? (
+                    <div className="flex flex-col items-center">
+                      <div className="border-4 border-[#ffc300]/20 rounded-2xl shadow-lg overflow-hidden">
+                        <Image
+                          src={qrTable.qrCode}
+                          alt={`QR Code for Table ${qrTable.number}`}
+                          width={280}
+                          height={280}
+                          style={{
+                            objectFit: 'contain',
+                            backgroundColor: 'white',
+                          }}
+                          className="w-[200px] sm:w-[280px]"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+                        <FaQrcode className="text-[#ffc300]" />
+                        <span>Scan to access the menu</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-[200px] sm:w-[280px] h-[200px] sm:h-[280px] border-2 border-gray-200 rounded-xl flex flex-col items-center justify-center bg-white">
+                      <div className="text-center">
+                        <FaQrcode
+                          size={60}
+                          className="mx-auto mb-3 text-[#ffc300] sm:w-20 sm:h-20"
+                        />
+                        <p className="text-sm sm:text-base text-gray-500">
+                          QR Code not generated yet
+                        </p>
+                        <div className="mt-4 text-xs text-gray-400">
+                          Save to generate QR code
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200 shadow-sm w-full">
+                    <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                      <MdTableRestaurant className="text-[#ffc300]" />
+                      {qrTable.name}
+                    </h3>
+                    <div className="mt-1 space-y-1 text-sm">
+                      <p className="text-gray-500">Table #{qrTable.number}</p>
+                      <p className="text-gray-500">
+                        Capacity: {qrTable.capacity} people
                       </p>
+                      {qrTable.location && (
+                        <p className="text-gray-500">
+                          Location: {qrTable.location}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <p className="mt-3 font-semibold text-gray-700 text-sm sm:text-base text-center">
-                    {qrTable.name} - Table #{qrTable.number}
-                  </p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-3 pt-4">
                   <button
                     onClick={() => {
-                      alert('QR code would be downloaded here')
+                      if (qrTable.qrCode) {
+                        const link = document.createElement('a')
+                        link.href = qrTable.qrCode
+                        link.download = `table-${qrTable.number}-qr.png`
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                      } else {
+                        alert('QR code not available yet.')
+                      }
                     }}
-                    className="py-2 px-4 border border-gray-200 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors duration-200 flex items-center justify-center gap-2 font-semibold w-full sm:w-auto"
+                    className="py-2 whitespace-nowrap px-4 border border-gray-200 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors duration-200 flex items-center justify-center gap-2 font-semibold w-full sm:w-auto"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -760,13 +933,13 @@ export default function TablesPage() {
                   <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => setIsQRModalOpen(false)}
-                      className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
+                      className="py-2 px-4  whitespace-nowrap border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
                     >
                       Close
                     </button>
                     <button
                       onClick={saveQRCode}
-                      className="py-2 px-4 bg-[#ffc300] hover:bg-[#fede31] text-yellow-900 font-semibold rounded-xl transition-colors duration-200 shadow-sm w-full sm:w-auto"
+                      className="py-2 px-4  whitespace-nowrap bg-[#ffc300] hover:bg-[#fede31] text-yellow-900 font-semibold rounded-xl transition-colors duration-200 shadow-sm w-full sm:w-auto"
                     >
                       <span className="hidden sm:inline">Save QR Code</span>
                       <span className="sm:hidden">Save</span>

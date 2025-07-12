@@ -147,13 +147,25 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
 
   useEffect(() => {
     setLoading(true)
-    setLoading(true)
     fetch(`/api/tables/occupancy?range=${timeRange}`)
       .then(async (res) => {
         if (!res.ok) throw new Error('Failed to fetch occupancy data')
         const result = await res.json()
-        // Expecting result.data: [{ name, occupied, available, reserved }]
-        setData(result.data || [])
+        let incoming = result.data || []
+        // If the API returns table objects, map them to chart format
+        if (
+          incoming.length &&
+          incoming[0] &&
+          typeof incoming[0].status === 'string'
+        ) {
+          incoming = incoming.map((table: any) => ({
+            name: table.name,
+            occupied: table.status === 'occupied' ? 1 : 0,
+            available: table.status === 'available' ? 1 : 0,
+            reserved: table.status === 'reserved' ? 1 : 0,
+          }))
+        }
+        setData(incoming)
       })
       .catch((err) => {
         setData([])

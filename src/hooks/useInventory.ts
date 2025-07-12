@@ -8,7 +8,6 @@ import {
   createBatchInventoryUpdate,
   deleteInventoryItem as deleteInventoryItemService,
   deleteSupplier as deleteSupplierService,
-  getAllInventoryItems,
   getAllSuppliers,
   getBatchInventoryUpdates,
   getInventoryAnalytics,
@@ -52,7 +51,7 @@ export const useInventory = () => {
   const [analytics, setAnalytics] = useState<InventoryAnalytics | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES)
+  const [categories] = useState<string[]>(DEFAULT_CATEGORIES)
 
   const loadInventoryItemsByCategory = async (category: string) => {
     setLoading(true)

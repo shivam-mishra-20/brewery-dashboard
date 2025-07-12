@@ -79,7 +79,7 @@ export const useOrder = () => {
   )
 
   /**
-   * Update order status
+   * Update order status or payment status
    */
   const updateOrderStatus = useCallback(
     async (updateData: UpdateOrderStatusRequest) => {
@@ -90,7 +90,7 @@ export const useOrder = () => {
         const result = await orderService.updateOrderStatus(updateData)
 
         if (!result.success) {
-          setError(result.error || 'Failed to update order status')
+          setError(result.error || 'Failed to update order')
           return {
             success: false,
             error: result.error,
@@ -101,15 +101,19 @@ export const useOrder = () => {
         // Update the local state if we have orders
         if (orders?.length) {
           setOrders((prevOrders) =>
-            prevOrders?.map((order) =>
-              order.id === updateData.id
-                ? {
-                    ...order,
-                    status: updateData.status,
-                    updatedAt: new Date().toISOString(),
-                  }
-                : order,
-            ),
+            prevOrders?.map((order) => {
+              if (order.id === updateData.id) {
+                const updatedOrder = {
+                  ...order,
+                  updatedAt: new Date().toISOString(),
+                }
+                if (updateData.status) updatedOrder.status = updateData.status
+                if (updateData.paymentStatus)
+                  updatedOrder.paymentStatus = updateData.paymentStatus
+                return updatedOrder
+              }
+              return order
+            }),
           )
         }
 

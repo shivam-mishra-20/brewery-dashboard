@@ -51,7 +51,7 @@ export default function DashboardLayout({
         }}
       >
         <div
-          className="min-h-[95vh] overflow-x-hidden flex bg-background text-foreground"
+          className="min-h-[95vh] overflow-x-hidden px-0 md:px-5 flex bg-background text-foreground"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <Sidebar />
@@ -59,8 +59,10 @@ export default function DashboardLayout({
             className="flex-1 flex flex-col min-h-[95vh]"
             style={{ overflow: 'hidden' }}
           >
-            <Navbar />
-            <main className="flex-1 px-5 md:px-0 pb-6">{children}</main>
+            <main className="flex-1 px-5 md:px-0 pb-6">
+              <Navbar />
+              {children}
+            </main>
           </div>
         </div>
       </ConfigProvider>

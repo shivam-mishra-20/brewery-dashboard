@@ -40,6 +40,38 @@ const statusColors = {
   cancelled: 'error',
 }
 
+function TableInfo({ tableId }: { tableId: string }) {
+  const [table, setTable] = useState<any>(null)
+  useEffect(() => {
+    if (!tableId) return
+    fetch(`/api/tables`)
+      .then((res) => res.json())
+      .then((data) => {
+        const found = (data.tables || []).find((t: any) => t._id === tableId)
+        setTable(found)
+      })
+      .catch(() => setTable(null))
+  }, [tableId])
+  if (!table) return <span>-</span>
+  return (
+    <span>
+      Table {table.number} ({table.name})
+      <Tag
+        color={
+          table.status === 'available'
+            ? 'green'
+            : table.status === 'occupied'
+              ? 'red'
+              : 'gold'
+        }
+        className="ml-2"
+      >
+        {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
+      </Tag>
+    </span>
+  )
+}
+
 export default function OrdersPage() {
   const { orders, isLoading, error, fetchOrders, updateOrderStatus } =
     useOrder()
@@ -133,8 +165,13 @@ export default function OrdersPage() {
       title: 'Table',
       dataIndex: 'tableNumber',
       key: 'tableNumber',
-      render: (tableNumber: string) =>
-        tableNumber || <Text type="secondary">-</Text>,
+      render: (_: any, record: any) => {
+        // Prefer tableId if available, else fallback to tableNumber
+        if (record.tableId) {
+          return <TableInfo tableId={record.tableId} />
+        }
+        return record.tableNumber || <Text type="secondary">-</Text>
+      },
     },
     {
       title: 'Items',
@@ -147,7 +184,7 @@ export default function OrdersPage() {
       title: 'Total',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
-      render: (amount: number) => <Text strong>${amount.toFixed(2)}</Text>,
+      render: (amount: number) => <Text strong>₹ {amount.toFixed(2)}</Text>,
     },
     {
       title: 'Status',
@@ -349,37 +386,24 @@ export default function OrdersPage() {
         }
         placement="right"
         width={500}
-        onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
-        extra={
-          selectedOrder && (
-            <Tag
-              color={
-                statusColors[
-                  selectedOrder.status as keyof typeof statusColors
-                ] || 'default'
-              }
-            >
-              {selectedOrder.status.charAt(0).toUpperCase() +
-                selectedOrder.status.slice(1)}
-            </Tag>
-          )
-        }
+        onClose={() => setDrawerVisible(false)}
       >
         {selectedOrder && (
           <>
-            <Descriptions bordered column={1} size="small">
-              <Descriptions.Item label="Customer">
-                {selectedOrder.customerName}
-              </Descriptions.Item>
+            <Descriptions bordered column={1} size="small" className="mb-4">
               <Descriptions.Item label="Table">
-                {selectedOrder.tableNumber || '-'}
+                {selectedOrder.tableId ? (
+                  <TableInfo tableId={selectedOrder.tableId} />
+                ) : (
+                  selectedOrder.tableNumber || '-'
+                )}
               </Descriptions.Item>
               <Descriptions.Item label="Order Time">
                 {format(new Date(selectedOrder.createdAt), 'PPpp')}
               </Descriptions.Item>
               <Descriptions.Item label="Total Amount">
-                <Text strong>${selectedOrder.totalAmount.toFixed(2)}</Text>
+                <Text>₹{selectedOrder.totalAmount.toFixed(2)}</Text>
               </Descriptions.Item>
               {selectedOrder.notes && (
                 <Descriptions.Item label="Notes">
@@ -396,17 +420,15 @@ export default function OrdersPage() {
                 className="mb-2"
                 key={index}
                 title={
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-row justify-between items-center">
                     <span>
                       {item.quantity} × {item.name}
                     </span>
                     <Text strong>
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </Text>
+                    <Text type="secondary"> ₹{item.price.toFixed(2)} each</Text>
                   </div>
-                }
-                extra={
-                  <Text type="secondary">${item.price.toFixed(2)} each</Text>
                 }
               >
                 {item.ingredients && item.ingredients.length > 0 ? (
@@ -428,6 +450,26 @@ export default function OrdersPage() {
                   <Text type="secondary" italic>
                     No ingredient information
                   </Text>
+                )}
+                {/* Add-ons details */}
+                {item.selectedAddOns && item.selectedAddOns.length > 0 && (
+                  <div className="mt-2">
+                    <Text type="secondary" className="block mb-1">
+                      <span className="font-medium">Add-ons:</span>
+                    </Text>
+                    <div className="flex flex-wrap gap-1">
+                      {item.selectedAddOns.map((addon: any, idx: number) => (
+                        <Tag key={idx} color="green">
+                          {addon.name}: +₹{addon.price.toFixed(2)}
+                          {addon.quantity && addon.unit && (
+                            <span className="ml-1 text-gray-700">
+                              ({addon.quantity} {addon.unit})
+                            </span>
+                          )}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </Card>
             ))}

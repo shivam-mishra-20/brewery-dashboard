@@ -173,7 +173,7 @@ export default function InventoryPage() {
   const [lowStockCount, setLowStockCount] = useState(0)
 
   // Get low stock items count
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     const fetchLowStockCount = async () => {
       try {

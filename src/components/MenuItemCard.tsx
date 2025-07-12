@@ -1,10 +1,13 @@
+import { Image as AntdImage } from 'antd'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import {
   BsCartDash,
+  BsCheckCircle,
   BsChevronLeft,
   BsChevronRight,
+  BsCreditCard,
   BsPencil,
   BsToggleOff,
   BsToggleOn,
@@ -13,7 +16,8 @@ import {
 import { Carousel } from 'react-responsive-carousel'
 import 'react-responsive-carousel/lib/styles/carousel.min.css'
 import '@/styles/menu-carousel.css'
-import { Badge, Popover, Tag } from 'antd'
+import { Badge, message, Popover, Tag } from 'antd'
+import { useOrder } from '@/hooks/useOrder'
 import { MenuItem } from '@/models/MenuItem'
 
 interface MenuItemCardProps {
@@ -21,6 +25,8 @@ interface MenuItemCardProps {
   onEdit: (item: MenuItem) => void
   onDelete: (id: string) => void
   onToggleAvailability: (id: string, available: boolean) => void
+  orderId?: string
+  paymentStatus?: 'unpaid' | 'paid'
 }
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({
@@ -28,17 +34,25 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   onEdit,
   onDelete,
   onToggleAvailability,
+  orderId,
+  paymentStatus = 'unpaid',
 }) => {
   // State to handle image loading errors
   const [imageLoadErrors, setImageLoadErrors] = useState<boolean[]>([])
   const [activeSlide, setActiveSlide] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
+  // State for Ant Design image preview
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewImage, setPreviewImage] = useState('')
   // Video related states
   // Show video by default if present, but make it configurable
   const [showVideo, setShowVideo] = useState(Boolean(item.videoUrl))
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
   const videoRef = React.useRef<HTMLVideoElement>(null)
-  // Remove unused state
+  // Payment related state
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [localPaymentStatus, setLocalPaymentStatus] = useState(paymentStatus)
+  const { updateOrderStatus, isLoading } = useOrder()
 
   // Check if there are multiple images to display
   const hasMultipleImages = item.imageURLs && item.imageURLs.length > 0
@@ -48,6 +62,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const hasIngredients = Boolean(
     item.ingredients && item.ingredients.length > 0,
   )
+  // Check if the item has add-ons
+  const hasAddOns = Boolean(item.addOns && item.addOns.length > 0)
 
   // For displaying video indicator in card header
   // Removed unused videoIndicator variable
@@ -94,10 +110,10 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     }
   }
 
-  const handleCloseVideo = () => {
-    setShowVideo(false)
-    setIsVideoPlaying(false)
-  }
+  // const handleCloseVideo = () => {
+  //   setShowVideo(false)
+  //   setIsVideoPlaying(false)
+  // }
 
   // Ingredients content for popover
   const ingredientsContent = (
@@ -116,8 +132,53 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     </div>
   )
 
-  // Enhanced ingredients display for the card
-  // Removed unused function
+  // Add-ons content for popover
+  const addOnsContent = (
+    <div className="w-64 max-w-xs">
+      <h4 className="text-sm font-medium mb-2 text-gray-800">Add-ons:</h4>
+      <div className="flex flex-wrap gap-1">
+        {item.addOns?.map((addon, index) => (
+          <Tag key={index} color="green" className="mb-1">
+            {addon.name}: ${addon.price.toFixed(2)}
+          </Tag>
+        ))}
+      </div>
+      {(!item.addOns || item.addOns.length === 0) && (
+        <p className="text-xs text-gray-500">No add-ons available</p>
+      )}
+    </div>
+  )
+
+  // Function to handle payment processing
+  const handleProcessPayment = async () => {
+    if (!orderId || isProcessingPayment) return
+
+    try {
+      setIsProcessingPayment(true)
+
+      // Call the API to update payment status
+      const result = await updateOrderStatus({
+        id: orderId,
+        paymentStatus: 'paid',
+      })
+
+      if (result.success) {
+        setLocalPaymentStatus('paid')
+        message.success('Payment processed successfully')
+      } else {
+        message.error(
+          `Failed to process payment: ${result.error || 'Unknown error'}`,
+        )
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred'
+      message.error(`Failed to process payment: ${errorMessage}`)
+      console.error('Payment processing error:', err)
+    } finally {
+      setIsProcessingPayment(false)
+    }
+  }
 
   return (
     <motion.div
@@ -201,7 +262,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                         </svg>
                       )}
                     </button>
-                    <button
+                    {/* <button
                       onClick={handleCloseVideo}
                       className="p-2 bg-white bg-opacity-80 rounded-full shadow hover:bg-opacity-100 transition"
                       title="Close video"
@@ -214,7 +275,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                       >
                         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                       </svg>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               )}
@@ -405,7 +466,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             {hasIngredients && (
               <Popover
                 content={ingredientsContent}
-                title={item.name}
+                title={`${item.name} - Ingredients`}
                 trigger="click"
                 overlayClassName="max-w-xs"
               >
@@ -419,6 +480,100 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                 </Badge>
               </Popover>
             )}
+            {hasAddOns && (
+              <Popover
+                content={addOnsContent}
+                title={`${item.name} - Add-ons`}
+                trigger="click"
+                overlayClassName="max-w-xs"
+              >
+                <Badge dot={hasAddOns} color="green">
+                  <button
+                    className="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50 transition-colors"
+                    aria-label="View add-ons"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                    </svg>
+                  </button>
+                </Badge>
+              </Popover>
+            )}
+            {/* Images button and popover with modal preview */}
+            {allImageUrls && allImageUrls.length > 0 && (
+              <>
+                <Popover
+                  content={
+                    <div className="w-64 max-w-xs">
+                      <h4 className="text-sm font-medium mb-2 text-gray-800">
+                        Images:
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {allImageUrls.map((url, idx) => (
+                          <div
+                            key={idx}
+                            className="w-20 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center cursor-pointer"
+                            onClick={() => {
+                              setPreviewImage(url)
+                              setPreviewOpen(true)
+                            }}
+                          >
+                            <AntdImage
+                              wrapperStyle={{ display: 'block' }}
+                              src={url}
+                              alt={`${item.name} image ${idx + 1}`}
+                              width={80}
+                              height={64}
+                              style={{
+                                objectFit: 'cover',
+                                borderRadius: '0.5rem',
+                              }}
+                              preview={false}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  }
+                  title={`${item.name} - Images`}
+                  trigger="click"
+                  overlayClassName="max-w-xs"
+                >
+                  <button
+                    className="text-yellow-600 hover:text-yellow-800 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                    aria-label="View images"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v8H8V8z" />
+                    </svg>
+                  </button>
+                </Popover>
+                <AntdImage
+                  wrapperStyle={{ display: 'none' }}
+                  preview={{
+                    visible: previewOpen,
+                    src: previewImage,
+                    onVisibleChange: (visible) => setPreviewOpen(visible),
+                    afterOpenChange: (visible) =>
+                      !visible && setPreviewImage(''),
+                  }}
+                  src={previewImage}
+                />
+              </>
+            )}
+
             <button
               className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors"
               onClick={() => onEdit(item)}
@@ -442,30 +597,93 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
         <div className="flex justify-between items-center mb-2">
           <p className="font-semibold text-primary text-xl">
-            ${Number(item.price).toFixed(2)}
+            ₹{Number(item.price).toFixed(2)}
           </p>
           <div className="flex items-center gap-2">
-            <button
-              className="p-1"
-              onClick={() => onToggleAvailability(item.id, !item.available)}
-            >
-              {item.available ? (
-                <BsToggleOn
-                  size={24}
-                  className="text-green-500 hover:text-green-700"
-                />
-              ) : (
-                <BsToggleOff
-                  size={24}
-                  className="text-gray-400 hover:text-gray-600"
-                />
-              )}
-            </button>
-            <span className="text-sm text-gray-500 font-medium">
-              {item.available ? 'Available' : 'Unavailable'}
-            </span>
+            {!orderId && (
+              <div className="flex items-center gap-2">
+                <button
+                  className="p-1"
+                  onClick={() => onToggleAvailability(item.id, !item.available)}
+                >
+                  {item.available ? (
+                    <BsToggleOn
+                      size={24}
+                      className="text-green-500 hover:text-green-700"
+                    />
+                  ) : (
+                    <BsToggleOff
+                      size={24}
+                      className="text-gray-400 hover:text-gray-600"
+                    />
+                  )}
+                </button>
+                <span className="text-sm text-gray-500 font-medium">
+                  {item.available ? 'Available' : 'Unavailable'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Payment status section - Only render when we have an order ID */}
+        {orderId && (
+          <div className="flex justify-between items-center mt-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">
+                Order ID:{' '}
+                <span className="font-medium text-gray-800">{orderId}</span>
+              </span>
+              <span className="h-4 w-px bg-gray-300" />
+              <span className="text-sm font-medium">
+                Payment:{' '}
+                <span
+                  className={`${
+                    localPaymentStatus === 'paid'
+                      ? 'text-green-500'
+                      : 'text-red-500'
+                  }`}
+                >
+                  {localPaymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+                </span>
+              </span>
+            </div>
+            {localPaymentStatus === 'unpaid' ? (
+              <button
+                onClick={handleProcessPayment}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 transition-all"
+                disabled={isProcessingPayment || isLoading}
+              >
+                {isProcessingPayment ? (
+                  <svg
+                    className="w-5 h-5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                ) : (
+                  <>
+                    <BsCreditCard className="w-5 h-5" />
+                    Pay Now
+                  </>
+                )}
+              </button>
+            ) : (
+              <Tag color="green" className="flex items-center gap-1 py-1 px-3">
+                <BsCheckCircle size={14} />
+                <span>Paid</span>
+              </Tag>
+            )}
+          </div>
+        )}
 
         {hasIngredients && (
           <div className="mt-2 p-3 bg-gray-50 rounded-xl">
@@ -498,6 +716,44 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
                     className="text-sm cursor-pointer px-3 py-1"
                   >
                     +{item.ingredients.length - 3} more
+                  </Tag>
+                </Popover>
+              )}
+            </div>
+          </div>
+        )}
+
+        {hasAddOns && (
+          <div className="mt-2 p-3 bg-green-50 rounded-xl">
+            <p className="text-sm text-gray-600 mb-2 font-medium">
+              Available Add-ons:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {item.addOns?.slice(0, 3).map((addon, idx) => (
+                <Tag key={idx} color="green" className="text-sm px-3 py-1">
+                  {addon.name}: ${addon.price.toFixed(2)}
+                </Tag>
+              ))}
+              {item.addOns && item.addOns.length > 3 && (
+                <Popover
+                  title="All Add-ons"
+                  content={
+                    <div className="max-w-xs">
+                      <div className="flex flex-wrap gap-1">
+                        {item.addOns?.map((addon, idx) => (
+                          <Tag key={idx} color="green" className="mb-1">
+                            {addon.name}: ${addon.price.toFixed(2)}
+                          </Tag>
+                        ))}
+                      </div>
+                    </div>
+                  }
+                >
+                  <Tag
+                    color="default"
+                    className="text-sm cursor-pointer px-3 py-1"
+                  >
+                    +{item.addOns.length - 3} more
                   </Tag>
                 </Popover>
               )}

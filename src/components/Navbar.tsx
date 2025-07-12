@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
   }, [])
 
   return (
-    <header className="w-full mt-5 px-4 sm:px-6 py-4 mb-3 border border-gray-200 dark:border-gray-300/[0.1] rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between bg-[#f7f7f7] dark:bg-[#f7f7f7] gap-4 flex-shrink-0">
+    <header className="w-full   mt-5 px-4 sm:px-6 py-4 mb-3 border border-gray-200 dark:border-gray-300/[0.1] rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between bg-[#f7f7f7] dark:bg-[#f7f7f7] gap-4 flex-shrink-0">
       {/* Hamburger for sidebar (mobile only, left side) */}
       <div className="flex w-full items-center justify-between sm:hidden mb-2">
         <button

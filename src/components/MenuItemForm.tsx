@@ -1,8 +1,9 @@
+import { PlusOutlined } from '@ant-design/icons'
 import { Select } from 'antd'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
-import { BsImage, BsLightningChargeFill, BsX } from 'react-icons/bs'
+import { BsImage, BsLightningChargeFill, BsTrash, BsX } from 'react-icons/bs'
 import { useInventory } from '@/hooks/useInventory'
 import {
   DEFAULT_CATEGORIES,
@@ -38,6 +39,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
     videoFile: null, // Recipe/promotional video
     videoUrl: undefined, // For existing video
     available: true,
+    addOns: [], // Array of AddOnItem
   })
 
   const [previewURLs, setPreviewURLs] = useState<string[]>([])
@@ -46,6 +48,15 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
   const [additionalInfo, setAdditionalInfo] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [newAddOn, setNewAddOn] = useState({
+    name: '',
+    price: '',
+    available: true,
+    quantity: '',
+    unit: '',
+    inventoryItemId: '',
+  })
+  const [addOnError, setAddOnError] = useState<string | null>(null)
 
   // Initialize form if editing an item
   useEffect(() => {
@@ -70,6 +81,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         videoThumbnailUrl: item.videoThumbnailUrl,
         ingredients: item.ingredients || [],
         available: item.available,
+        addOns: item.addOns || [],
       })
       setPreviewURLs(urls)
       if (item.videoUrl) {
@@ -202,6 +214,84 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // Add a new add-on item
+  const handleAddAddOn = () => {
+    setAddOnError(null)
+
+    // Validation
+    if (!newAddOn.name.trim()) {
+      setAddOnError('Add-on name is required')
+      return
+    }
+    if (
+      !newAddOn.price ||
+      isNaN(Number(newAddOn.price)) ||
+      Number(newAddOn.price) < 0
+    ) {
+      setAddOnError('Add-on price must be a valid number')
+      return
+    }
+    if (
+      !newAddOn.quantity ||
+      isNaN(Number(newAddOn.quantity)) ||
+      Number(newAddOn.quantity) <= 0
+    ) {
+      setAddOnError('Add-on quantity must be a positive number')
+      return
+    }
+    if (!newAddOn.unit) {
+      setAddOnError('Unit is required')
+      return
+    }
+    if (!newAddOn.inventoryItemId) {
+      setAddOnError('Inventory item is required')
+      return
+    }
+    // Add the new add-on to the list
+    setFormData((prev) => ({
+      ...prev,
+      addOns: [
+        ...(prev.addOns || []),
+        {
+          name: newAddOn.name.trim(),
+          price: Number(newAddOn.price),
+          available: newAddOn.available,
+          quantity: Number(newAddOn.quantity),
+          unit: newAddOn.unit,
+          inventoryItemId: newAddOn.inventoryItemId,
+        },
+      ],
+    }))
+    // Reset the form
+    setNewAddOn({
+      name: '',
+      price: '',
+      available: true,
+      quantity: '',
+      unit: '',
+      inventoryItemId: '',
+    })
+  }
+
+  // Remove an add-on
+  const handleRemoveAddOn = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      addOns: (prev.addOns || []).filter((_, i) => i !== index),
+    }))
+  }
+
+  // When inventory item is selected for add-on, auto-fill unit and inventoryItemId
+  const handleAddOnInventorySelect = (value: string) => {
+    const selectedItem = inventoryItems.find((item) => item.name === value)
+    setNewAddOn((prev) => ({
+      ...prev,
+      name: value,
+      unit: selectedItem?.unit || '',
+      inventoryItemId: selectedItem?.id || '',
+    }))
   }
 
   return (
@@ -519,6 +609,269 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
                 Add ingredients from your inventory to keep track of stock
                 usage.
               </p>
+            </div>
+
+            {/* Add-ons Manager */}
+            <div className="col-span-full mt-6">
+              <h3 className="text-lg font-medium mb-2">Add-on Options</h3>
+              <div className="border border-gray-200 rounded-xl p-4">
+                {/* Display existing add-ons */}
+                {formData.addOns && formData.addOns.length > 0 ? (
+                  <div className="mb-4">
+                    <div className="grid grid-cols-12 gap-2 font-medium text-gray-600 mb-2 text-sm">
+                      <div className="col-span-3">Name</div>
+                      <div className="col-span-2">Price</div>
+                      <div className="col-span-2">Quantity</div>
+                      <div className="col-span-2">Unit</div>
+                      <div className="col-span-2">Available</div>
+                      <div className="col-span-1"></div>
+                    </div>
+                    {formData.addOns.map((addon, index) => (
+                      <div
+                        key={index}
+                        className="grid grid-cols-12 gap-2 items-center mb-2"
+                      >
+                        <div className="col-span-3">
+                          <input
+                            type="text"
+                            value={addon.name}
+                            onChange={(e) => {
+                              const newAddOns = [...formData.addOns!]
+                              newAddOns[index] = {
+                                ...addon,
+                                name: e.target.value,
+                              }
+                              setFormData((prev) => ({
+                                ...prev,
+                                addOns: newAddOns,
+                              }))
+                            }}
+                            className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            value={addon.price}
+                            onChange={(e) => {
+                              const price = e.target.value.replace(
+                                /[^0-9.]/g,
+                                '',
+                              )
+                              const newAddOns = [...formData.addOns!]
+                              newAddOns[index] = {
+                                ...addon,
+                                price: Number(price),
+                              }
+                              setFormData((prev) => ({
+                                ...prev,
+                                addOns: newAddOns,
+                              }))
+                            }}
+                            className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            value={addon.quantity}
+                            onChange={(e) => {
+                              const quantity = e.target.value.replace(
+                                /[^0-9.]/g,
+                                '',
+                              )
+                              const newAddOns = [...formData.addOns!]
+                              newAddOns[index] = {
+                                ...addon,
+                                quantity: Number(quantity),
+                              }
+                              setFormData((prev) => ({
+                                ...prev,
+                                addOns: newAddOns,
+                              }))
+                            }}
+                            className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            value={addon.unit}
+                            onChange={(e) => {
+                              const newAddOns = [...formData.addOns!]
+                              newAddOns[index] = {
+                                ...addon,
+                                unit: e.target.value,
+                              }
+                              setFormData((prev) => ({
+                                ...prev,
+                                addOns: newAddOns,
+                              }))
+                            }}
+                            className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <Select
+                            value={addon.available ? 'true' : 'false'}
+                            onChange={(value) => {
+                              const available = value === 'true'
+                              const newAddOns = [...formData.addOns!]
+                              newAddOns[index] = { ...addon, available }
+                              setFormData((prev) => ({
+                                ...prev,
+                                addOns: newAddOns,
+                              }))
+                            }}
+                            options={[
+                              { value: 'true', label: 'Yes' },
+                              { value: 'false', label: 'No' },
+                            ]}
+                            className="w-full rounded-xl"
+                            size="small"
+                            style={{ borderRadius: 12 }}
+                          />
+                        </div>
+                        <div className="col-span-1">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAddOn(index)}
+                            className="w-full p-2 flex justify-center items-center bg-red-50 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-xl transition-colors"
+                          >
+                            <BsTrash size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 mb-4 text-sm">
+                    No add-ons defined yet. Add options like &quot;Extra
+                    cheese&quot; or &quot;Large size&quot; below.
+                  </p>
+                )}
+
+                {/* Add new add-on form */}
+                <div className="border-t border-gray-100 pt-3">
+                  <h4 className="text-sm font-medium mb-2">Add New Add-on</h4>
+                  {inventoryItems.length === 0 ? (
+                    <div className="text-red-500 text-sm mb-2">
+                      No inventory items found. Please add items to inventory
+                      before creating add-ons.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-12 gap-2 items-end">
+                      <div className="col-span-3">
+                        <label className="block text-xs text-gray-500 mb-1">
+                          Inventory Item
+                        </label>
+                        <Select
+                          showSearch
+                          value={newAddOn.name || undefined}
+                          onChange={handleAddOnInventorySelect}
+                          options={inventoryItems.map((item) => ({
+                            value: item.name,
+                            label: item.name,
+                          }))}
+                          placeholder="Select inventory item"
+                          className="w-full rounded-xl"
+                          size="small"
+                          style={{ borderRadius: 12 }}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs text-gray-500 mb-1">
+                          Price (₹)
+                        </label>
+                        <input
+                          type="text"
+                          value={newAddOn.price}
+                          onChange={(e) =>
+                            setNewAddOn({
+                              ...newAddOn,
+                              price: e.target.value.replace(/[^0-9.]/g, ''),
+                            })
+                          }
+                          placeholder="0.00"
+                          className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs text-gray-500 mb-1">
+                          Quantity
+                        </label>
+                        <input
+                          type="text"
+                          value={newAddOn.quantity}
+                          onChange={(e) =>
+                            setNewAddOn({
+                              ...newAddOn,
+                              quantity: e.target.value.replace(/[^0-9.]/g, ''),
+                            })
+                          }
+                          placeholder="e.g. 1"
+                          className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs text-gray-500 mb-1">
+                          Unit
+                        </label>
+                        <input
+                          type="text"
+                          value={newAddOn.unit}
+                          onChange={(e) =>
+                            setNewAddOn({
+                              ...newAddOn,
+                              unit: e.target.value,
+                            })
+                          }
+                          placeholder="e.g. ml, slice"
+                          className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs text-gray-500 mb-1">
+                          Available
+                        </label>
+                        <Select
+                          value={newAddOn.available ? 'true' : 'false'}
+                          onChange={(value) =>
+                            setNewAddOn({
+                              ...newAddOn,
+                              available: value === 'true',
+                            })
+                          }
+                          options={[
+                            { value: 'true', label: 'Yes' },
+                            { value: 'false', label: 'No' },
+                          ]}
+                          className="w-full rounded-xl"
+                          size="small"
+                          style={{ borderRadius: 12 }}
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <button
+                          type="button"
+                          onClick={handleAddAddOn}
+                          className="w-full p-2 bg-gradient-to-tr from-primary to-secondary text-white rounded-xl hover:bg-green-700 text-sm flex items-center justify-center shadow-inner shadow-white/[0.1]"
+                          disabled={!newAddOn.name}
+                        >
+                          <PlusOutlined />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {addOnError && (
+                    <p className="text-red-500 text-xs mt-1">{addOnError}</p>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-3">
+                  Add-ons are optional items customers can select when ordering
+                  this menu item.
+                </p>
+              </div>
             </div>
 
             {/* Error message */}

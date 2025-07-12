@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     await dbConnect()
 
-    let query: any = {}
+    const query: any = {}
 
     // Apply filters
     if (category && category !== 'All') {

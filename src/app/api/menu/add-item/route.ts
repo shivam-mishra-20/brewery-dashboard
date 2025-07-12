@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
       ? JSON.parse(ingredientsStr)
       : []
 
+    // Get the add-ons if provided
+    const addOnsStr = formData.get('addOns') as string | null
+    const addOns = addOnsStr ? JSON.parse(addOnsStr) : []
+
     // Validate required fields
     if (!name || !description || isNaN(price) || !category) {
       return NextResponse.json(
@@ -158,6 +162,7 @@ export async function POST(request: NextRequest) {
         videoThumbnailUrl: videoThumbnailUrl || '',
         available,
         ingredients: ingredients.length > 0 ? ingredients : [],
+        addOns: addOns.length > 0 ? addOns : [],
       })
       await newMenuItem.save()
       return newMenuItem

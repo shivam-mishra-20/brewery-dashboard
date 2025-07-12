@@ -4,47 +4,75 @@ import { OrderModel } from '@/models/OrderModel'
 
 export async function POST(request: NextRequest) {
   try {
-    const { id, status, notes } = await request.json()
+    const { id, status, paymentStatus, notes } = await request.json()
 
     // Validate required fields
-    if (!id || !status) {
+    if (!id || (!status && !paymentStatus)) {
       return NextResponse.json(
         {
           success: false,
           error: 'Missing required fields',
           details: {
             id: !id ? 'Order ID is required' : null,
-            status: !status ? 'Status is required' : null,
+            status:
+              !status && !paymentStatus
+                ? 'Either status or paymentStatus is required'
+                : null,
           },
         },
         { status: 400 },
       )
     }
 
-    // Validate status
-    const validStatuses = [
-      'pending',
-      'preparing',
-      'ready',
-      'completed',
-      'cancelled',
-    ]
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid status',
-          details: {
-            status: `Status must be one of: ${validStatuses.join(', ')}`,
+    // Validate status if provided
+    if (status) {
+      const validStatuses = [
+        'pending',
+        'preparing',
+        'ready',
+        'completed',
+        'cancelled',
+      ]
+      if (!validStatuses.includes(status)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid status',
+            details: {
+              status: `Status must be one of: ${validStatuses.join(', ')}`,
+            },
           },
-        },
-        { status: 400 },
-      )
+          { status: 400 },
+        )
+      }
     }
 
-    // Update order status
+    // Validate paymentStatus if provided
+    if (paymentStatus) {
+      const validPaymentStatuses = ['unpaid', 'paid']
+      if (!validPaymentStatuses.includes(paymentStatus)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid payment status',
+            details: {
+              paymentStatus: `Payment status must be one of: ${validPaymentStatuses.join(', ')}`,
+            },
+          },
+          { status: 400 },
+        )
+      }
+    }
+
+    // Update order status and table status if needed
     const order = await withDBRetry(async () => {
-      const updateData: { status: string; notes?: string } = { status }
+      const updateData: {
+        status?: string
+        paymentStatus?: string
+        notes?: string
+      } = {}
+      if (status) updateData.status = status
+      if (paymentStatus) updateData.paymentStatus = paymentStatus
       if (notes) updateData.notes = notes
 
       const updatedOrder = await OrderModel.findByIdAndUpdate(id, updateData, {
@@ -53,6 +81,21 @@ export async function POST(request: NextRequest) {
 
       if (!updatedOrder) {
         throw new Error('Order not found')
+      }
+
+      // If status is completed or cancelled, set table status to available
+      if (status === 'completed' || status === 'cancelled') {
+        const tableId = updatedOrder.tableId
+        if (tableId) {
+          await (
+            await import('@/models/Table')
+          ).Table.findByIdAndUpdate(tableId, {
+            status: 'available',
+            $push: {
+              statusHistory: { status: 'available', timestamp: new Date() },
+            },
+          })
+        }
       }
 
       return updatedOrder
@@ -64,9 +107,10 @@ export async function POST(request: NextRequest) {
         id: order._id,
         customerName: order.customerName,
         status: order.status,
+        paymentStatus: order.paymentStatus,
         updatedAt: order.updatedAt,
       },
-      message: 'Order status updated successfully',
+      message: 'Order updated successfully',
     })
   } catch (error) {
     console.error('Error updating order status:', error)

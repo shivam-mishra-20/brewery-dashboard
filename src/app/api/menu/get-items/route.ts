@@ -51,6 +51,14 @@ export async function GET(request: NextRequest) {
         videoThumbnailUrl: item.videoThumbnailUrl || '',
         available: item.available,
         ingredients: item.ingredients || [],
+        addOns: (item.addOns || []).map((addon: any) => ({
+          name: addon.name,
+          price: addon.price,
+          available: addon.available,
+          quantity: addon.quantity,
+          unit: addon.unit,
+          inventoryItemId: addon.inventoryItemId,
+        })),
         createdAt: item.createdAt?.toISOString?.() || '',
         updatedAt: item.updatedAt?.toISOString?.() || '',
       }))

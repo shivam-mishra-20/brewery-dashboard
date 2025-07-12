@@ -2,6 +2,16 @@ import mongoose, { Document, Model, Schema } from 'mongoose'
 import { MenuItemIngredient } from './InventoryItem'
 import { DEFAULT_CATEGORIES } from './MenuItem'
 
+// Interface for add-on items that can be added to menu items
+export interface AddOnItem {
+  name: string
+  price: number
+  available: boolean
+  quantity: number
+  unit: string
+  inventoryItemId: string
+}
+
 export interface IMenuItem extends Document {
   name: string
   description: string
@@ -15,6 +25,7 @@ export interface IMenuItem extends Document {
   videoThumbnailUrl?: string // URL to video thumbnail
   available: boolean
   ingredients?: MenuItemIngredient[] // Ingredients from inventory
+  addOns?: AddOnItem[] // Optional add-on items with their own prices, quantity, unit, inventory link
   createdAt: Date
   updatedAt: Date
 }
@@ -43,6 +54,19 @@ const MenuItemSchema: Schema<IMenuItem> = new Schema(
           inventoryItemName: { type: String, required: true },
           quantity: { type: Number, required: true },
           unit: { type: String, required: true },
+        },
+      ],
+      default: [],
+    },
+    addOns: {
+      type: [
+        {
+          name: { type: String, required: true },
+          price: { type: Number, required: true },
+          available: { type: Boolean, default: true },
+          quantity: { type: Number, required: true },
+          unit: { type: String, required: true },
+          inventoryItemId: { type: String, required: true },
         },
       ],
       default: [],

@@ -10,15 +10,15 @@ import {
   XAxis,
 } from 'recharts'
 
-const data = [
-  { day: 'S', value: 12, full: 'Sunday' },
-  { day: 'M', value: 10, full: 'Monday' },
-  { day: 'T', value: 8, full: 'Tuesday' },
-  { day: 'W', value: 15, full: 'Wednesday' },
-  { day: 'T', value: 7, full: 'Thursday' },
-  { day: 'F', value: 14, full: 'Friday' },
-  { day: 'S', value: 9, full: 'Saturday' },
-]
+// const data = [
+//   { day: 'S', value: 12, full: 'Sunday' },
+//   { day: 'M', value: 10, full: 'Monday' },
+//   { day: 'T', value: 8, full: 'Tuesday' },
+//   { day: 'W', value: 15, full: 'Wednesday' },
+//   { day: 'T', value: 7, full: 'Thursday' },
+//   { day: 'F', value: 14, full: 'Friday' },
+//   { day: 'S', value: 9, full: 'Saturday' },
+// ]
 
 const barFills = [
   '#fff9c4', // light yellow
@@ -30,7 +30,11 @@ const barFills = [
   '#ffa000', // darker yellow
 ]
 
-const DashboardBarChart: React.FC = () => (
+interface DashboardBarChartProps {
+  data: Array<{ day: string; value: number; full: string }>
+}
+
+const DashboardBarChart: React.FC<DashboardBarChartProps> = ({ data }) => (
   <div
     className="w-full h-full flex items-center justify-center"
     tabIndex={-1}
@@ -39,7 +43,7 @@ const DashboardBarChart: React.FC = () => (
   >
     <div className="flex flex-col justify-start w-full h-full">
       <h1 className="text-lg font-inter-semibold text-black">
-        Project Analytics
+        Weekly Sales Analytics
       </h1>
       <div className="w-full h-full flex items-center justify-center">
         <ResponsiveContainer width="70%" height="100%">

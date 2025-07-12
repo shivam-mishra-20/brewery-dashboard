@@ -66,6 +66,11 @@ export const addMenuItem = async (
       apiFormData.append('ingredients', JSON.stringify(formData.ingredients))
     }
 
+    // Add add-ons if they exist
+    if (formData.addOns && formData.addOns.length > 0) {
+      apiFormData.append('addOns', JSON.stringify(formData.addOns))
+    }
+
     // Append up to 3 images as image0, image1, image2
     if (formData.images && formData.images.length > 0) {
       formData.images.slice(0, 3).forEach((file, idx) => {
@@ -116,6 +121,11 @@ export const updateMenuItem = async (
     // Add ingredients if they exist
     if (formData.ingredients && formData.ingredients.length > 0) {
       apiFormData.append('ingredients', JSON.stringify(formData.ingredients))
+    }
+
+    // Add add-ons if they exist
+    if (formData.addOns && formData.addOns.length > 0) {
+      apiFormData.append('addOns', JSON.stringify(formData.addOns))
     }
 
     // Append existing imageURLs if available

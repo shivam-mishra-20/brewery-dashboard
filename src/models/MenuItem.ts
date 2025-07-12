@@ -1,5 +1,15 @@
 import { MenuItemIngredient } from './InventoryItem'
 
+// Interface for add-on items that can be added to menu items
+export interface AddOnItem {
+  name: string
+  price: number
+  available: boolean
+  quantity: number
+  unit: string
+  inventoryItemId: string
+}
+
 export interface MenuItem {
   id: string
   name: string
@@ -16,6 +26,7 @@ export interface MenuItem {
   createdAt?: string
   updatedAt?: string
   ingredients?: MenuItemIngredient[] // Ingredients from inventory
+  addOns?: AddOnItem[] // Optional add-on items with their own prices, quantity, unit, inventory link
 }
 
 export interface MenuItemFormData {
@@ -30,6 +41,7 @@ export interface MenuItemFormData {
   videoThumbnailUrl?: string // For video thumbnail
   available: boolean
   ingredients?: MenuItemIngredient[] // Ingredients from inventory
+  addOns?: AddOnItem[] // Optional add-on items with their own prices, quantity, unit, inventory link
 }
 
 export const DEFAULT_CATEGORIES = [

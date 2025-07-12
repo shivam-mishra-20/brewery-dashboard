@@ -11,6 +11,7 @@ interface OrderItem {
   price: number
   quantity: number
   ingredients: Ingredient[]
+  selectedAddOns?: Array<{ name: string; price: number }>
 }
 
 interface Ingredient {
@@ -28,11 +29,12 @@ interface IngredientToDeduct {
 }
 export async function POST(request: NextRequest) {
   try {
-    const { customerName, tableNumber, items, notes } = await request.json()
+    const { customerName, tableId, items, notes } = await request.json()
 
     // Validate required fields
     if (
       !customerName ||
+      !tableId ||
       !items ||
       !Array.isArray(items) ||
       items.length === 0
@@ -43,6 +45,7 @@ export async function POST(request: NextRequest) {
           error: 'Missing required fields',
           details: {
             customerName: !customerName ? 'Customer name is required' : null,
+            tableId: !tableId ? 'Table ID is required' : null,
             items:
               !items || !Array.isArray(items) || items.length === 0
                 ? 'At least one item is required'
@@ -52,6 +55,17 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
+    // Set table status to occupied
+    await withDBRetry(async () => {
+      await (
+        await import('@/models/Table')
+      ).Table.findByIdAndUpdate(tableId, {
+        status: 'occupied',
+        $push: {
+          statusHistory: { status: 'occupied', timestamp: new Date() },
+        },
+      })
+    })
 
     // Fetch menu items to get their ingredients and validate
     const menuItemIds = items.map((item) => item.menuItemId)
@@ -87,31 +101,42 @@ export async function POST(request: NextRequest) {
 
     const orderItems: OrderItem[] = []
     const ingredientsToDeduct: IngredientToDeduct[] = []
+    const addOnsToDeduct: IngredientToDeduct[] = []
 
     for (const orderItem of items) {
       const menuItem = menuItems.find(
         (mi) => mi._id.toString() === orderItem.menuItemId,
       )
-
       if (!menuItem) continue
 
-      const itemTotal = menuItem.price * orderItem.quantity
+      // Calculate base price
+      let itemTotal = menuItem.price * orderItem.quantity
+
+      // Calculate add-ons price if any
+      let addOnTotal = 0
+      if (orderItem.selectedAddOns && orderItem.selectedAddOns.length > 0) {
+        addOnTotal = orderItem.selectedAddOns.reduce(
+          (sum: number, addOn: { name: string; price: number }): number =>
+            sum + addOn.price * orderItem.quantity,
+          0,
+        )
+        itemTotal += addOnTotal
+      }
       totalAmount += itemTotal
 
-      // Include ingredients in order item
+      // Include ingredients and selected add-ons in order item
       const itemWithIngredients: OrderItem = {
         menuItemId: orderItem.menuItemId,
         name: menuItem.name,
         price: menuItem.price,
         quantity: orderItem.quantity,
         ingredients: [],
+        selectedAddOns: orderItem.selectedAddOns || [],
       }
 
       // If menu item has ingredients, prepare for inventory deduction
       if (menuItem.ingredients && menuItem.ingredients.length > 0) {
         itemWithIngredients.ingredients = menuItem.ingredients as Ingredient[]
-
-        // For each ingredient in the menu item, we need to deduct (ingredient quantity × order item quantity)
         menuItem.ingredients.forEach((ingredient: Ingredient) => {
           ingredientsToDeduct.push({
             inventoryItemId: ingredient.inventoryItemId,
@@ -123,62 +148,62 @@ export async function POST(request: NextRequest) {
         })
       }
 
+      // Deduct add-on quantities from inventory
+      if (orderItem.selectedAddOns && orderItem.selectedAddOns.length > 0) {
+        orderItem.selectedAddOns.forEach((addon: any) => {
+          if (addon.inventoryItemId && addon.quantity && addon.unit) {
+            addOnsToDeduct.push({
+              inventoryItemId: addon.inventoryItemId,
+              quantity: addon.quantity * orderItem.quantity,
+              menuItemId: orderItem.menuItemId,
+              menuItemName: menuItem.name,
+              ingredientName: addon.name,
+            })
+          }
+        })
+      }
+
       orderItems.push(itemWithIngredients)
     }
 
-    // Check if we have sufficient inventory for all ingredients
-    if (ingredientsToDeduct.length > 0) {
+    // Check if we have sufficient inventory for all ingredients and add-ons
+    const allToDeduct = [...ingredientsToDeduct, ...addOnsToDeduct]
+    if (allToDeduct.length > 0) {
       const inventoryCheck = await withDBRetry(async () => {
         const insufficientItems = []
-
-        // Group ingredients by ID to get total quantity needed
-        const groupedIngredients = ingredientsToDeduct.reduce(
-          (
-            acc: {
-              [key: string]: { id: string; totalQuantity: number; name: string }
-            },
-            curr,
-          ) => {
-            if (!acc[curr.inventoryItemId]) {
-              acc[curr.inventoryItemId] = {
-                id: curr.inventoryItemId,
-                totalQuantity: 0,
-                name: curr.ingredientName,
-              }
+        // Group by inventoryItemId
+        const grouped = allToDeduct.reduce((acc: any, curr: any) => {
+          if (!acc[curr.inventoryItemId]) {
+            acc[curr.inventoryItemId] = {
+              id: curr.inventoryItemId,
+              totalQuantity: 0,
+              name: curr.ingredientName,
             }
-            acc[curr.inventoryItemId].totalQuantity += curr.quantity
-            return acc
-          },
-          {} as {
-            [key: string]: { id: string; totalQuantity: number; name: string }
-          },
-        )
-
+          }
+          acc[curr.inventoryItemId].totalQuantity += curr.quantity
+          return acc
+        }, {})
         // Check inventory levels
-        for (const id of Object.keys(groupedIngredients)) {
+        for (const id of Object.keys(grouped)) {
           const inventoryItem = await InventoryItem.findById(id)
-
           if (!inventoryItem) {
             insufficientItems.push({
-              name: groupedIngredients[id].name,
+              name: grouped[id].name,
               error: 'Item not found in inventory',
             })
             continue
           }
-
-          if (inventoryItem.quantity < groupedIngredients[id].totalQuantity) {
+          if (inventoryItem.quantity < grouped[id].totalQuantity) {
             insufficientItems.push({
               name: inventoryItem.name,
               available: inventoryItem.quantity,
-              requested: groupedIngredients[id].totalQuantity,
+              requested: grouped[id].totalQuantity,
               unit: inventoryItem.unit,
             })
           }
         }
-
         return insufficientItems
       })
-
       if (inventoryCheck.length > 0) {
         return NextResponse.json(
           {
@@ -195,63 +220,42 @@ export async function POST(request: NextRequest) {
     const order = await withDBRetry(async () => {
       const newOrder = await OrderModel.create({
         customerName,
-        tableNumber,
+        tableId,
         items: orderItems,
         totalAmount,
         status: 'pending',
+        paymentStatus: 'unpaid',
         notes,
       })
 
-      // Now deduct inventory
-      if (ingredientsToDeduct.length > 0) {
-        // Group ingredients by ID to get total quantity needed
-        const groupedIngredients = ingredientsToDeduct.reduce(
-          (
-            acc: {
-              [key: string]: {
-                id: string
-                totalQuantity: number
-                menuItems: Set<string>
-              }
-            },
-            curr,
-          ) => {
-            if (!acc[curr.inventoryItemId]) {
-              acc[curr.inventoryItemId] = {
-                id: curr.inventoryItemId,
-                totalQuantity: 0,
-                menuItems: new Set<string>(),
-              }
+      // Now deduct inventory for ingredients and add-ons
+      const allToDeduct = [...ingredientsToDeduct, ...addOnsToDeduct]
+      if (allToDeduct.length > 0) {
+        // Group by inventoryItemId
+        const grouped = allToDeduct.reduce((acc: any, curr: any) => {
+          if (!acc[curr.inventoryItemId]) {
+            acc[curr.inventoryItemId] = {
+              id: curr.inventoryItemId,
+              totalQuantity: 0,
+              menuItems: new Set<string>(),
             }
-            acc[curr.inventoryItemId].totalQuantity += curr.quantity
-            acc[curr.inventoryItemId].menuItems.add(
-              `${curr.menuItemName} (${curr.menuItemId})`,
-            )
-            return acc
-          },
-          {} as {
-            [key: string]: {
-              id: string
-              totalQuantity: number
-              menuItems: Set<string>
-            }
-          },
-        )
-
+          }
+          acc[curr.inventoryItemId].totalQuantity += curr.quantity
+          acc[curr.inventoryItemId].menuItems.add(
+            `${curr.menuItemName} (${curr.menuItemId})`,
+          )
+          return acc
+        }, {})
         // Update inventory for each item
-        for (const id of Object.keys(groupedIngredients)) {
+        for (const id of Object.keys(grouped)) {
           const inventoryItem = await InventoryItem.findById(id)
-
           if (!inventoryItem) continue
-
           const previousQuantity = inventoryItem.quantity
-          const deductionAmount = groupedIngredients[id].totalQuantity
+          const deductionAmount = grouped[id].totalQuantity
           const newQuantity = Math.max(0, previousQuantity - deductionAmount)
-
           // Update inventory item quantity
           inventoryItem.quantity = newQuantity
           await inventoryItem.save()
-
           // Create inventory transaction record
           await InventoryTransaction.create({
             inventoryItem: id,
@@ -261,7 +265,7 @@ export async function POST(request: NextRequest) {
             newQuantity,
             unitCost: inventoryItem.costPerUnit,
             totalCost: deductionAmount * inventoryItem.costPerUnit,
-            notes: `Used in order #${newOrder._id} for menu items: ${Array.from(groupedIngredients[id].menuItems).join(', ')}`,
+            notes: `Used in order #${newOrder._id} for menu items: ${Array.from(grouped[id].menuItems).join(', ')}`,
             performedBy: 'System',
             orderId: newOrder._id,
           })
@@ -276,8 +280,9 @@ export async function POST(request: NextRequest) {
       order: {
         id: order._id,
         customerName: order.customerName,
-        tableNumber: order.tableNumber,
+        tableId: order.tableId,
         status: order.status,
+        paymentStatus: order.paymentStatus,
         totalAmount: order.totalAmount,
         createdAt: order.createdAt,
       },

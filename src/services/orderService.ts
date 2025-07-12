@@ -2,7 +2,7 @@ import { OrderItem } from '@/models/OrderModel'
 
 export interface PlaceOrderRequest {
   customerName: string
-  tableNumber?: string
+  tableId: string
   items: OrderRequestItem[]
   notes?: string
 }
@@ -10,6 +10,10 @@ export interface PlaceOrderRequest {
 export interface OrderRequestItem {
   menuItemId: string
   quantity: number
+  selectedAddOns?: {
+    name: string
+    price: number
+  }[]
 }
 
 export interface PlaceOrderResponse {
@@ -19,6 +23,7 @@ export interface PlaceOrderResponse {
     customerName: string
     tableNumber?: string
     status: string
+    paymentStatus: string
     totalAmount: number
     createdAt: string
   }
@@ -36,6 +41,7 @@ export interface GetOrdersResponse {
     items: OrderItem[]
     totalAmount: number
     status: string
+    paymentStatus: string
     notes?: string
     createdAt: string
     updatedAt: string
@@ -46,7 +52,8 @@ export interface GetOrdersResponse {
 
 export interface UpdateOrderStatusRequest {
   id: string
-  status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
+  status?: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
+  paymentStatus?: 'unpaid' | 'paid'
   notes?: string
 }
 
@@ -56,6 +63,7 @@ export interface UpdateOrderStatusResponse {
     id: string
     customerName: string
     status: string
+    paymentStatus: string
     updatedAt: string
   }
   error?: string

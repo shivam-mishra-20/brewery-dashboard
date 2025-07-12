@@ -47,6 +47,10 @@ export async function POST(request: NextRequest) {
     const existingVideoThumbnailUrl = formData.get(
       'existingVideoThumbnailUrl',
     ) as string | null
+    
+    // Get the add-ons if provided
+    const addOnsStr = formData.get('addOns') as string | null
+    const addOns = addOnsStr ? JSON.parse(addOnsStr) : []
 
     // Get the ingredients if provided
     const ingredientsStr = formData.get('ingredients') as string | null
@@ -248,6 +252,8 @@ export async function POST(request: NextRequest) {
     await withDBRetry(async () => {
       // Update ingredients without modifying inventory quantities
       menuItem.ingredients = ingredients
+      // Update add-ons if provided
+      menuItem.addOns = addOns
       await menuItem.save()
     })
 
