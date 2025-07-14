@@ -110,7 +110,10 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
   }
 
   const getMenuItemIngredients = (menuItemId: string) => {
-    const menuItem = selectedMenuItems.get(menuItemId)
+    // First try selectedMenuItems for performance
+    const menuItem =
+      selectedMenuItems.get(menuItemId) ||
+      availableMenuItems.find((item) => item.id === menuItemId)
     return menuItem?.ingredients || []
   }
 
@@ -121,15 +124,19 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
 
     items.forEach((item: any) => {
       if (item.menuItemId && item.quantity) {
-        const menuItem = selectedMenuItems.get(item.menuItemId)
+        // Always get menuItem from availableMenuItems
+        const menuItem = availableMenuItems.find(
+          (mi) => mi.id === item.menuItemId,
+        )
         if (menuItem) {
           // Base price
           let itemTotal = menuItem.price * item.quantity
 
-          // Add selected add-ons price
+          // Add selected add-ons price (each add-on price * add-on quantity * menu item quantity)
           if (item.selectedAddOns && item.selectedAddOns.length > 0) {
             const addOnTotal = item.selectedAddOns.reduce(
-              (sum: number, addOn: any) => sum + (addOn.price || 0),
+              (sum: number, addOn: any) =>
+                sum + (addOn.price || 0) * (addOn.quantity || 1),
               0,
             )
             itemTotal += addOnTotal * item.quantity
@@ -145,18 +152,28 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
 
   // Update total when form changes
   const [, forceUpdate] = useState({})
-  useEffect(() => {
-    // Set up form field watcher
-    const { setFieldsValue } = form
-    form.setFieldsValue = (fields: any) => {
-      setFieldsValue(fields)
-      forceUpdate({})
-    }
 
-    return () => {
-      // Cleanup
-    }
-  }, [form])
+  // Use onValuesChange to force update on any form value change
+  const handleFormValuesChange = () => {
+    forceUpdate({})
+
+    // Re-populate selectedMenuItems for any menu items in the form that aren't in the map
+    const items = form.getFieldValue('items') || []
+    items.forEach((item: any) => {
+      if (item && item.menuItemId && !selectedMenuItems.has(item.menuItemId)) {
+        const menuItem = availableMenuItems.find(
+          (mi) => mi.id === item.menuItemId,
+        )
+        if (menuItem) {
+          setSelectedMenuItems((prev) => {
+            const newMap = new Map(prev)
+            newMap.set(item.menuItemId, menuItem)
+            return newMap
+          })
+        }
+      }
+    })
+  }
 
   return (
     <Spin spinning={menuLoading || tablesLoading}>
@@ -164,6 +181,11 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
         {error && (
           <Alert message={error} type="error" showIcon className="mb-4" />
         )}
+
+        {/* Debug view - uncomment to debug form values */}
+        {/* <div className="bg-gray-50 p-2 mb-4 rounded text-xs overflow-auto max-h-20">
+          <pre>{JSON.stringify(form.getFieldsValue(true), null, 2)}</pre>
+        </div> */}
 
         {availableMenuItems.length === 0 ? (
           <Empty
@@ -176,6 +198,7 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
             layout="vertical"
             onFinish={handleSubmit}
             initialValues={{ items: [{ menuItemId: undefined, quantity: 1 }] }}
+            onValuesChange={handleFormValuesChange}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Form.Item
@@ -229,6 +252,7 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
                       size="small"
                       key={field.key}
                       className="mb-4"
+                      bodyStyle={{ padding: '16px' }}
                       extra={
                         fields.length > 1 && (
                           <Button
@@ -241,7 +265,7 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
                       }
                     >
                       <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        <div className="flex-1">
+                        <div className="flex-1 w-full">
                           <Form.Item
                             {...field}
                             name={[field.name, 'menuItemId']}
@@ -337,8 +361,12 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
                                   field.name,
                                   'menuItemId',
                                 ])
+                                // Try selectedMenuItems first, then availableMenuItems
                                 const menuItem =
-                                  selectedMenuItems.get(menuItemId)
+                                  selectedMenuItems.get(menuItemId) ||
+                                  availableMenuItems.find(
+                                    (item) => item.id === menuItemId,
+                                  )
                                 const addOns = menuItem?.addOns || []
 
                                 if (addOns.length === 0) return null
@@ -466,10 +494,13 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
                                                       ...item,
                                                       selectedAddOns,
                                                     }
-                                                    form.setFieldsValue({
-                                                      items,
-                                                    })
-                                                    forceUpdate({})
+                                                    // Use setTimeout to ensure the state update completes
+                                                    setTimeout(() => {
+                                                      form.setFieldsValue({
+                                                        items,
+                                                      })
+                                                      forceUpdate({})
+                                                    }, 0)
                                                   }}
                                                   size="small"
                                                   className="w-16 ml-2"
@@ -502,7 +533,20 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
                           ]}
                           className="mb-0 w-24"
                         >
-                          <InputNumber min={1} className="w-full" />
+                          <InputNumber
+                            min={1}
+                            className="w-full"
+                            onChange={(value) => {
+                              // Directly update the form field
+                              const items = form.getFieldValue('items') || []
+                              if (items[field.name]) {
+                                items[field.name].quantity = value
+                                form.setFieldsValue({ items })
+                                // Force re-render to update total
+                                forceUpdate({})
+                              }
+                            }}
+                          />
                         </Form.Item>
                       </div>
                     </Card>
@@ -536,7 +580,10 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
             <div className="flex justify-between items-center mb-4">
               <div>
                 <Text className="text-base font-medium">Total:</Text>
-                <Text className="text-lg font-bold ml-2" type="danger">
+                <Text
+                  className="text-lg font-bold ml-2 inline-block min-w-[5rem] text-right"
+                  type="danger"
+                >
                   ${calculateOrderTotal()}
                 </Text>
               </div>

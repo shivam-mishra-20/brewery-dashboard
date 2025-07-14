@@ -345,35 +345,38 @@ export default function OrdersPage() {
           </Select>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Spin size="large" />
-          </div>
-        ) : error ? (
-          <div className="col-span-full bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl">
-            <p className="font-semibold">Error loading orders</p>
-            <p className="text-sm mt-1">Please try refreshing the page.</p>
-          </div>
-        ) : filteredOrders && filteredOrders.length > 0 ? (
-          <Table
-            columns={columns}
-            dataSource={filteredOrders}
-            rowKey="id"
-            pagination={{ pageSize: 10 }}
-            className="custom-table"
-          />
-        ) : (
-          <Empty
-            description={
-              <span className="text-gray-500">
-                No orders found.{' '}
-                {filter !== 'all' && 'Try changing the filter or '}
-                Create a new order to get started.
-              </span>
-            }
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          />
-        )}
+        <div className="w-full overflow-x-auto">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20">
+              <Spin size="large" />
+            </div>
+          ) : error ? (
+            <div className="col-span-full bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl">
+              <p className="font-semibold">Error loading orders</p>
+              <p className="text-sm mt-1">Please try refreshing the page.</p>
+            </div>
+          ) : filteredOrders && filteredOrders.length > 0 ? (
+            <Table
+              columns={columns}
+              dataSource={filteredOrders}
+              rowKey="id"
+              pagination={{ pageSize: 10 }}
+              className="custom-table min-w-[700px]"
+              scroll={{ x: true }}
+            />
+          ) : (
+            <Empty
+              description={
+                <span className="text-gray-500">
+                  No orders found.{' '}
+                  {filter !== 'all' && 'Try changing the filter or '}
+                  Create a new order to get started.
+                </span>
+              }
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          )}
+        </div>
       </div>
 
       {/* Order Detail Drawer */}
@@ -414,65 +417,79 @@ export default function OrdersPage() {
 
             <Divider orientation="left">Order Items</Divider>
 
-            {selectedOrder.items.map((item: OrderItem, index: number) => (
-              <Card
-                size="small"
-                className="mb-2"
-                key={index}
-                title={
-                  <div className="flex flex-row justify-between items-center">
-                    <span>
-                      {item.quantity} × {item.name}
-                    </span>
-                    <Text strong>
-                      ₹{(item.price * item.quantity).toFixed(2)}
+            {selectedOrder.items.map((item: OrderItem, index: number) => {
+              // Calculate total add-ons price for this item
+              const addOnsTotal =
+                item.selectedAddOns && item.selectedAddOns.length > 0
+                  ? item.selectedAddOns.reduce(
+                      (sum: number, addon: any) =>
+                        sum + addon.price * (addon.quantity || 1),
+                      0,
+                    )
+                  : 0
+              // Calculate total price for this item (base + add-ons)
+              const itemTotal = item.price * item.quantity + addOnsTotal
+              return (
+                <Card
+                  size="small"
+                  className="mb-2"
+                  key={index}
+                  title={
+                    <div className="flex flex-row justify-between items-center">
+                      <span>
+                        {item.quantity} × {item.name}
+                      </span>
+                      <Text strong>₹{itemTotal.toFixed(2)}</Text>
+                      <Text type="secondary">
+                        {' '}
+                        ₹{item.price.toFixed(2)} each
+                      </Text>
+                    </div>
+                  }
+                >
+                  {item.ingredients && item.ingredients.length > 0 ? (
+                    <div>
+                      <Text type="secondary" className="block mb-1">
+                        <span className="font-medium">Ingredients:</span>
+                      </Text>
+                      <div className="flex flex-wrap gap-1">
+                        {item.ingredients.map(
+                          (ing: MenuItemIngredient, idx: number) => (
+                            <Tag key={idx} color="blue">
+                              {ing.inventoryItemName}: {ing.quantity} {ing.unit}
+                            </Tag>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <Text type="secondary" italic>
+                      No ingredient information
                     </Text>
-                    <Text type="secondary"> ₹{item.price.toFixed(2)} each</Text>
-                  </div>
-                }
-              >
-                {item.ingredients && item.ingredients.length > 0 ? (
-                  <div>
-                    <Text type="secondary" className="block mb-1">
-                      <span className="font-medium">Ingredients:</span>
-                    </Text>
-                    <div className="flex flex-wrap gap-1">
-                      {item.ingredients.map(
-                        (ing: MenuItemIngredient, idx: number) => (
-                          <Tag key={idx} color="blue">
-                            {ing.inventoryItemName}: {ing.quantity} {ing.unit}
+                  )}
+                  {/* Add-ons details */}
+                  {item.selectedAddOns && item.selectedAddOns.length > 0 && (
+                    <div className="mt-2">
+                      <Text type="secondary" className="block mb-1">
+                        <span className="font-medium">Add-ons:</span>
+                      </Text>
+                      <div className="flex flex-wrap gap-1">
+                        {item.selectedAddOns.map((addon: any, idx: number) => (
+                          <Tag key={idx} color="green">
+                            {addon.name}: +₹{addon.price.toFixed(2)}
+                            {addon.quantity && addon.unit && (
+                              <span className="ml-1 text-gray-700">
+                                ({addon.quantity} {addon.unit})
+                              </span>
+                            )}
                           </Tag>
-                        ),
-                      )}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <Text type="secondary" italic>
-                    No ingredient information
-                  </Text>
-                )}
-                {/* Add-ons details */}
-                {item.selectedAddOns && item.selectedAddOns.length > 0 && (
-                  <div className="mt-2">
-                    <Text type="secondary" className="block mb-1">
-                      <span className="font-medium">Add-ons:</span>
-                    </Text>
-                    <div className="flex flex-wrap gap-1">
-                      {item.selectedAddOns.map((addon: any, idx: number) => (
-                        <Tag key={idx} color="green">
-                          {addon.name}: +₹{addon.price.toFixed(2)}
-                          {addon.quantity && addon.unit && (
-                            <span className="ml-1 text-gray-700">
-                              ({addon.quantity} {addon.unit})
-                            </span>
-                          )}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </Card>
-            ))}
+                  )}
+                </Card>
+              )
+            })}
 
             <Divider />
 
