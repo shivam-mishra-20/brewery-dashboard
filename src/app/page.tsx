@@ -2,7 +2,7 @@
 
 import { FiCoffee, FiTruck } from 'react-icons/fi'
 
-export default function HomeIntro() {
+export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-white px-4">
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-10 flex flex-col items-center max-w-lg w-full">
@@ -16,7 +16,7 @@ export default function HomeIntro() {
         <p className="text-lg text-gray-700 mb-6 mt-3 text-center">
           Your favorite spot for coffee, comfort, and creativity.
         </p>
-        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-primary to-secondary border border-primary/[0.1] shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3 shadow-inner">
+        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-primary to-secondary border border-primary/[0.1] shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3 ">
           <FiTruck className="text-white text-2xl" />
           <span className="font-semibold text-white text-lg">
             Delivery &amp; Takeaway options are coming soon!
