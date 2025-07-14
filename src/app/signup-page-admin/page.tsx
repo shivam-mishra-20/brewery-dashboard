@@ -1,9 +1,37 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 
-export default function Signup() {
+// This is the main page component
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<SignupLoadingFallback />}>
+      <SignupForm />
+    </Suspense>
+  )
+}
+
+// Loading fallback component
+function SignupLoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center relative">
+      <div className="rounded-3xl shadow-2xl p-8 sm:p-12 w-full max-w-md relative overflow-hidden bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl">
+        <div className="animate-pulse flex flex-col gap-6">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mx-auto"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto"></div>
+          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Client component with useSearchParams safely inside
+function SignupForm() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')

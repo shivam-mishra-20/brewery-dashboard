@@ -22,19 +22,19 @@ export default function RootLayout({
       <body>
         <div style={{ minHeight: '100vh', paddingBottom: '4.5rem' }}>
           <ThemeProvider>
-            <CartProvider>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50">
-                    <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg flex flex-col items-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
-                      <h1 className="text-xl font-bold text-amber-800">
-                        Loading menu...
-                      </h1>
-                    </div>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50">
+                  <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
+                    <h1 className="text-xl font-bold text-amber-800">
+                      Loading menu...
+                    </h1>
                   </div>
-                }
-              >
+                </div>
+              }
+            >
+              <CartProvider>
                 {/* Main Content */}
                 <main className="w-full mx-auto light">{children}</main>
                 <footer className="bg-gradient-to-r from-amber-50/90 to-white/90 backdrop-blur-sm border-t border-amber-100 py-6 mt-12 relative z-10">
@@ -103,9 +103,9 @@ export default function RootLayout({
                     </div>
                   </div>
                 </footer>
-              </Suspense>
+              </CartProvider>
               <BottomNavBar />
-            </CartProvider>
+            </Suspense>
           </ThemeProvider>
         </div>
       </body>
