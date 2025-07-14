@@ -1,95 +1,28 @@
 'use client'
 
-import CryptoJS from 'crypto-js'
-import { useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
+import { FiCoffee, FiTruck } from 'react-icons/fi'
 
-interface TableData {
-  name: string
-  number: number
-  capacity: number
-  status: string
-  location?: string
-  _id?: string
-  timestamp?: number
-  [key: string]: any // For any other properties
-}
-const QR_SECRET = process.env.NEXT_PUBLIC_QR_SECRET || 'your-very-secret-key'
-
-function MenuContent() {
-  const searchParams = useSearchParams()
-  const [tableData, setTableData] = useState<TableData | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Get table data from URL
-    const tableDataParam = searchParams.get('tabledata')
-
-    if (tableDataParam) {
-      try {
-        // Decrypt and parse the table data
-        const decrypted = CryptoJS.AES.decrypt(
-          decodeURIComponent(tableDataParam),
-          QR_SECRET,
-        ).toString(CryptoJS.enc.Utf8)
-        const decodedData = JSON.parse(decrypted)
-        setTableData(decodedData)
-      } catch (err) {
-        console.error('Error parsing table data:', err)
-        setError('Invalid table data in QR code')
-      }
-    }
-  }, [searchParams])
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-bold text-red-500">Error</h1>
-        <p>{error}</p>
-      </div>
-    )
-  }
-
-  if (!tableData) {
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-bold">Loading...</h1>
-      </div>
-    )
-  }
-
+export default function HomeIntro() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Menu</h1>
-      <div className="bg-yellow-100 p-4 rounded-lg mb-6">
-        <p className="font-semibold">You are at:</p>
-        <p className="text-lg">
-          {tableData.name} - Table #{tableData.number}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-white px-4">
+      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-10 flex flex-col items-center max-w-lg w-full">
+        <FiCoffee className="text-amber-600 text-6xl mb-4 animate-bounce" />
+        <h1 className="text-3xl md:text-4xl font-extrabold text-amber-900 mb-2 text-center">
+          Welcome to <br />
+          <span className="bg-clip-text mt-4 text-transparent bg-gradient-to-r from-primary to-secondary">
+            Work Brew Café
+          </span>
+        </h1>
+        <p className="text-lg text-gray-700 mb-6 mt-3 text-center">
+          Your favorite spot for coffee, comfort, and creativity.
         </p>
-        {tableData.location && (
-          <p className="text-sm text-gray-600">
-            Location: {tableData.location}
-          </p>
-        )}
-        <p className="text-sm">Capacity: {tableData.capacity} people</p>
-      </div>
-
-      {/* Your menu items will go here */}
-      <div>{/* Menu content */}</div>
-    </div>
-  )
-}
-
-export default function MenuPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="p-6">
-          <h1 className="text-xl font-bold">Loading...</h1>
+        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-primary to-secondary border border-primary/[0.1] shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3 shadow-inner">
+          <FiTruck className="text-white text-2xl" />
+          <span className="font-semibold text-white text-lg">
+            Delivery &amp; Takeaway options are coming soon!
+          </span>
         </div>
-      }
-    >
-      <MenuContent />
-    </Suspense>
+      </div>
+    </div>
   )
 }

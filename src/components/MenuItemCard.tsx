@@ -188,7 +188,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
       whileHover={{ y: -8, boxShadow: '0 20px 50px rgba(255, 207, 51, 0.20)' }}
       onHoverStart={() => setIsHovering(true)}
       onHoverEnd={() => setIsHovering(false)}
-      className={`relative bg-white rounded-3xl shadow-xl p-6 flex flex-col gap-4 border-2 transition-all duration-300 min-h-[240px] max-w-[450px] w-full ${
+      className={`relative bg-white rounded-2xl shadow-lg p-4 flex flex-col gap-3 border transition-all duration-300 min-h-[180px] max-w-[340px] w-full${
         item.available
           ? 'border-yellow-200 hover:border-yellow-400'
           : 'border-gray-200 opacity-60'
@@ -463,48 +463,50 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             {item.name}
           </h3>
           <div className="flex items-center gap-2 ml-3">
-            {hasIngredients && (
-              <Popover
-                content={ingredientsContent}
-                title={`${item.name} - Ingredients`}
-                trigger="click"
-                overlayClassName="max-w-xs"
-              >
-                <Badge dot={hasIngredients} color="blue">
-                  <button
-                    className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                    aria-label="View ingredients"
-                  >
-                    <BsCartDash size={16} />
-                  </button>
-                </Badge>
-              </Popover>
-            )}
-            {hasAddOns && (
-              <Popover
-                content={addOnsContent}
-                title={`${item.name} - Add-ons`}
-                trigger="click"
-                overlayClassName="max-w-xs"
-              >
-                <Badge dot={hasAddOns} color="green">
-                  <button
-                    className="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50 transition-colors"
-                    aria-label="View add-ons"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      xmlns="http://www.w3.org/2000/svg"
+            <div className="flex">
+              {hasIngredients && (
+                <Popover
+                  content={ingredientsContent}
+                  title={`${item.name} - Ingredients`}
+                  trigger="click"
+                  overlayClassName="max-w-xs"
+                >
+                  <Badge dot={hasIngredients} color="blue">
+                    <button
+                      className="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                      aria-label="View ingredients"
                     >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
-                    </svg>
-                  </button>
-                </Badge>
-              </Popover>
-            )}
+                      <BsCartDash size={16} />
+                    </button>
+                  </Badge>
+                </Popover>
+              )}
+              {hasAddOns && (
+                <Popover
+                  content={addOnsContent}
+                  title={`${item.name} - Add-ons`}
+                  trigger="click"
+                  overlayClassName="max-w-xs"
+                >
+                  <Badge dot={hasAddOns} color="green">
+                    <button
+                      className="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50 transition-colors"
+                      aria-label="View add-ons"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                      </svg>
+                    </button>
+                  </Badge>
+                </Popover>
+              )}
+            </div>
             {/* Images button and popover with modal preview */}
             {allImageUrls && allImageUrls.length > 0 && (
               <>
@@ -685,81 +687,83 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           </div>
         )}
 
-        {hasIngredients && (
-          <div className="mt-2 p-3 bg-gray-50 rounded-xl">
-            <p className="text-sm text-gray-600 mb-2 font-medium">
-              Ingredients:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {item.ingredients?.slice(0, 3).map((ing, idx) => (
-                <Tag key={idx} color="blue" className="text-sm px-3 py-1">
-                  {ing.inventoryItemName}: {ing.quantity} {ing.unit}
-                </Tag>
-              ))}
-              {item.ingredients && item.ingredients.length > 3 && (
-                <Popover
-                  title="All Ingredients"
-                  content={
-                    <div className="max-w-xs">
-                      <div className="flex flex-wrap gap-1">
-                        {item.ingredients?.map((ing, idx) => (
-                          <Tag key={idx} color="blue" className="mb-1">
-                            {ing.inventoryItemName}: {ing.quantity} {ing.unit}
-                          </Tag>
-                        ))}
-                      </div>
-                    </div>
-                  }
-                >
-                  <Tag
-                    color="default"
-                    className="text-sm cursor-pointer px-3 py-1"
-                  >
-                    +{item.ingredients.length - 3} more
+        <div className="flex flex-row overflow-auto gap-2 mt-2 custom-scrollbar">
+          {hasIngredients && (
+            <div className="mt-2 p-3 bg-gray-50 rounded-xl">
+              <p className="text-sm text-gray-600 mb-2 font-medium">
+                Ingredients:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {item.ingredients?.slice(0, 3).map((ing, idx) => (
+                  <Tag key={idx} color="blue" className="text-sm px-3 py-1">
+                    {ing.inventoryItemName}: {ing.quantity} {ing.unit}
                   </Tag>
-                </Popover>
-              )}
+                ))}
+                {item.ingredients && item.ingredients.length > 3 && (
+                  <Popover
+                    title="All Ingredients"
+                    content={
+                      <div className="max-w-xs">
+                        <div className="flex flex-wrap gap-1">
+                          {item.ingredients?.map((ing, idx) => (
+                            <Tag key={idx} color="blue" className="mb-1">
+                              {ing.inventoryItemName}: {ing.quantity} {ing.unit}
+                            </Tag>
+                          ))}
+                        </div>
+                      </div>
+                    }
+                  >
+                    <Tag
+                      color="default"
+                      className="text-sm cursor-pointer px-3 py-1"
+                    >
+                      +{item.ingredients.length - 3} more
+                    </Tag>
+                  </Popover>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {hasAddOns && (
-          <div className="mt-2 p-3 bg-green-50 rounded-xl">
-            <p className="text-sm text-gray-600 mb-2 font-medium">
-              Available Add-ons:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {item.addOns?.slice(0, 3).map((addon, idx) => (
-                <Tag key={idx} color="green" className="text-sm px-3 py-1">
-                  {addon.name}: ${addon.price.toFixed(2)}
-                </Tag>
-              ))}
-              {item.addOns && item.addOns.length > 3 && (
-                <Popover
-                  title="All Add-ons"
-                  content={
-                    <div className="max-w-xs">
-                      <div className="flex flex-wrap gap-1">
-                        {item.addOns?.map((addon, idx) => (
-                          <Tag key={idx} color="green" className="mb-1">
-                            {addon.name}: ${addon.price.toFixed(2)}
-                          </Tag>
-                        ))}
-                      </div>
-                    </div>
-                  }
-                >
-                  <Tag
-                    color="default"
-                    className="text-sm cursor-pointer px-3 py-1"
-                  >
-                    +{item.addOns.length - 3} more
+          {hasAddOns && (
+            <div className="mt-2 p-3 bg-green-50 rounded-xl">
+              <p className="text-sm text-gray-600 mb-2 font-medium">
+                Available Add-ons:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {item.addOns?.slice(0, 3).map((addon, idx) => (
+                  <Tag key={idx} color="green" className="text-sm px-3 py-1">
+                    {addon.name}: ${addon.price.toFixed(2)}
                   </Tag>
-                </Popover>
-              )}
+                ))}
+                {item.addOns && item.addOns.length > 3 && (
+                  <Popover
+                    title="All Add-ons"
+                    content={
+                      <div className="max-w-xs">
+                        <div className="flex flex-wrap gap-1">
+                          {item.addOns?.map((addon, idx) => (
+                            <Tag key={idx} color="green" className="mb-1">
+                              {addon.name}: ${addon.price.toFixed(2)}
+                            </Tag>
+                          ))}
+                        </div>
+                      </div>
+                    }
+                  >
+                    <Tag
+                      color="default"
+                      className="text-sm cursor-pointer px-3 py-1"
+                    >
+                      +{item.addOns.length - 3} more
+                    </Tag>
+                  </Popover>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </motion.div>
   )

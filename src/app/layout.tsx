@@ -1,23 +1,7 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono, Poppins } from 'next/font/google'
 import './globals.css'
+import { Suspense } from 'react'
 import { ThemeProvider } from '@/context/ThemeContext'
-
-const poppins = Poppins({
-  variable: '--font-poppins',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-})
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -32,13 +16,26 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={` ${poppins.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ThemeProvider>
-          {/* Main Content */}
-          <main className="w-full mx-auto light">{children}</main>
-        </ThemeProvider>
+      <body>
+        <div style={{ minHeight: '100vh', paddingBottom: '4.5rem' }}>
+          <ThemeProvider>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50">
+                  <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mb-4"></div>
+                    <h1 className="text-xl font-bold text-amber-800">
+                      Loading menu...
+                    </h1>
+                  </div>
+                </div>
+              }
+            >
+              {/* Main Content */}
+              <main className="w-full mx-auto light">{children}</main>
+            </Suspense>
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   )

@@ -43,15 +43,20 @@ interface MenuItem {
 
 export default function ProductDetailPage() {
   // Cart and order state
-  // Local cart state (since useOrder only handles API orders)
   const [cart, setCart] = useState<any[]>([])
-  const [orderStatus] = useState<string | null>(null)
+  const [showCart, setShowCart] = useState(false)
+  const [placingOrder, setPlacingOrder] = useState(false)
+  const [orderFeedback, setOrderFeedback] = useState<string | null>(null)
+  const [orderStatus, setOrderStatus] = useState<string | null>(null)
+  const [selectedAddOns, setSelectedAddOns] = useState<string[]>([])
+  const [quantity, setQuantity] = useState(1)
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { placeOrder } = useOrder()
 
   // Add to cart logic
   const addToCart = (item: any) => {
     setCart((prev) => {
-      // If item already in cart, update quantity and addOns
       const idx = prev.findIndex(
         (ci) =>
           ci.id === item.id &&
@@ -64,18 +69,14 @@ export default function ProductDetailPage() {
       }
       return [...prev, item]
     })
+    setShowCart(true)
+    setOrderFeedback('Added to cart!')
+    setTimeout(() => setOrderFeedback(null), 1500)
   }
   const removeFromCart = (id: string) => {
     setCart((prev) => prev.filter((ci) => ci.id !== id))
   }
   const clearCart = () => setCart([])
-  const [selectedAddOns, setSelectedAddOns] = useState<string[]>([])
-  const [quantity, setQuantity] = useState(1)
-  const [showCart, setShowCart] = useState(false)
-  const [placingOrder, setPlacingOrder] = useState(false)
-  const [orderFeedback, setOrderFeedback] = useState<string | null>(null)
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const [item, setItem] = useState<MenuItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -128,11 +129,10 @@ export default function ProductDetailPage() {
     setTimeout(() => setOrderFeedback(null), 1500)
   }
 
-  // Place order logic
+  // Place order logic (only from cart UI)
   const handlePlaceOrder = async () => {
     setPlacingOrder(true)
     try {
-      // Prepare orderData according to PlaceOrderRequest type
       const orderData = {
         items: cart.map((cartItem) => ({
           menuItemId: cartItem.id,
@@ -144,14 +144,16 @@ export default function ProductDetailPage() {
             })) || [],
         })),
         tabledata,
-        customerName: 'Guest', // Replace with actual customer name if available
-        tableId: tabledata, // Replace with actual table ID if different
+        customerName: 'Guest',
+        tableId: tabledata,
       }
       await placeOrder(orderData)
       setOrderFeedback('Order placed successfully!')
+      setOrderStatus('Order placed successfully!')
       clearCart()
     } catch {
       setOrderFeedback('Failed to place order.')
+      setOrderStatus('Failed to place order.')
     } finally {
       setPlacingOrder(false)
       setTimeout(() => setOrderFeedback(null), 2000)
@@ -296,7 +298,9 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-amber-50 to-white relative">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-amber-50 to-white relative pb-24">
+      {' '}
+      {/* Add bottom padding for navbar */}
       {/* App-like header with back button */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg shadow-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -563,7 +567,7 @@ export default function ProductDetailPage() {
 
         {/* Category and availability indicators with improved styling */}
         <div className="flex flex-wrap items-center gap-2 mb-4 product-category-row w-full justify-center">
-          <span className="bg-gradient-to-r from-amber-600 to-amber-500 text-white text-sm px-4 py-1.5 rounded-full font-medium shadow-md flex items-center gap-1">
+          <span className="bg-gradient-to-r from-amber-600 to-amber-500 shadow-white/[0.5] shadow-inner text-white text-sm px-4 py-1.5 rounded-full font-medium  border-amber-500/[0.1] border flex items-center gap-1">
             <FiCoffee className="mr-1" />
             {item.category}
           </span>
@@ -771,7 +775,7 @@ export default function ProductDetailPage() {
         {/* Floating Cart UI */}
         {showCart && (
           <div
-            className="fixed bottom-0 right-0 z-50 w-full max-w-md bg-white/95 shadow-2xl rounded-t-2xl border-t border-amber-200 p-6 animate-fadein-card product-cart-ui"
+            className="fixed bottom-24 right-0 z-[60] w-full max-w-md bg-white/95 shadow-2xl rounded-t-2xl border-t border-amber-200 p-6 animate-fadein-card product-cart-ui"
             style={{ marginRight: '1rem' }}
           >
             <div className="flex items-center justify-between mb-4">
@@ -880,7 +884,10 @@ export default function ProductDetailPage() {
           </div>
         )}
       </div>
-      <div className="flex w-full pb-5 flex-row justify-center items-center product-add-to-order-row">
+      <div
+        className="flex w-full pb-5 flex-row justify-center items-center product-add-to-order-row"
+        style={{ zIndex: 30, position: 'relative' }}
+      >
         <button
           className={`w-[95%] max-w-md py-4 shadow-inner shadow-white/[0.5] rounded-2xl font-extrabold text-lg tracking-wide font-inter relative overflow-hidden transition-all duration-300 product-add-to-order-btn ${
             item.available
