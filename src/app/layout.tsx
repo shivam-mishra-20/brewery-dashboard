@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import React, { Suspense } from 'react'
 import LayoutClient from '@/components/LayoutClient'
+import { AuthProvider } from '@/context/AuthContext'
 import { CartProvider } from '@/context/CartContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 
@@ -33,9 +34,11 @@ export default function RootLayout({
                 </div>
               }
             >
-              <CartProvider>
-                <LayoutClient>{children}</LayoutClient>
-              </CartProvider>
+              <AuthProvider>
+                <CartProvider>
+                  <LayoutClient>{children}</LayoutClient>
+                </CartProvider>
+              </AuthProvider>
             </Suspense>
           </ThemeProvider>
         </div>

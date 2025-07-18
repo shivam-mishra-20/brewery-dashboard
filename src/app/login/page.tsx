@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
 
 function LoginPage() {
   const router = useRouter()
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -16,23 +18,9 @@ function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      // Try new login route first, fallback to legacy if needed
-      let res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      if (res.status === 404) {
-        // fallback to legacy route
-        res = await fetch('/api/auth', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        })
-      }
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Login failed')
-      localStorage.setItem('token', data.token)
+      // Use the login function from AuthContext
+      await login(email, password)
+      // If successful, navigate to dashboard
       router.replace('/dashboard')
     } catch (err: unknown) {
       if (err instanceof Error) {

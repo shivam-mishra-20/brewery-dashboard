@@ -1,39 +1,14 @@
 'use client'
 
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import React from 'react'
 import { CiSearch } from 'react-icons/ci'
 import { HiOutlineBell, HiOutlineEnvelope } from 'react-icons/hi2'
+import { useAuth } from '@/context/AuthContext'
 
 const Navbar: React.FC = () => {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null)
-
-  // Fetch user data with error handling and console logging for debugging
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const token = localStorage.getItem('token') // or get from cookies
-        if (!token) {
-          setUser(null)
-          return
-        }
-        const res = await fetch('/api/auth/user/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        const data = await res.json()
-        if (res.ok && data.user) {
-          setUser(data.user)
-        } else {
-          setUser(null)
-        }
-      } catch (error) {
-        setUser(null)
-      }
-    }
-    fetchUser()
-  }, [])
+  const { user, loading, logout } = useAuth()
 
   return (
     <header className="w-full   mt-5 px-4 sm:px-6 py-4 mb-3 border border-gray-200 dark:border-gray-300/[0.1] rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between bg-[#f7f7f7] dark:bg-[#f7f7f7] gap-4 flex-shrink-0">
@@ -101,12 +76,38 @@ const Navbar: React.FC = () => {
             className="w-12 h-12 rounded-full"
           />
           <div className="hidden sm:flex flex-col ml-3">
-            <h1 className="text-sm sm:text-base">
-              {user ? user.name : 'Not logged in'}
-            </h1>
-            <p className="text-xs sm:text-sm font-inter-regular text-gray-500">
-              {user ? user.email : ''}
-            </p>
+            {loading ? (
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
+                <div className="h-3 bg-gray-200 rounded w-32"></div>
+              </div>
+            ) : user ? (
+              <>
+                <h1 className="text-sm sm:text-base font-medium">
+                  {user.name}
+                </h1>
+                <div className="flex space-x-3 text-xs sm:text-sm">
+                  <p className="font-inter-regular text-gray-500">
+                    {user.email}
+                  </p>
+                  <button
+                    onClick={logout}
+                    className="text-blue-500 hover:underline"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h1 className="text-sm sm:text-base">Not logged in</h1>
+                <p className="text-xs sm:text-sm font-inter-regular">
+                  <Link href="/login" className="text-blue-500 hover:underline">
+                    Sign in
+                  </Link>
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -195,14 +195,8 @@ export default function Dashboard() {
   //   },
   //   { header: 'Revenue', value: '$2,340', description: 'Revenue this month' },
   // ]
-  const {
-    stats,
-    historyOrders,
-    pendingOrders,
-    barChartData,
-    lineChartData,
-    fetchDashboardData,
-  } = useDashboardData()
+  const { stats, historyOrders, barChartData, lineChartData } =
+    useDashboardData()
 
   const statsData = [
     {
@@ -370,7 +364,7 @@ export default function Dashboard() {
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
                 <BsClockHistory className="text-5xl mb-2" />
-                <span className="text-lg font-semibold">
+                <span className="text-lg text-center font-semibold">
                   No order history yet
                 </span>
               </div>
@@ -385,187 +379,7 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
-        {/* Right: Pending Orders, spans all rows */}
-        <div className="gap-2 sm:gap-3 bg-white p-3 sm:p-4 md:p-5 rounded-2xl flex flex-col items-start justify-between py-4 sm:py-8 h-[300px] md:h-[625px] md:col-start-4 md:row-span-2 lg:row-span-2 lg:col-start-4 lg:row-start-1">
-          <div className="flex items-center justify-between w-full mb-2">
-            <div>
-              <p className="text-black flex items-center gap-2 w-full text-sm sm:text-md md:text-lg font-medium">
-                Pending Orders
-              </p>
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mt-1 text-black">
-                {pendingOrders.length}
-              </h2>
-              <span className="text-xs sm:text-sm text-[#ffc300]">
-                Orders waiting to be served
-              </span>
-            </div>
-            <BsArrowUpRightCircle className="text-2xl sm:text-3xl text-gray-400" />
-          </div>
 
-          {/* Order list with actions */}
-          <div className="w-full flex-1 overflow-y-auto mt-3 custom-scrollbar">
-            {pendingOrders && pendingOrders.length > 0 ? (
-              <div className="space-y-3 custom-scrollbar">
-                {pendingOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className={`bg-gray-50 rounded-xl p-2 sm:p-3  ${
-                      order.status.toLowerCase() === 'ready'
-                        ? 'bg-green-400/[0.1]'
-                        : order.status.toLowerCase() === 'preparing'
-                          ? 'bg-yellow-400/[0.1]'
-                          : 'bg-gray-400/[0.1]'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-gray-900">
-                            {order.items
-                              .map(
-                                (item: any) =>
-                                  `${item.quantity} x ${item.name}`,
-                              )
-                              .join(', ')}
-                          </span>
-                          <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
-                            {order.tableNumber}
-                          </span>
-                        </div>
-                        <span className="text-xs text-gray-500 mt-0.5">
-                          {order.customerName || '-'} •{' '}
-                          {order.createdAt
-                            ? new Date(order.createdAt).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : '-'}
-                        </span>
-                      </div>
-                      <span
-                        className={`text-xs font-medium px-2 py-1 rounded-md ${
-                          order.status.toLowerCase() === 'ready'
-                            ? 'bg-green-50 text-green-600'
-                            : order.status.toLowerCase() === 'preparing'
-                              ? 'bg-yellow-50 text-yellow-600'
-                              : 'bg-gray-50 text-gray-600'
-                        }`}
-                      >
-                        {order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)}
-                      </span>
-                    </div>
-
-                    <div className="pl-1">
-                      {order.items.map((item: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex items-center text-xs text-gray-600"
-                        >
-                          <span>
-                            • {item.quantity}x {item.name}{' '}
-                            {item.size && `(${item.size})`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-                      <div className="flex gap-1">
-                        <button
-                          className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
-                          onClick={() => {
-                            setSelectedOrder(order)
-                            setViewOrderModal(true)
-                          }}
-                        >
-                          View
-                        </button>
-                        <button
-                          className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
-                          onClick={() => {
-                            setSelectedOrder(order)
-                            setEditOrderModal(true)
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                      <button
-                        className={`text-xs px-2 py-1 rounded ${
-                          order.status.toLowerCase() === 'ready'
-                            ? 'bg-primary text-white'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}
-                        onClick={async () => {
-                          // Update order status: Ready -> Completed, Pending/Preparing -> Ready
-                          let nextStatus:
-                            | 'pending'
-                            | 'preparing'
-                            | 'ready'
-                            | 'completed'
-                            | 'cancelled' = 'ready'
-                          if (order.status.toLowerCase() === 'ready')
-                            nextStatus = 'completed'
-                          else if (order.status.toLowerCase() === 'preparing')
-                            nextStatus = 'ready'
-                          else if (order.status.toLowerCase() === 'pending')
-                            nextStatus = 'preparing'
-                          // Dynamically import orderService
-                          const { orderService } = await import(
-                            '@/services/orderService'
-                          )
-                          await orderService.updateOrderStatus({
-                            id: order.id,
-                            status: nextStatus,
-                          })
-                          // Refetch dashboard data to update UI immediately
-                          fetchDashboardData()
-                        }}
-                      >
-                        {order.status.toLowerCase() === 'ready'
-                          ? 'Serve'
-                          : order.status.toLowerCase() === 'preparing'
-                            ? 'Prepared'
-                            : 'Prepare'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
-                <BsArrowUpRightCircle className="text-5xl mb-2" />
-                <span className="text-lg font-semibold">No pending orders</span>
-              </div>
-            )}
-          </div>
-
-          <div className="w-full pt-3 mt-auto">
-            <div className="flex justify-between mb-2">
-              <button className="text-gray-500 text-xs font-medium flex items-center gap-1">
-                View All
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-3 h-3"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </button>
-            </div>
-            <button className="w-full bg-gradient-to-tr from-secondary to-primary text-white py-2 rounded-xl text-sm font-medium">
-              Manage All Orders
-            </button>
-          </div>
-        </div>
         {/* Bottom: Line chart */}
         <div className="col-span-1 sm:col-span-3 bg-white mt-3 p-3 sm:p-4 md:p-5 rounded-2xl flex flex-col items-start justify-center overflow-hidden md:row-start-2 md:col-start-1 md:col-span-3 lg:row-start-2 lg:col-start-1 lg:col-span-3 h-[300px]">
           {lineChartData && lineChartData.some((d) => d.sales > 0) ? (
@@ -764,3 +578,187 @@ export default function Dashboard() {
     </div>
   )
 }
+
+{
+  /* Right: Pending Orders, spans all rows */
+}
+// <div className="gap-2 sm:gap-3 bg-white p-3 sm:p-4 md:p-5 rounded-2xl flex flex-col items-start justify-between py-4 sm:py-8 h-[300px] md:h-[625px] md:col-start-4 md:row-span-2 lg:row-span-2 lg:col-start-4 lg:row-start-1">
+//   <div className="flex items-center justify-between w-full mb-2">
+//     <div>
+//       <p className="text-black flex items-center gap-2 w-full text-sm sm:text-md md:text-lg font-medium">
+//         Pending Orders
+//       </p>
+//       <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mt-1 text-black">
+//         {pendingOrders.length}
+//       </h2>
+//       <span className="text-xs sm:text-sm text-[#ffc300]">
+//         Orders waiting to be served
+//       </span>
+//     </div>
+//     <BsArrowUpRightCircle className="text-2xl sm:text-3xl text-gray-400" />
+//   </div>
+
+//   {/* Order list with actions */}
+//   <div className="w-full flex-1 overflow-y-auto mt-3 custom-scrollbar">
+//     {pendingOrders && pendingOrders.length > 0 ? (
+//       <div className="space-y-3 custom-scrollbar">
+//         {pendingOrders.map((order) => (
+//           <div
+//             key={order.id}
+//             className={`bg-gray-50 rounded-xl p-2 sm:p-3  ${
+//               order.status.toLowerCase() === 'ready'
+//                 ? 'bg-green-400/[0.1]'
+//                 : order.status.toLowerCase() === 'preparing'
+//                   ? 'bg-yellow-400/[0.1]'
+//                   : 'bg-gray-400/[0.1]'
+//             }`}
+//           >
+//             <div className="flex justify-between items-start mb-2">
+//               <div className="flex flex-col">
+//                 <div className="flex items-center gap-2">
+//                   <span className="font-semibold text-sm text-gray-900">
+//                     {order.items
+//                       .map(
+//                         (item: any) =>
+//                           `${item.quantity} x ${item.name}`,
+//                       )
+//                       .join(', ')}
+//                   </span>
+//                   <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+//                     {order.tableNumber}
+//                   </span>
+//                 </div>
+//                 <span className="text-xs text-gray-500 mt-0.5">
+//                   {order.customerName || '-'} •{' '}
+//                   {order.createdAt
+//                     ? new Date(order.createdAt).toLocaleTimeString([], {
+//                         hour: '2-digit',
+//                         minute: '2-digit',
+//                       })
+//                     : '-'}
+//                 </span>
+//               </div>
+//               <span
+//                 className={`text-xs font-medium px-2 py-1 rounded-md ${
+//                   order.status.toLowerCase() === 'ready'
+//                     ? 'bg-green-50 text-green-600'
+//                     : order.status.toLowerCase() === 'preparing'
+//                       ? 'bg-yellow-50 text-yellow-600'
+//                       : 'bg-gray-50 text-gray-600'
+//                 }`}
+//               >
+//                 {order.status.charAt(0).toUpperCase() +
+//                   order.status.slice(1)}
+//               </span>
+//             </div>
+
+//             <div className="pl-1">
+//               {order.items.map((item: any, i: number) => (
+//                 <div
+//                   key={i}
+//                   className="flex items-center text-xs text-gray-600"
+//                 >
+//                   <span>
+//                     • {item.quantity}x {item.name}{' '}
+//                     {item.size && `(${item.size})`}
+//                   </span>
+//                 </div>
+//               ))}
+//             </div>
+
+//             <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+//               <div className="flex gap-1">
+//                 <button
+//                   className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
+//                   onClick={() => {
+//                     setSelectedOrder(order)
+//                     setViewOrderModal(true)
+//                   }}
+//                 >
+//                   View
+//                 </button>
+//                 <button
+//                   className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
+//                   onClick={() => {
+//                     setSelectedOrder(order)
+//                     setEditOrderModal(true)
+//                   }}
+//                 >
+//                   Edit
+//                 </button>
+//               </div>
+//               <button
+//                 className={`text-xs px-2 py-1 rounded ${
+//                   order.status.toLowerCase() === 'ready'
+//                     ? 'bg-primary text-white'
+//                     : 'bg-yellow-100 text-yellow-700'
+//                 }`}
+//                 onClick={async () => {
+//                   // Update order status: Ready -> Completed, Pending/Preparing -> Ready
+//                   let nextStatus:
+//                     | 'pending'
+//                     | 'preparing'
+//                     | 'ready'
+//                     | 'completed'
+//                     | 'cancelled' = 'ready'
+//                   if (order.status.toLowerCase() === 'ready')
+//                     nextStatus = 'completed'
+//                   else if (order.status.toLowerCase() === 'preparing')
+//                     nextStatus = 'ready'
+//                   else if (order.status.toLowerCase() === 'pending')
+//                     nextStatus = 'preparing'
+//                   // Dynamically import orderService
+//                   const { orderService } = await import(
+//                     '@/services/orderService'
+//                   )
+//                   await orderService.updateOrderStatus({
+//                     id: order.id,
+//                     status: nextStatus,
+//                   })
+//                   // Refetch dashboard data to update UI immediately
+//                   fetchDashboardData()
+//                 }}
+//               >
+//                 {order.status.toLowerCase() === 'ready'
+//                   ? 'Serve'
+//                   : order.status.toLowerCase() === 'preparing'
+//                     ? 'Prepared'
+//                     : 'Prepare'}
+//               </button>
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+//     ) : (
+//       <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
+//         <BsArrowUpRightCircle className="text-5xl mb-2" />
+//         <span className="text-lg font-semibold">No pending orders</span>
+//       </div>
+//     )}
+//   </div>
+
+//   <div className="w-full pt-3 mt-auto">
+//     <div className="flex justify-between mb-2">
+//       <button className="text-gray-500 text-xs font-medium flex items-center gap-1">
+//         View All
+//         <svg
+//           xmlns="http://www.w3.org/2000/svg"
+//           fill="none"
+//           viewBox="0 0 24 24"
+//           strokeWidth={1.5}
+//           stroke="currentColor"
+//           className="w-3 h-3"
+//         >
+//           <path
+//             strokeLinecap="round"
+//             strokeLinejoin="round"
+//             d="M8.25 4.5l7.5 7.5-7.5 7.5"
+//           />
+//         </svg>
+//       </button>
+//     </div>
+//     <button className="w-full bg-gradient-to-tr from-secondary to-primary text-white py-2 rounded-xl text-sm font-medium">
+//       Manage All Orders
+//     </button>
+//   </div>
+// </div>

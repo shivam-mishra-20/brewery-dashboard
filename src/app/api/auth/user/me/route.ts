@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken'
 import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'
-import { SubscriptionPlan } from '@/models/SubscriptionPlan'
+// Remove SubscriptionPlan import as it's not needed for now
 import { User } from '@/models/User'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'changeme'
@@ -40,7 +40,8 @@ export async function GET(req: Request) {
     }
     let user
     try {
-      user = await User.findById(payload.id).populate('subscriptionPlan')
+      // Don't use populate to avoid the MissingSchemaError
+      user = await User.findById(payload.id).select('-password')
     } catch (err) {
       console.error('User DB error:', err)
       return NextResponse.json({ error: 'User DB error' }, { status: 500 })
@@ -54,7 +55,7 @@ export async function GET(req: Request) {
         id: user._id,
         email: user.email,
         name: user.name,
-        subscriptionPlan: user.subscriptionPlan,
+        // Omit subscriptionPlan to avoid errors
         trialStart: user.trialStart,
       },
     })
