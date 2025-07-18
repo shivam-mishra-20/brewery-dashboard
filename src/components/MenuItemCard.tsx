@@ -139,7 +139,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
       <div className="flex flex-wrap gap-1">
         {item.addOns?.map((addon, index) => (
           <Tag key={index} color="green" className="mb-1">
-            {addon.name}: ${addon.price.toFixed(2)}
+            {addon.name}: ₹{addon.price.toFixed(2)}
           </Tag>
         ))}
       </div>

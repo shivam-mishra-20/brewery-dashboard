@@ -13,6 +13,7 @@ interface InventoryItemFormProps {
   categories: string[]
   suppliers: Supplier[]
   isSubmitting?: boolean
+  onAddCategory?: (category: string) => Promise<boolean>
 }
 
 const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
@@ -22,6 +23,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
   categories,
   suppliers,
   isSubmitting = false,
+  onAddCategory,
 }) => {
   const [formData, setFormData] = useState<InventoryItemFormData>({
     name: '',
@@ -180,12 +182,36 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                   .toLowerCase()
                   .includes(input.toLowerCase())
               }
-              onInputKeyDown={(e) => {
+              showAction={['focus', 'click']}
+              onInputKeyDown={async (e) => {
                 if (e.key === 'Enter' && e.currentTarget.value) {
-                  setFormData((prev) => ({
-                    ...prev,
-                    category: e.currentTarget.value,
-                  }))
+                  // On Enter, set the category to the typed value
+                  const newCategory = e.currentTarget.value
+
+                  // If onAddCategory is provided, try to add the category
+                  if (onAddCategory) {
+                    try {
+                      const success = await onAddCategory(newCategory)
+                      if (success) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          category: newCategory,
+                        }))
+                      }
+                    } catch (error) {
+                      console.error('Failed to add category', error)
+                    }
+                  } else {
+                    // Default behavior if no onAddCategory
+                    setFormData((prev) => ({
+                      ...prev,
+                      category: newCategory,
+                    }))
+                  }
+
+                  // Prevent form submission
+                  e.preventDefault()
+                  e.stopPropagation()
                 }
               }}
               dropdownRender={(menu) => (
@@ -193,13 +219,17 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                   {menu}
                   <div className="px-3 py-2 border-t border-gray-100">
                     <span className="text-xs text-gray-400">
-                      Type to add a new category
+                      Type and press Enter to add a new category
                     </span>
                   </div>
                 </>
               )}
               notFoundContent={
-                <span className="text-gray-400">Type to add new category</span>
+                <div className="px-3 py-2 text-center">
+                  <span className="text-gray-600 text-sm">
+                    Type a new category name and press Enter
+                  </span>
+                </div>
               }
             />
           </div>
@@ -300,7 +330,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                 htmlFor="costPerUnit"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Cost per Unit ($)
+                Cost per Unit (₹)
               </label>
               <input
                 type="number"

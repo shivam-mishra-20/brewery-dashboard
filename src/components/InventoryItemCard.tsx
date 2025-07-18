@@ -80,7 +80,7 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
           <div>
             <p className="text-gray-500">Cost Per Unit</p>
             <p className="font-medium text-black">
-              ${item.costPerUnit.toFixed(2)}/{item.unit}
+              ₹{item.costPerUnit.toFixed(2)}/{item.unit}
             </p>
           </div>
           <div>

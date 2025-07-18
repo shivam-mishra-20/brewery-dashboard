@@ -2,7 +2,7 @@
 
 import { message } from 'antd'
 import Image from 'next/image'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { BsPlusCircle, BsSearch } from 'react-icons/bs'
 import { TbLoader3 } from 'react-icons/tb'
 import AutoReorderSettings from '@/components/AutoReorderSettings'
@@ -23,13 +23,14 @@ export default function InventoryPage() {
     error,
     categories,
     loadInventoryItemsByCategory,
-    loadSuppliers,
     addInventoryItem,
     updateInventoryItem,
     deleteInventoryItem,
     restockInventoryItem,
     getLowStockItems,
     setAutoReorder,
+    addCategory,
+    loadCategories,
   } = useInventory()
 
   // Local state
@@ -49,19 +50,26 @@ export default function InventoryPage() {
     null,
   )
 
-  // Handle category change
+  // Handle category change - use a ref to track if initial load has happened
+  const initialLoadDone = useRef(false)
+
   useEffect(() => {
+    // Skip initial load as it will be handled by useInventory hook
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true
+      return
+    }
+
+    // Only load on category change after initial load
     loadInventoryItemsByCategory(selectedCategory)
-  }, [selectedCategory])
+  }, [selectedCategory, loadInventoryItemsByCategory])
 
-  // Load suppliers for the form
-  useEffect(() => {
-    loadSuppliers()
-  }, [])
-
-  // Get low stock items count
+  // Get low stock items count - using a debounced approach
   useEffect(() => {
     const fetchLowStockCount = async () => {
+      // Skip if we're already loading
+      if (loading) return
+
       try {
         const lowStockItems = await getLowStockItems()
         setLowStockCount(lowStockItems.length)
@@ -70,8 +78,16 @@ export default function InventoryPage() {
       }
     }
 
+    // Initial fetch
     fetchLowStockCount()
-  }, [])
+
+    // Set up refresh interval, but less frequently (5 minutes)
+    const intervalId = setInterval(fetchLowStockCount, 5 * 60 * 1000)
+
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [getLowStockItems, loading])
 
   // Filter items based on search and low stock filter
   const filteredItems = inventoryItems
@@ -82,19 +98,56 @@ export default function InventoryPage() {
     )
     .filter((item) => !showLowStockOnly || item.quantity <= item.reorderPoint)
 
-  // Handle form submit for add/edit
+  // Handle form submit for add/edit with force bypass cache approach
   const handleFormSubmit = async (formData: InventoryItemFormData) => {
     try {
       setIsSubmitting(true)
+
       if (editingItem) {
+        // For edits
         await updateInventoryItem(editingItem.id, formData)
+        // Force a complete refresh to get updated data
+        await loadInventoryItemsByCategory(selectedCategory, true)
       } else {
-        await addInventoryItem(formData)
+        // For new items
+        const newItem = await addInventoryItem(formData)
+        console.log('New item added successfully:', newItem)
+
+        // Refresh categories in case a new one was added
+        await loadCategories()
+
+        message.success('Item added successfully! Refreshing data...')
+
+        // Force a complete refresh with cache bypass to ensure we get the latest data
+        if (selectedCategory === 'All') {
+          // When adding to "All" category, force reload with cache bypass
+          await loadInventoryItemsByCategory('All', true)
+        } else {
+          // For specific category, refresh both the category and All
+          await loadInventoryItemsByCategory(selectedCategory, true)
+
+          // No need for a timeout since we're using a different approach
+          loadInventoryItemsByCategory('All', true)
+        }
       }
+
       setIsFormOpen(false)
       setEditingItem(null)
+
+      // Show additional success message for edit operations
+      if (editingItem) {
+        message.success('Item updated successfully!')
+      }
     } catch (error) {
       console.error('Error submitting form:', error)
+      message.error('Failed to save item. Please try again.')
+
+      // Even on error, try to refresh the data to maintain consistency
+      try {
+        await loadInventoryItemsByCategory(selectedCategory, true)
+      } catch {
+        // Ignore any secondary errors
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -107,10 +160,16 @@ export default function InventoryPage() {
     try {
       setIsDeleting(true)
       await deleteInventoryItem(itemToDelete)
+
+      // Refresh inventory data after deletion with cache bypass
+      await loadInventoryItemsByCategory(selectedCategory, true)
+
       setIsDeleteDialogOpen(false)
       setItemToDelete(null)
+      message.success('Item deleted successfully!')
     } catch (error) {
       console.error('Error deleting item:', error)
+      message.error('Failed to delete item. Please try again.')
     } finally {
       setIsDeleting(false)
     }
@@ -132,6 +191,11 @@ export default function InventoryPage() {
   const handleRestock = async (id: string, quantity: number) => {
     try {
       await restockInventoryItem(id, quantity)
+
+      // Refresh inventory data after restocking with cache bypass
+      await loadInventoryItemsByCategory(selectedCategory, true)
+
+      message.success(`Successfully restocked ${quantity} units`)
     } catch (error) {
       console.error('Error restocking item:', error)
       message.error('Failed to restock item')
@@ -157,6 +221,10 @@ export default function InventoryPage() {
 
     try {
       await setAutoReorder(id, settings)
+
+      // Refresh inventory data after updating auto-reorder settings with cache bypass
+      await loadInventoryItemsByCategory(selectedCategory, true)
+
       setIsAutoReorderModalOpen(false)
       setAutoReorderItem(null)
       message.success('Auto-reorder settings updated successfully')
@@ -171,21 +239,6 @@ export default function InventoryPage() {
   // Get low stock items count for UI display
   // Count of low stock items
   const [lowStockCount, setLowStockCount] = useState(0)
-
-  // Get low stock items count
-
-  useEffect(() => {
-    const fetchLowStockCount = async () => {
-      try {
-        const lowStockItems = await getLowStockItems()
-        setLowStockCount(lowStockItems.length)
-      } catch (error) {
-        console.error('Error fetching low stock items:', error)
-      }
-    }
-
-    fetchLowStockCount()
-  }, [])
 
   return (
     <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#f7f7f7] rounded-2xl shadow-inner custom-scrollbar">
@@ -211,10 +264,10 @@ export default function InventoryPage() {
               <BsSearch className="text-xl" />
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex   items-center gap-2">
             <a
               href="/dashboard/inventory/suppliers"
-              className="flex items-center gap-1 px-4 py-2 rounded-xl border border-primary text-primary hover:bg-primary hover:text-white text-sm transition"
+              className="flex items-center gap-1 px-4 py-2 rounded-xl whitespace-nowrap border border-primary text-primary hover:bg-primary hover:text-white text-sm transition"
             >
               Manage Suppliers
             </a>
@@ -223,7 +276,7 @@ export default function InventoryPage() {
                 setEditingItem(null)
                 setIsFormOpen(true)
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
+              className="flex flex-nowrap whitespace-nowrap items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
             >
               <BsPlusCircle className="text-lg" /> Add Item
             </button>
@@ -324,6 +377,7 @@ export default function InventoryPage() {
           categories={categories.filter((cat) => cat !== 'All')}
           suppliers={suppliers}
           isSubmitting={isSubmitting}
+          onAddCategory={addCategory}
         />
       )}
 

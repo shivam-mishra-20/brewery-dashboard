@@ -15,7 +15,6 @@ import React, { useEffect, useState } from 'react'
 import { FaEdit, FaPlus, FaQrcode, FaTrash } from 'react-icons/fa'
 import { MdTableRestaurant } from 'react-icons/md'
 import { TbLoader3 } from 'react-icons/tb'
-import TableFloorPlan from '@/components/TableFloorPlan'
 import TableOccupancy from '@/components/TableOccupancy'
 import TableStats from '@/components/TableStats'
 import { storage } from '@/lib/firebase'
@@ -505,18 +504,18 @@ export default function TablesPage() {
           {!loading && <TableStats tables={tables} />}
 
           {/* View Options */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
             {/* Floor Plan (Left side) */}
-            <div className="w-full order-2 xl:order-1">
+            {/* <div className="w-full order-2 xl:order-1">
               {!loading && (
                 <TableFloorPlan
                   tables={tables}
                   onTableClick={(table) => openEditModal(table)}
                 />
               )}
-            </div>
+            </div> */}
             {/* Occupancy Chart (Right side) */}
-            <div className="w-full order-1 xl:order-2">
+            <div className="w-full ">
               <TableOccupancy timeRange="weekly" />
             </div>
           </div>

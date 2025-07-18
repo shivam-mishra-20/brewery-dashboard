@@ -11,6 +11,7 @@ import {
   getAllSuppliers,
   getBatchInventoryUpdates,
   getInventoryAnalytics,
+  getInventoryCategories,
   getInventoryItemsByCategory,
   getInventoryTransactions,
   getLowStockItems as getLowStockItemsService,
@@ -25,20 +26,8 @@ import {
   updateInventoryItem as updateInventoryItemService,
   updateReorderNotificationStatus,
   updateSupplier as updateSupplierService,
+  validateCategory,
 } from '@/services/inventoryService'
-
-// Placeholder categories - in a real app, these might be dynamic
-const DEFAULT_CATEGORIES = [
-  'All',
-  'Beverages',
-  'Dairy',
-  'Grains',
-  'Produce',
-  'Meats',
-  'Spices',
-  'Baking',
-  'Other',
-]
 
 export const useInventory = () => {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
@@ -51,14 +40,26 @@ export const useInventory = () => {
   const [analytics, setAnalytics] = useState<InventoryAnalytics | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [categories] = useState<string[]>(DEFAULT_CATEGORIES)
+  const [categories, setCategories] = useState<string[]>(['All'])
 
-  const loadInventoryItemsByCategory = async (category: string) => {
+  const loadInventoryItemsByCategory = async (
+    category: string,
+    bypassCache: boolean = false,
+  ) => {
     setLoading(true)
     setError(null)
 
     try {
-      const items = await getInventoryItemsByCategory(category)
+      // Add a timestamp parameter to bypass potential API caching issues
+      const timestamp = bypassCache ? Date.now() : undefined
+      console.log(
+        `Loading inventory items for category: ${category}${bypassCache ? ' (bypassing cache)' : ''}`,
+      )
+
+      // Get items with optional cache bypass
+      const items = await getInventoryItemsByCategory(category, timestamp)
+
+      console.log(`Loaded ${items.length} items for category ${category}`)
       setInventoryItems(items)
     } catch (err) {
       console.error('Error loading inventory:', err)
@@ -83,16 +84,19 @@ export const useInventory = () => {
     }
   }
 
-  // Load all categories - in a real app, this would come from the backend
+  // Load all categories from the API
   const loadCategories = async () => {
     try {
-      // Here you would fetch categories from the API
-      // For now, we'll use the default ones
-      // In a real implementation, this might be:
-      // const response = await axios.get('/api/inventory/categories');
-      // setCategories(['All', ...response.data.categories]);
+      const categoryList = await getInventoryCategories()
+      setCategories(categoryList)
+      return categoryList
     } catch (err) {
       console.error('Error loading categories:', err)
+      message.error('Failed to load categories')
+      // Fallback to basic categories
+      const fallbackCategories = ['All', 'Beverages', 'Dairy', 'Other']
+      setCategories(fallbackCategories)
+      return fallbackCategories
     }
   }
 
@@ -423,20 +427,60 @@ export const useInventory = () => {
     }
   }
 
-  // Initialize
+  // Add a new category
+  const addCategory = async (name: string): Promise<boolean> => {
+    try {
+      const isValid = await validateCategory(name)
+      if (isValid) {
+        // Update the local categories state (but don't add duplicates)
+        setCategories((prev) => {
+          if (prev.includes(name)) return prev
+          const newCategories = [...prev]
+          if (name !== 'All' && !newCategories.includes(name)) {
+            newCategories.push(name)
+            newCategories.sort()
+            // Always keep 'All' at the beginning
+            if (newCategories[0] !== 'All') {
+              newCategories.splice(newCategories.indexOf('All'), 1)
+              newCategories.unshift('All')
+            }
+          }
+          return newCategories
+        })
+        return true
+      }
+      return false
+    } catch (err) {
+      console.error('Error adding category:', err)
+      message.error('Failed to add category')
+      return false
+    }
+  }
+
+  // Initialize - combine both useEffects into a single one
   useEffect(() => {
+    // Add a flag to prevent multiple initializations
+    let isInitialized = false
+
     const initInventory = async () => {
-      await loadCategories()
-      await loadInventoryItemsByCategory('All')
-      await loadSuppliers()
+      if (isInitialized) return
+      isInitialized = true
+
+      try {
+        setLoading(true)
+        // Load data in sequence to prevent race conditions
+        await loadCategories()
+        await loadInventoryItemsByCategory('All')
+        await loadSuppliers()
+      } catch (err) {
+        console.error('Error initializing inventory data:', err)
+        setError('Failed to load inventory data. Please refresh the page.')
+      } finally {
+        setLoading(false)
+      }
     }
 
     initInventory()
-  }, [])
-
-  // Load initial data
-  useEffect(() => {
-    loadSuppliers()
   }, [])
 
   return {
@@ -451,6 +495,7 @@ export const useInventory = () => {
     categories,
     loadInventoryItemsByCategory,
     loadSuppliers,
+    loadCategories,
     addInventoryItem,
     updateInventoryItem,
     deleteInventoryItem,
@@ -467,5 +512,6 @@ export const useInventory = () => {
     loadInventoryAnalytics,
     loadTransactions,
     setAutoReorder,
+    addCategory,
   }
 }

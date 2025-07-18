@@ -38,14 +38,20 @@ async function dbConnect(): Promise<typeof mongoose> {
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false,
+      bufferCommands: true, // Changed to true to allow buffering commands before connection
     }
 
     cached.promise = mongoose
       .connect(MONGO_URI, opts)
       .then((mongooseInstance) => {
+        console.log('MongoDB connected successfully')
         cached.conn = mongooseInstance
         return mongooseInstance
+      })
+      .catch((err) => {
+        console.error('MongoDB connection error:', err)
+        cached.promise = null
+        throw err
       })
   }
   await cached.promise

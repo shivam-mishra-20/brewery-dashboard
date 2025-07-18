@@ -7,6 +7,52 @@ import {
 
 // API-based functions to interact with the MongoDB backend
 
+// Get all categories from the API
+// Cache for API responses
+let categoryCache: { data: string[]; timestamp: number } | null = null
+const CACHE_DURATION = 60 * 1000 // 1 minute cache
+
+export const getInventoryCategories = async (): Promise<string[]> => {
+  try {
+    // Use cached data if available and fresh
+    const now = Date.now()
+    if (categoryCache && now - categoryCache.timestamp < CACHE_DURATION) {
+      return categoryCache.data
+    }
+
+    // Otherwise make API call
+    const response = await axios.get('/api/inventory/categories')
+    const categories = response.data.categories || []
+
+    // Update cache
+    categoryCache = {
+      data: categories,
+      timestamp: now,
+    }
+
+    return categories
+  } catch (error) {
+    console.error('Error fetching inventory categories:', error)
+
+    // Return cached data on error if available
+    if (categoryCache) {
+      return categoryCache.data
+    }
+    throw error
+  }
+}
+
+// Validate a new category name
+export const validateCategory = async (name: string): Promise<boolean> => {
+  try {
+    const response = await axios.post('/api/inventory/categories', { name })
+    return response.data.success || false
+  } catch (error) {
+    console.error('Error validating category:', error)
+    throw error
+  }
+}
+
 export const getAllInventoryItems = async (): Promise<InventoryItem[]> => {
   try {
     const response = await axios.get('/api/inventory/items')
@@ -33,14 +79,42 @@ export const getAllInventoryItems = async (): Promise<InventoryItem[]> => {
   }
 }
 
+// Cache for inventory items by category
+const inventoryItemsCache: Record<
+  string,
+  { data: InventoryItem[]; timestamp: number }
+> = {}
+
 export const getInventoryItemsByCategory = async (
   category: string,
+  timestamp?: number, // Optional timestamp parameter to bypass cache
 ): Promise<InventoryItem[]> => {
   try {
+    // Use cached data if available and fresh, unless timestamp is provided to bypass cache
+    const now = Date.now()
+
+    if (
+      !timestamp && // Only use cache if not explicitly bypassing
+      inventoryItemsCache[category] &&
+      now - inventoryItemsCache[category].timestamp < CACHE_DURATION
+    ) {
+      console.log(`Using cached data for category: ${category}`)
+      return inventoryItemsCache[category].data
+    }
+
+    // If timestamp is provided, we're explicitly bypassing the cache
+    if (timestamp) {
+      console.log(
+        `Bypassing cache for category: ${category} with timestamp: ${timestamp}`,
+      )
+    }
+
+    // Otherwise make API call
     const response = await axios.get(
       `/api/inventory/items?category=${encodeURIComponent(category)}`,
     )
-    return response.data.items.map((item: any) => ({
+
+    const items = response.data.items.map((item: any) => ({
       id: item._id,
       name: item.name,
       quantity: item.quantity,
@@ -57,8 +131,22 @@ export const getInventoryItemsByCategory = async (
       autoReorderNotify: item.autoReorderNotify || false,
       autoReorderQuantity: item.autoReorderQuantity || 0,
     }))
+
+    // Update cache
+    inventoryItemsCache[category] = {
+      data: items,
+      timestamp: now,
+    }
+
+    return items
   } catch (error) {
     console.error('Error fetching inventory items by category:', error)
+
+    // Return cached data on error if available
+    if (inventoryItemsCache[category]) {
+      return inventoryItemsCache[category].data
+    }
+
     throw error
   }
 }
@@ -69,6 +157,12 @@ export const addInventoryItem = async (
   try {
     const response = await axios.post('/api/inventory/items', formData)
     const newItem = response.data.item
+
+    // Clear the cache for both "All" category and the specific category of this item
+    // to ensure fresh data is fetched next time
+    delete inventoryItemsCache['All']
+    delete inventoryItemsCache[formData.category]
+    console.log(`Cleared cache for category: All and ${formData.category}`)
 
     return {
       id: newItem._id,
@@ -223,14 +317,32 @@ export interface SupplierFormData {
   isActive?: boolean
 }
 
+// Cache for suppliers
+const suppliersCache: Record<string, { data: Supplier[]; timestamp: number }> =
+  {}
+
 export const getAllSuppliers = async (
   activeOnly: boolean = false,
 ): Promise<Supplier[]> => {
   try {
+    // Create cache key based on activeOnly parameter
+    const cacheKey = `suppliers-${activeOnly}`
+
+    // Use cached data if available and fresh
+    const now = Date.now()
+    if (
+      suppliersCache[cacheKey] &&
+      now - suppliersCache[cacheKey].timestamp < CACHE_DURATION
+    ) {
+      return suppliersCache[cacheKey].data
+    }
+
+    // Otherwise make API call
     const response = await axios.get(
       `/api/inventory/suppliers${activeOnly ? '?activeOnly=true' : ''}`,
     )
-    return response.data.suppliers.map((supplier: any) => ({
+
+    const suppliers = response.data.suppliers.map((supplier: any) => ({
       id: supplier._id,
       name: supplier.name,
       contactPerson: supplier.contactPerson,
@@ -242,8 +354,23 @@ export const getAllSuppliers = async (
       createdAt: supplier.createdAt,
       updatedAt: supplier.updatedAt,
     }))
+
+    // Update cache
+    suppliersCache[cacheKey] = {
+      data: suppliers,
+      timestamp: now,
+    }
+
+    return suppliers
   } catch (error) {
     console.error('Error fetching suppliers:', error)
+
+    // Return cached data on error if available
+    const cacheKey = `suppliers-${activeOnly}`
+    if (suppliersCache[cacheKey]) {
+      return suppliersCache[cacheKey].data
+    }
+
     throw error
   }
 }
@@ -601,6 +728,18 @@ export const getInventoryAnalytics = async (
   }
 }
 
+// Cache for transactions with a timeout and key based on parameters
+const transactionsCache: Record<
+  string,
+  {
+    data: {
+      transactions: InventoryTransaction[]
+      pagination: { total: number; page: number; limit: number; pages: number }
+    }
+    timestamp: number
+  }
+> = {}
+
 export const getInventoryTransactions = async (
   itemId?: string,
   type?: 'restock' | 'usage' | 'adjustment' | 'waste',
@@ -613,6 +752,28 @@ export const getInventoryTransactions = async (
   pagination: { total: number; page: number; limit: number; pages: number }
 }> => {
   try {
+    // Create a cache key based on all parameters
+    const cacheKey = JSON.stringify({
+      itemId,
+      type,
+      startDate,
+      endDate,
+      page,
+      limit,
+    })
+
+    // Use cached data if available and fresh (30 seconds for transaction data)
+    const now = Date.now()
+    const TRANSACTION_CACHE_DURATION = 30 * 1000 // 30 seconds for transaction data
+
+    if (
+      transactionsCache[cacheKey] &&
+      now - transactionsCache[cacheKey].timestamp < TRANSACTION_CACHE_DURATION
+    ) {
+      return transactionsCache[cacheKey].data
+    }
+
+    // Build the query parameters
     const params = new URLSearchParams()
     if (itemId) params.append('itemId', itemId)
     if (type) params.append('type', type)
@@ -621,6 +782,7 @@ export const getInventoryTransactions = async (
     params.append('page', page.toString())
     params.append('limit', limit.toString())
 
+    // Make the API call
     const response = await axios.get(
       `/api/inventory/transactions?${params.toString()}`,
     )
@@ -643,22 +805,55 @@ export const getInventoryTransactions = async (
       createdAt: tx.createdAt,
     }))
 
-    return {
+    const result = {
       transactions,
       pagination: response.data.pagination,
     }
+
+    // Update cache
+    transactionsCache[cacheKey] = {
+      data: result,
+      timestamp: now,
+    }
+
+    return result
   } catch (error) {
     console.error('Error fetching inventory transactions:', error)
+
+    // If error occurs but we have cached data, return it
+    const cacheKey = JSON.stringify({
+      itemId,
+      type,
+      startDate,
+      endDate,
+      page,
+      limit,
+    })
+
+    if (transactionsCache[cacheKey]) {
+      return transactionsCache[cacheKey].data
+    }
+
     throw error
   }
 }
 
 // Low Stock and Reorder Management
+// Cache for low stock items
+let lowStockCache: { data: InventoryItem[]; timestamp: number } | null = null
+
 export const getLowStockItems = async (): Promise<InventoryItem[]> => {
   try {
+    // Use cached data if available and fresh
+    const now = Date.now()
+    if (lowStockCache && now - lowStockCache.timestamp < CACHE_DURATION) {
+      return lowStockCache.data
+    }
+
+    // Otherwise make API call
     const response = await axios.get('/api/inventory/items?lowStock=true')
 
-    return response.data.items.map((item: any) => ({
+    const items = response.data.items.map((item: any) => ({
       id: item._id,
       name: item.name,
       quantity: item.quantity,
@@ -677,8 +872,22 @@ export const getLowStockItems = async (): Promise<InventoryItem[]> => {
       sku: item.sku,
       location: item.location,
     }))
+
+    // Update cache
+    lowStockCache = {
+      data: items,
+      timestamp: now,
+    }
+
+    return items
   } catch (error) {
     console.error('Error fetching low stock items:', error)
+
+    // Return cached data on error if available
+    if (lowStockCache) {
+      return lowStockCache.data
+    }
+
     throw error
   }
 }

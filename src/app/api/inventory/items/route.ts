@@ -11,7 +11,13 @@ export async function GET(req: NextRequest) {
     const lowStock = searchParams.get('lowStock') === 'true'
     const autoReorderOnly = searchParams.get('autoReorderOnly') === 'true'
 
-    await dbConnect()
+    // Ensure MongoDB connection is established before proceeding
+    const mongoose = await dbConnect()
+
+    // Wait for the connection to be ready
+    if (mongoose.connection.readyState !== 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
 
     const query: any = {}
 
@@ -46,7 +52,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json()
-    await dbConnect()
+
+    // Ensure MongoDB connection is established before proceeding
+    const mongoose = await dbConnect()
+
+    // Wait for the connection to be ready
+    if (mongoose.connection.readyState !== 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
 
     const newItem = new InventoryItem(data)
     await newItem.save()
@@ -93,7 +106,13 @@ export async function PUT(req: NextRequest) {
       )
     }
 
-    await dbConnect()
+    // Ensure MongoDB connection is established before proceeding
+    const mongoose = await dbConnect()
+
+    // Wait for the connection to be ready
+    if (mongoose.connection.readyState !== 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
 
     // Get the original item to record the change
     const originalItem = await InventoryItem.findById(id)

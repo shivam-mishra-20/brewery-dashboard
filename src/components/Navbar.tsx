@@ -7,16 +7,30 @@ import { HiOutlineBell, HiOutlineEnvelope } from 'react-icons/hi2'
 
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null)
+
+  // Fetch user data with error handling and console logging for debugging
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch('/api/auth/user')
-        const data = await res.json()
-        if (res.ok && Array.isArray(data.users) && data.users.length > 0) {
-          // For demo, just use the first user
-          setUser(data.users[0])
+        const token = localStorage.getItem('token') // or get from cookies
+        if (!token) {
+          setUser(null)
+          return
         }
-      } catch {}
+        const res = await fetch('/api/auth/user/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        const data = await res.json()
+        if (res.ok && data.user) {
+          setUser(data.user)
+        } else {
+          setUser(null)
+        }
+      } catch (error) {
+        setUser(null)
+      }
     }
     fetchUser()
   }, [])
@@ -88,7 +102,7 @@ const Navbar: React.FC = () => {
           />
           <div className="hidden sm:flex flex-col ml-3">
             <h1 className="text-sm sm:text-base">
-              {user ? user.name : 'Loading...'}
+              {user ? user.name : 'Not logged in'}
             </h1>
             <p className="text-xs sm:text-sm font-inter-regular text-gray-500">
               {user ? user.email : ''}

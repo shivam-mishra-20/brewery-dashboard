@@ -300,7 +300,7 @@ const NewOrderForm: React.FC<NewOrderFormProps> = ({ onSuccess, onCancel }) => {
                                   <div className="flex justify-between">
                                     <span>{item.name}</span>
                                     <Text type="secondary">
-                                      ${Number(item.price).toFixed(2)}
+                                      ₹{Number(item.price).toFixed(2)}
                                     </Text>
                                   </div>
                                 </Option>
