@@ -14,6 +14,7 @@ import { CiCircleMore } from 'react-icons/ci'
 import DashboardBarChart from '@/components/DashboardBarChart'
 import DashboardHeader from '@/components/DashboardHeader'
 import DashboardLineChart from '@/components/DashboardLineChart'
+import { exportDashboardPDFAndCSV } from '@/utils/exportDashboardData'
 
 // Placeholder for line chart
 // const LineChartPlaceholder = () => (
@@ -36,7 +37,14 @@ export default function Dashboard() {
   const [editOrderModal, setEditOrderModal] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
 
+  // New modal states for dashboard stats
+  const [salesModal, setSalesModal] = useState(false)
+  const [customersModal, setCustomersModal] = useState(false)
+  const [pendingOrdersModal, setPendingOrdersModal] = useState(false)
+  const [revenueModal, setRevenueModal] = useState(false)
+
   function useDashboardData() {
+    const [loading, setLoading] = React.useState(true)
     const [stats, setStats] = React.useState({
       totalSales: 0,
       activeCustomers: 0,
@@ -50,41 +58,77 @@ export default function Dashboard() {
       items: { name: string; quantity: number }[]
       status: string
       createdAt?: string | number | Date
+      totalAmount?: number
     }
 
     interface HistoryOrder {
       id: string
       items: string
       status: string
+      totalAmount?: number
+      createdAt?: string | number | Date
+      customerName?: string
+    }
+
+    interface CustomerData {
+      id: string
+      name: string
+      orders: number
+      lastOrder?: string | number | Date
+      totalSpent: number
+      status: string
     }
     const [historyOrders, setHistoryOrders] = React.useState<HistoryOrder[]>([])
     const [pendingOrders, setPendingOrders] = React.useState<PendingOrder[]>([])
+    const [allOrders, setAllOrders] = React.useState<PendingOrder[]>([])
+    const [completedOrders, setCompletedOrders] = React.useState<
+      PendingOrder[]
+    >([])
+    const [activeCustomersList, setActiveCustomersList] = React.useState<
+      CustomerData[]
+    >([])
     const [barChartData, setBarChartData] = React.useState<
       { day: string; value: number; full: string }[]
     >([])
     const [lineChartData, setLineChartData] = React.useState<
       { month: string; sales: number }[]
     >([])
+    const [monthlyRevenueData, setMonthlyRevenueData] = React.useState<
+      { month: string; revenue: number }[]
+    >([])
 
     // Refetch function
     const fetchDashboardData = React.useCallback(() => {
+      setLoading(true)
       fetch('/api/orders')
         .then((res) => res.json())
         .then((data) => {
           const orders: Array<any> = data.orders || []
+
+          // Save all orders
+          setAllOrders(orders)
+
+          // Get completed orders
+          const completed = orders.filter((o: any) => o.status === 'completed')
+          setCompletedOrders(completed)
+
+          // Get pending orders
+          const pending = orders.filter((o: any) =>
+            ['pending', 'preparing', 'ready'].includes(o.status),
+          )
+
           // Stats
           setStats({
-            totalSales: orders.filter((o: any) => o.status === 'completed')
-              .length,
-            activeCustomers: new Set(orders.map((o: any) => o.customerName))
+            totalSales: completed.length,
+            activeCustomers: new Set(pending.map((o: any) => o.customerName))
               .size,
-            pendingOrders: orders.filter((o: any) =>
-              ['pending', 'preparing', 'ready'].includes(o.status),
-            ).length,
-            revenue: orders
-              .filter((o: any) => o.status === 'completed')
-              .reduce((sum: number, o: any) => sum + (o.totalAmount || 0), 0),
+            pendingOrders: pending.length,
+            revenue: completed.reduce(
+              (sum: number, o: any) => sum + (o.totalAmount || 0),
+              0,
+            ),
           })
+
           // History
           setHistoryOrders(
             orders.slice(0, 5).map((o: any) => ({
@@ -93,16 +137,42 @@ export default function Dashboard() {
                 .map((i: any) => `${i.quantity}x ${i.name}`)
                 .join(', '),
               status: o.status,
+              totalAmount: o.totalAmount || 0,
+              createdAt: o.createdAt || o.time,
+              customerName: o.customerName || 'Guest',
             })),
           )
+
           // Pending
-          setPendingOrders(
-            orders
-              .filter((o: any) =>
-                ['pending', 'preparing', 'ready'].includes(o.status),
-              )
-              .slice(0, 5),
-          )
+          setPendingOrders(pending.slice(0, 5))
+
+          // Active customers with pending orders
+          const customerMap = new Map()
+          pending.forEach((order: any) => {
+            const name = order.customerName || 'Guest'
+            if (!customerMap.has(name)) {
+              customerMap.set(name, {
+                id: order.id,
+                name: name,
+                orders: 1,
+                lastOrder: order.createdAt || order.time,
+                totalSpent: order.totalAmount || 0,
+                status: order.status,
+              })
+            } else {
+              const customer = customerMap.get(name)
+              customer.orders++
+              customer.totalSpent += order.totalAmount || 0
+              const lastOrderDate = new Date(order.createdAt || order.time)
+              const currentLastOrder = new Date(customer.lastOrder)
+              if (lastOrderDate > currentLastOrder) {
+                customer.lastOrder = order.createdAt || order.time
+                customer.status = order.status
+              }
+            }
+          })
+
+          setActiveCustomersList(Array.from(customerMap.values()))
 
           // Line chart: monthly sales trend
           const monthNames = [
@@ -120,19 +190,34 @@ export default function Dashboard() {
             'Dec',
           ]
           const monthlySales: { [key: string]: number } = {}
+          const monthlyRevenue: { [key: string]: number } = {}
+
           orders.forEach((order: any) => {
             if (order.status === 'completed') {
               const date = new Date(order.createdAt || order.time)
               const month = monthNames[date.getMonth()]
-              monthlySales[month] =
-                (monthlySales[month] || 0) + (order.totalAmount || 0)
+
+              // Count for sales (orders)
+              monthlySales[month] = (monthlySales[month] || 0) + 1
+
+              // Sum for revenue
+              monthlyRevenue[month] =
+                (monthlyRevenue[month] || 0) + (order.totalAmount || 0)
             }
           })
+
           const lineData = monthNames.map((month) => ({
             month,
             sales: monthlySales[month] || 0,
           }))
+
+          const revenueData = monthNames.map((month) => ({
+            month,
+            revenue: monthlyRevenue[month] || 0,
+          }))
+
           setLineChartData(lineData)
+          setMonthlyRevenueData(revenueData)
 
           // Bar chart: weekly sales trend
           const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -160,6 +245,13 @@ export default function Dashboard() {
             full: fullDayNames[idx],
           }))
           setBarChartData(barData)
+
+          // Set loading to false once all data is processed
+          setLoading(false)
+        })
+        .catch((error) => {
+          console.error('Error fetching dashboard data:', error)
+          setLoading(false)
         })
     }, [])
 
@@ -168,11 +260,16 @@ export default function Dashboard() {
     }, [fetchDashboardData])
 
     return {
+      loading,
       stats,
       historyOrders,
       pendingOrders,
+      allOrders,
+      completedOrders,
+      activeCustomersList,
       barChartData,
       lineChartData,
+      monthlyRevenueData,
       fetchDashboardData,
     }
   }
@@ -195,8 +292,17 @@ export default function Dashboard() {
   //   },
   //   { header: 'Revenue', value: '$2,340', description: 'Revenue this month' },
   // ]
-  const { stats, historyOrders, barChartData, lineChartData } =
-    useDashboardData()
+  const {
+    loading,
+    stats,
+    historyOrders,
+    pendingOrders,
+    completedOrders,
+    activeCustomersList,
+    barChartData,
+    lineChartData,
+    monthlyRevenueData,
+  } = useDashboardData()
 
   const statsData = [
     {
@@ -227,90 +333,156 @@ export default function Dashboard() {
         <DashboardHeader
           title="Dashboard"
           subtitle="Plan, prioritize, and accomplish your task with ease."
+          onExportData={() =>
+            exportDashboardPDFAndCSV({
+              stats,
+              historyOrders,
+              pendingOrders,
+              completedOrders,
+              activeCustomersList,
+              barChartData,
+              lineChartData,
+              monthlyRevenueData,
+            })
+          }
         />
       </div>
       <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-4 place-content-center items-center gap-2 md:gap-3">
-        {statsData.map((stat, index) => (
-          <div
-            key={index}
-            className={
-              index === 0
-                ? 'group gap-5 bg-gradient-to-bl from-primary to-secondary text-white p-5 rounded-2xl shadow-inner shadow-white/[.4] flex flex-col items-start justify-center border-2 border-primary/30 overflow-hidden min-h-[170px] transition-all duration-500'
-                : 'group gap-5 bg-white p-5 rounded-2xl flex flex-col items-start justify-center min-h-[170px] transition-all duration-500'
-            }
-          >
-            <p
-              className={`${index === 0 ? 'text-white/90' : 'text-black'} flex items-center justify-between w-full text-md md:text-lg`}
-            >
-              {stat.header}
-              <span className="relative w-10 h-8 flex items-center justify-center">
-                {index === 0 ? (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <BsArrowUpRightCircleFill
-                      className="text-3xl transition-transform duration-500 group-hover:opacity-0 group-hover:scale-75 group-hover:rotate-12"
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        margin: 'auto',
-                        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                      }}
-                    />
-                    <BsArrowUpCircleFill
-                      className="text-3xl transition-transform duration-500 opacity-0 scale-75 rotate-12 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0"
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        margin: 'auto',
-                        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                      }}
-                    />
+        {loading
+          ? // Skeleton UI for loading state
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={`skeleton-${index}`}
+                className={
+                  index === 0
+                    ? 'gap-5 bg-gradient-to-bl from-primary/60 to-secondary/60 p-5 rounded-2xl flex flex-col items-start justify-center border-2 border-primary/20 overflow-hidden min-h-[170px]'
+                    : 'gap-5 bg-white/60 p-5 rounded-2xl flex flex-col items-start justify-center min-h-[170px]'
+                }
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="h-6 bg-gray-200/70 animate-pulse rounded-md w-1/2 mb-2"></div>
+                  <div className="relative w-10 h-8">
+                    <div className="h-8 w-8 rounded-full bg-gray-200/70 animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="h-10 bg-gray-200/70 animate-pulse rounded-md w-2/3 my-2"></div>
+                <div className="h-4 bg-gray-200/70 animate-pulse rounded-md w-3/4"></div>
+              </div>
+            ))
+          : // Actual data
+            statsData.map((stat, index) => (
+              <div
+                key={index}
+                onClick={() => {
+                  // Open the appropriate modal based on index
+                  if (index === 0) setSalesModal(true)
+                  else if (index === 1) setCustomersModal(true)
+                  else if (index === 2) setPendingOrdersModal(true)
+                  else if (index === 3) setRevenueModal(true)
+                }}
+                className={
+                  index === 0
+                    ? 'group cursor-pointer hover:scale-[1.02] active:scale-[0.98] gap-5 bg-gradient-to-bl from-primary to-secondary text-white p-5 rounded-2xl shadow-inner shadow-white/[.4] flex flex-col items-start justify-center border-2 border-primary/30 overflow-hidden min-h-[170px] transition-all duration-500'
+                    : 'group cursor-pointer hover:scale-[1.02] active:scale-[0.98] gap-5 bg-white p-5 rounded-2xl flex flex-col items-start justify-center min-h-[170px] transition-all duration-500'
+                }
+              >
+                <p
+                  className={`${index === 0 ? 'text-white/90' : 'text-black'} flex items-center justify-between w-full text-md md:text-lg`}
+                >
+                  {stat.header}
+                  <span className="relative w-10 h-8 flex items-center justify-center">
+                    {index === 0 ? (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <BsArrowUpRightCircleFill
+                          className="text-3xl transition-transform duration-500 group-hover:opacity-0 group-hover:scale-75 group-hover:rotate-12"
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            margin: 'auto',
+                            transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+                          }}
+                        />
+                        <BsArrowUpCircleFill
+                          className="text-3xl transition-transform duration-500 opacity-0 scale-75 rotate-12 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0"
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            margin: 'auto',
+                            transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+                          }}
+                        />
+                      </span>
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <BsArrowUpRightCircle
+                          className="text-3xl transition-transform duration-500 group-hover:opacity-0 group-hover:scale-75 group-hover:rotate-12"
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            margin: 'auto',
+                            transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+                          }}
+                        />
+                        <BsArrowUpCircleFill
+                          className="text-3xl transition-transform duration-500 opacity-0 scale-75 rotate-12 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0"
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            margin: 'auto',
+                            transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+                          }}
+                        />
+                      </span>
+                    )}
                   </span>
-                ) : (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <BsArrowUpRightCircle
-                      className="text-3xl transition-transform duration-500 group-hover:opacity-0 group-hover:scale-75 group-hover:rotate-12"
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        margin: 'auto',
-                        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                      }}
-                    />
-                    <BsArrowUpCircleFill
-                      className="text-3xl transition-transform duration-500 opacity-0 scale-75 rotate-12 group-hover:opacity-100 group-hover:scale-100 group-hover:rotate-0"
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        margin: 'auto',
-                        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                      }}
-                    />
-                  </span>
-                )}
-              </span>
-            </p>
-            <h2 className="lg:text-5xl text-2xl md:text-4xl font-bold">
-              {stat.value}
-            </h2>
-            <span
-              className={
-                index === 0 ? 'text-sm text-white/80' : 'text-sm text-[#ffc300]'
-              }
-            >
-              {stat.description}
-            </span>
-          </div>
-        ))}
+                </p>
+                <h2 className="lg:text-5xl text-2xl md:text-4xl font-bold">
+                  {stat.value}
+                </h2>
+                <span
+                  className={
+                    index === 0
+                      ? 'text-sm text-white/80'
+                      : 'text-sm text-[#ffc300]'
+                  }
+                >
+                  {stat.description}
+                </span>
+              </div>
+            ))}
       </div>
       {/* Bento grid layout */}
-      <div className="grid w-full pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid w-full pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {/* Top left: Bar chart */}
         <div className="col-span-1 sm:col-span-2 bg-white p-3 sm:p-4 md:p-5 h-[300px] rounded-2xl shadow-inner flex flex-col items-start justify-center overflow-hidden md:col-start-1 md:col-span-2 md:row-span-1 lg:row-start-1">
-          {barChartData && barChartData.some((d) => d.value > 0) ? (
+          {loading ? (
+            <div className="w-full h-full flex flex-col">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-6 w-40 bg-gray-200 animate-pulse rounded-md"></div>
+                <div className="h-6 w-20 bg-gray-200 animate-pulse rounded-md"></div>
+              </div>
+              <div className="flex-1 flex items-end w-full space-x-2">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div
+                    key={`bar-skeleton-${i}`}
+                    className="flex-1 flex flex-col items-center"
+                  >
+                    <div
+                      className="w-full bg-gray-200 animate-pulse rounded-t-md"
+                      style={{
+                        height: `${Math.max(20, Math.random() * 120)}px`,
+                      }}
+                    ></div>
+                    <div className="h-4 w-full bg-gray-200 animate-pulse rounded-md mt-2"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : barChartData && barChartData.some((d) => d.value > 0) ? (
             <DashboardBarChart data={barChartData} />
           ) : (
             <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
@@ -332,7 +504,25 @@ export default function Dashboard() {
             </button>
           </div>
           <div className="flex-1 w-full overflow-y-auto mt-2 custom-scrollbar">
-            {historyOrders && historyOrders.length > 0 ? (
+            {loading ? (
+              <ul className="space-y-2">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <li
+                    key={`history-skeleton-${idx}`}
+                    className="p-3 rounded-lg bg-gray-50 animate-pulse flex justify-between items-center"
+                  >
+                    <div className="flex flex-col space-y-2">
+                      <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                      <div className="h-3 w-28 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="flex flex-col items-end space-y-2">
+                      <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                      <div className="h-3 w-12 bg-gray-200 rounded"></div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : historyOrders && historyOrders.length > 0 ? (
               <ul className="space-y-2">
                 {historyOrders.map((order) => {
                   let bgClass = 'bg-gray-50'
@@ -559,6 +749,600 @@ export default function Dashboard() {
           </motion.div>
         </motion.div>
       )}
+      {/* SALES MODAL */}
+      {salesModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex custom-scrollbar items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary to-secondary text-white">
+              <h2 className="text-xl font-semibold">Total Sales</h2>
+              <button
+                onClick={() => setSalesModal(false)}
+                className="text-white hover:text-gray-200"
+                aria-label="Close"
+              >
+                <span style={{ fontSize: 24 }}>&times;</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="flex flex-col md:flex-row gap-6 mb-6">
+                <div className="bg-white rounded-xl p-4 shadow flex-1 border border-gray-100">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Total Completed Orders
+                  </h3>
+                  <p className="text-4xl font-bold text-primary">
+                    {stats.totalSales}
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow flex-1 border border-gray-100">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Average Order Value
+                  </h3>
+                  <p className="text-4xl font-bold text-primary">
+                    ₹
+                    {completedOrders.length
+                      ? (stats.revenue / completedOrders.length).toFixed(2)
+                      : 0}
+                  </p>
+                </div>
+              </div>
+
+              {/* Line Chart */}
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">
+                  Monthly Sales Trend
+                </h3>
+                <div className="h-[300px]">
+                  {lineChartData && lineChartData.some((d) => d.sales > 0) ? (
+                    <DashboardLineChart data={lineChartData} />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
+                      <span className="text-lg font-semibold">
+                        No sales trend data
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Sales */}
+              <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">
+                  Recent Completed Sales
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-sm text-gray-500 border-b">
+                        <th className="pb-2 font-medium">Order ID</th>
+                        <th className="pb-2 font-medium">Customer</th>
+                        <th className="pb-2 font-medium">Items</th>
+                        <th className="pb-2 font-medium">Amount</th>
+                        <th className="pb-2 font-medium">Date</th>
+                        <th className="pb-2 font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {completedOrders.slice(0, 10).map((order) => (
+                        <tr
+                          key={order.id}
+                          className="border-b hover:bg-gray-50"
+                        >
+                          <td className="py-3 text-sm">
+                            {order.id.substring(0, 8)}...
+                          </td>
+                          <td className="py-3 text-sm">
+                            {order.customerName || 'Guest'}
+                          </td>
+                          <td className="py-3 text-sm">
+                            {order.items
+                              .map((i) => `${i.quantity}x ${i.name}`)
+                              .join(', ')
+                              .substring(0, 20)}
+                            {order.items
+                              .map((i) => `${i.quantity}x ${i.name}`)
+                              .join(', ').length > 20
+                              ? '...'
+                              : ''}
+                          </td>
+                          <td className="py-3 text-sm">₹{order.totalAmount}</td>
+                          <td className="py-3 text-sm">
+                            {new Date(
+                              order.createdAt || Date.now(),
+                            ).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 text-sm">
+                            <button
+                              className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
+                              onClick={() => {
+                                setSelectedOrder(order)
+                                setViewOrderModal(true)
+                                setSalesModal(false)
+                              }}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setSalesModal(false)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1]"
+                >
+                  Close
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* CUSTOMERS MODAL */}
+      {customersModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex custom-scrollbar items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+              <h2 className="text-xl font-semibold">Active Customers</h2>
+              <button
+                onClick={() => setCustomersModal(false)}
+                className="text-white hover:text-gray-200"
+                aria-label="Close"
+              >
+                <span style={{ fontSize: 24 }}>&times;</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">
+                  Customers with Pending Orders
+                </h3>
+
+                {activeCustomersList && activeCustomersList.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="text-sm text-gray-500 border-b">
+                          <th className="pb-2 font-medium">Customer</th>
+                          <th className="pb-2 font-medium">Active Orders</th>
+                          <th className="pb-2 font-medium">
+                            Last Order Status
+                          </th>
+                          <th className="pb-2 font-medium">Total Spent</th>
+                          <th className="pb-2 font-medium">Last Order Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeCustomersList.map((customer) => (
+                          <tr
+                            key={customer.id}
+                            className="border-b hover:bg-gray-50"
+                          >
+                            <td className="py-3 text-sm font-medium">
+                              {customer.name}
+                            </td>
+                            <td className="py-3 text-sm">{customer.orders}</td>
+                            <td className="py-3 text-sm">
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs ${
+                                  customer.status === 'ready'
+                                    ? 'bg-green-100 text-green-700'
+                                    : customer.status === 'preparing'
+                                      ? 'bg-yellow-100 text-yellow-700'
+                                      : 'bg-blue-100 text-blue-700'
+                                }`}
+                              >
+                                {customer.status.charAt(0).toUpperCase() +
+                                  customer.status.slice(1)}
+                              </span>
+                            </td>
+                            <td className="py-3 text-sm">
+                              ₹{customer.totalSpent.toFixed(2)}
+                            </td>
+                            <td className="py-3 text-sm">
+                              {customer.lastOrder
+                                ? new Date(customer.lastOrder).toLocaleString()
+                                : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                    <p className="text-lg font-semibold">
+                      No active customers at the moment
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setCustomersModal(false)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-500 text-white font-medium shadow-inner shadow-white/[0.5] border border-blue-900/[0.1]"
+                >
+                  Close
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* PENDING ORDERS MODAL */}
+      {pendingOrdersModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex custom-scrollbar items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
+              <h2 className="text-xl font-semibold">Pending Orders</h2>
+              <button
+                onClick={() => setPendingOrdersModal(false)}
+                className="text-white hover:text-gray-200"
+                aria-label="Close"
+              >
+                <span style={{ fontSize: 24 }}>&times;</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                  <h3 className="text-lg font-semibold text-orange-600 mb-2">
+                    Pending
+                  </h3>
+                  <p className="text-4xl font-bold">
+                    {pendingOrders.filter((o) => o.status === 'pending').length}
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                  <h3 className="text-lg font-semibold text-yellow-600 mb-2">
+                    Preparing
+                  </h3>
+                  <p className="text-4xl font-bold">
+                    {
+                      pendingOrders.filter((o) => o.status === 'preparing')
+                        .length
+                    }
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                  <h3 className="text-lg font-semibold text-green-600 mb-2">
+                    Ready
+                  </h3>
+                  <p className="text-4xl font-bold">
+                    {pendingOrders.filter((o) => o.status === 'ready').length}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">
+                  All Pending Orders
+                </h3>
+                {pendingOrders.length > 0 ? (
+                  <div className="space-y-3">
+                    {pendingOrders.map((order) => (
+                      <div
+                        key={order.id}
+                        className={`rounded-xl p-4 ${
+                          order.status === 'ready'
+                            ? 'bg-green-50'
+                            : order.status === 'preparing'
+                              ? 'bg-yellow-50'
+                              : 'bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">
+                                {order.items
+                                  .map((i) => `${i.quantity}x ${i.name}`)
+                                  .join(', ')}
+                              </span>
+                              {order.tableNumber && (
+                                <span className="bg-white px-2 py-0.5 text-xs rounded-full">
+                                  Table {order.tableNumber}
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {order.customerName || 'Guest'} •
+                              {order.createdAt
+                                ? new Date(order.createdAt).toLocaleTimeString()
+                                : ''}
+                            </span>
+                          </div>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              order.status === 'ready'
+                                ? 'bg-green-100 text-green-700'
+                                : order.status === 'preparing'
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-blue-100 text-blue-700'
+                            }`}
+                          >
+                            {order.status.charAt(0).toUpperCase() +
+                              order.status.slice(1)}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-end items-center gap-2 mt-3">
+                          <button
+                            className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setViewOrderModal(true)
+                              setPendingOrdersModal(false)
+                            }}
+                          >
+                            View
+                          </button>
+                          <button
+                            className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setEditOrderModal(true)
+                              setPendingOrdersModal(false)
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                    <p className="text-lg font-semibold">
+                      No pending orders at the moment
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between mt-6">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => router.push('/dashboard/orders')}
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <span>Manage All Orders</span>
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setPendingOrdersModal(false)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-orange-500 to-yellow-500 text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1]"
+                >
+                  Close
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* REVENUE MODAL */}
+      {revenueModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex custom-scrollbar items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-500 to-teal-500 text-white">
+              <h2 className="text-xl font-semibold">Revenue Details</h2>
+              <button
+                onClick={() => setRevenueModal(false)}
+                className="text-white hover:text-gray-200"
+                aria-label="Close"
+              >
+                <span style={{ fontSize: 24 }}>&times;</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                  <h3 className="text-lg font-semibold mb-2">Total Revenue</h3>
+                  <p className="text-4xl font-bold text-green-600">
+                    ₹{stats.revenue.toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Completed Orders
+                  </h3>
+                  <p className="text-4xl font-bold text-green-600">
+                    {stats.totalSales}
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Avg. Order Value
+                  </h3>
+                  <p className="text-4xl font-bold text-green-600">
+                    ₹
+                    {completedOrders.length
+                      ? (stats.revenue / completedOrders.length).toFixed(2)
+                      : 0}
+                  </p>
+                </div>
+              </div>
+
+              {/* Monthly Revenue Chart */}
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">
+                  Monthly Revenue Trend
+                </h3>
+                <div className="h-[300px]">
+                  {monthlyRevenueData &&
+                  monthlyRevenueData.some((d) => d.revenue > 0) ? (
+                    <DashboardLineChart
+                      data={monthlyRevenueData.map((item) => ({
+                        month: item.month,
+                        sales: item.revenue, // reusing the sales field for revenue
+                      }))}
+                      color="#10b981"
+                      label="Monthly Revenue Trend"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
+                      <span className="text-lg font-semibold">
+                        No revenue data available
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Top Selling Items */}
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">
+                  Top Revenue Generating Items
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-sm text-gray-500 border-b">
+                        <th className="pb-2 font-medium">Item</th>
+                        <th className="pb-2 font-medium">Quantity Sold</th>
+                        <th className="pb-2 font-medium">Revenue Generated</th>
+                        <th className="pb-2 font-medium">% of Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        // Calculate top items by revenue
+                        const itemMap = new Map()
+                        completedOrders.forEach((order) => {
+                          order.items.forEach((item) => {
+                            // Assuming a default price of 100 per item for calculation
+                            // In a real app, you'd get the actual price from the item or order data
+                            const estimatedPrice = 100
+                            const key = item.name
+                            if (!itemMap.has(key)) {
+                              itemMap.set(key, {
+                                name: item.name,
+                                quantity: item.quantity,
+                                revenue: item.quantity * estimatedPrice,
+                              })
+                            } else {
+                              const existing = itemMap.get(key)
+                              existing.quantity += item.quantity
+                              existing.revenue += item.quantity * estimatedPrice
+                            }
+                          })
+                        })
+
+                        const sortedItems = Array.from(itemMap.values())
+                          .sort((a, b) => b.revenue - a.revenue)
+                          .slice(0, 5)
+
+                        return sortedItems.length > 0 ? (
+                          sortedItems.map((item, index) => (
+                            <tr
+                              key={index}
+                              className="border-b hover:bg-gray-50"
+                            >
+                              <td className="py-3 text-sm font-medium">
+                                {item.name}
+                              </td>
+                              <td className="py-3 text-sm">{item.quantity}</td>
+                              <td className="py-3 text-sm">
+                                ₹{item.revenue.toFixed(2)}
+                              </td>
+                              <td className="py-3 text-sm">
+                                {stats.revenue
+                                  ? (
+                                      (item.revenue / stats.revenue) *
+                                      100
+                                    ).toFixed(1)
+                                  : 0}
+                                %
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={4}
+                              className="py-8 text-center text-gray-400"
+                            >
+                              No revenue data available
+                            </td>
+                          </tr>
+                        )
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setRevenueModal(false)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-green-500 to-teal-500 text-white font-medium shadow-inner shadow-white/[0.5] border border-green-900/[0.1]"
+                >
+                  Close
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;

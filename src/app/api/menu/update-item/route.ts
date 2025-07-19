@@ -12,7 +12,9 @@ import { withDBRetry } from '@/lib/mongodb'
 import InventoryItem from '@/models/db/InventoryItem'
 import { MenuItemIngredient } from '@/models/InventoryItem'
 import { MenuItemModel } from '@/models/MenuItemModel'
+import dbConnect from '@/utils/dbConnect'
 
+// This handler is for updating a menu item with file uploads using FormData
 export async function POST(request: NextRequest) {
   try {
     // Get form data (multipart/form-data)
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
     const existingVideoThumbnailUrl = formData.get(
       'existingVideoThumbnailUrl',
     ) as string | null
-    
+
     // Get the add-ons if provided
     const addOnsStr = formData.get('addOns') as string | null
     const addOns = addOnsStr ? JSON.parse(addOnsStr) : []
@@ -96,12 +98,29 @@ export async function POST(request: NextRequest) {
       // Keep existing images, no need to delete anything
       // We'll set them later
     }
-    // If new images are uploaded, remove old ones
+    // Only delete images that are no longer in existingImageURLs
     else if (images.length > 0 && Array.isArray(menuItem.imageURLs)) {
-      for (const url of menuItem.imageURLs) {
+      // Don't delete all old images - only delete the ones not in existingImageURLs
+      const imagesToDelete = menuItem.imageURLs.filter(
+        (url) => !existingImageURLs.includes(url),
+      )
+
+      for (const url of imagesToDelete) {
         try {
-          const oldImageRef = ref(storage, url)
-          await deleteObject(oldImageRef)
+          // Parse the URL to extract just the path
+          const parsedUrl = new URL(url)
+          const pathMatch = parsedUrl.pathname.match(/o\/([^?]+)/)
+
+          if (pathMatch && pathMatch[1]) {
+            // Decode the URL-encoded path
+            const storagePath = decodeURIComponent(pathMatch[1])
+            console.log(`Deleting image at storage path: ${storagePath}`)
+
+            const oldImageRef = ref(storage, storagePath)
+            await deleteObject(oldImageRef)
+          } else {
+            console.error(`Could not parse storage path from URL: ${url}`)
+          }
         } catch (error) {
           console.error('Error deleting old image (continuing):', error)
         }
@@ -111,8 +130,22 @@ export async function POST(request: NextRequest) {
     // Handle video deletion if a new video is uploaded but there was an existing one
     if (videoFile && videoFile.size > 0 && menuItem.videoUrl) {
       try {
-        const oldVideoRef = ref(storage, menuItem.videoUrl)
-        await deleteObject(oldVideoRef)
+        // Parse the URL to extract just the path
+        const parsedUrl = new URL(menuItem.videoUrl)
+        const pathMatch = parsedUrl.pathname.match(/o\/([^?]+)/)
+
+        if (pathMatch && pathMatch[1]) {
+          // Decode the URL-encoded path
+          const storagePath = decodeURIComponent(pathMatch[1])
+          console.log(`Deleting video at storage path: ${storagePath}`)
+
+          const oldVideoRef = ref(storage, storagePath)
+          await deleteObject(oldVideoRef)
+        } else {
+          console.error(
+            `Could not parse storage path from URL: ${menuItem.videoUrl}`,
+          )
+        }
       } catch (error) {
         console.error('Error deleting old video (continuing):', error)
       }
@@ -184,13 +217,21 @@ export async function POST(request: NextRequest) {
     menuItem.videoUrl = videoUrl
     menuItem.videoThumbnailUrl = videoThumbnailUrl
 
+    // Handle both existing and new images
     if (images.length > 0) {
-      // If new images were uploaded
-      menuItem.image = imageNames.length > 0 ? imageNames[0] : ''
-      menuItem.imageURL = imageURLs.length > 0 ? imageURLs[0] : ''
-      // Always set as arrays, even if single item
-      menuItem.images = imageNames.length > 0 ? imageNames : []
-      menuItem.imageURLs = imageURLs.length > 0 ? imageURLs : []
+      // If new images were uploaded, combine them with existing ones
+      const combinedImageURLs = [...existingImageURLs, ...imageURLs]
+
+      // Update image-related fields
+      menuItem.imageURLs = combinedImageURLs
+      menuItem.imageURL =
+        combinedImageURLs.length > 0 ? combinedImageURLs[0] : ''
+
+      // For image names, keep existing ones and add new ones
+      // Since we can't easily get names from existing URLs, we'll append new names
+      const updatedImageNames = [...(menuItem.images || []), ...imageNames]
+      menuItem.images = updatedImageNames
+      menuItem.image = updatedImageNames.length > 0 ? updatedImageNames[0] : ''
     } else if (existingImageURLs.length > 0) {
       // If keeping existing images (no new uploads but has existing URLs)
       // We need to ensure all image fields are properly populated:
@@ -268,6 +309,135 @@ export async function POST(request: NextRequest) {
       {
         error: 'Failed to update menu item',
         details: (error as Error).message,
+      },
+      { status: 500 },
+    )
+  }
+}
+
+// Ensure the backend update handler preserves existing data
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { id } = Object.fromEntries(request.nextUrl.searchParams)
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Menu item ID is required' },
+        { status: 400 },
+      )
+    }
+
+    const data = await request.json()
+    console.log('Updating menu item with ID:', id)
+
+    await dbConnect()
+
+    // First, get the existing item
+    const existingItem = await MenuItemModel.findById(id)
+    if (!existingItem) {
+      return NextResponse.json(
+        { error: 'Menu item not found' },
+        { status: 404 },
+      )
+    }
+
+    // Merge the existing data with the new data
+    const updatedData = {
+      ...existingItem.toObject(), // Convert mongoose doc to plain object
+      ...data,
+      // Ensure certain fields are properly updated
+      updatedAt: new Date(),
+
+      // Properly handle ingredients array
+      ingredients: Array.isArray(data.ingredients)
+        ? data.ingredients
+        : existingItem.ingredients || [],
+
+      // Ensure images is always an array of strings to match the schema
+      images: Array.isArray(data.images)
+        ? data.images.filter((img: any) => typeof img === 'string')
+        : existingItem.images || [],
+
+      // Make sure imageURLs are properly handled - this is what MongoDB expects
+      imageURLs: Array.isArray(data.imageURLs)
+        ? data.imageURLs
+        : existingItem.imageURLs || [],
+    }
+
+    // Image legacy field for backward compatibility
+    if (
+      updatedData.imageURLs &&
+      updatedData.imageURLs.length > 0 &&
+      !updatedData.imageURL
+    ) {
+      updatedData.imageURL = updatedData.imageURLs[0]
+    }
+
+    // Update image names if they're missing
+    if (
+      (updatedData.imageURLs?.length || 0) > 0 &&
+      (updatedData.images?.length || 0) === 0
+    ) {
+      updatedData.images = updatedData.imageURLs.map((url: string) => {
+        const parts = url.split('/')
+        return parts[parts.length - 1].split('?')[0]
+      })
+    }
+
+    console.log('Data prepared for update:', {
+      id,
+      images: updatedData.images,
+      imageURLs: updatedData.imageURLs,
+    })
+
+    // Use findByIdAndUpdate with { new: true } to get the updated document
+    const updatedMenuItem = await MenuItemModel.findByIdAndUpdate(
+      id,
+      updatedData,
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+
+    if (!updatedMenuItem) {
+      throw new Error('Failed to update menu item in database')
+    }
+
+    // Verify the update worked correctly
+    console.log('Menu item updated successfully:', {
+      id: updatedMenuItem._id,
+      imageCount: updatedMenuItem.imageURLs?.length || 0,
+      imageURLs: updatedMenuItem.imageURLs || [],
+      images: updatedMenuItem.images || [],
+    })
+
+    return NextResponse.json({
+      message: 'Menu item updated successfully',
+      menuItem: updatedMenuItem,
+    })
+  } catch (error) {
+    console.error('Error updating menu item:', error)
+
+    // Provide more detailed error message
+    let errorMessage = 'Failed to update menu item'
+    let details = null
+
+    if (error instanceof Error) {
+      errorMessage = error.message
+
+      // Handle MongoDB cast errors
+      if (error.name === 'CastError' && 'path' in error) {
+        const castError = error as any
+        errorMessage = `Invalid data format for field: ${castError.path}`
+        details = castError
+      }
+    }
+
+    return NextResponse.json(
+      {
+        error: errorMessage,
+        details: details,
       },
       { status: 500 },
     )

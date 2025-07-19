@@ -28,13 +28,17 @@ import {
 
 type DashboardLineChartProps = {
   data: Array<{ month: string; sales: number }>
+  color?: string
+  label?: string
 }
 
-const DashboardLineChart: React.FC<DashboardLineChartProps> = ({ data }) => (
-  <div className="w-full h-full flex flex-col items-start justify-center">
-    <h1 className="text-lg font-inter-semibold text-black mb-2">
-      Monthly Sales Trend
-    </h1>
+const DashboardLineChart: React.FC<DashboardLineChartProps> = ({
+  data,
+  color = '#ffc300',
+  label = 'Monthly Sales Trend',
+}) => (
+  <div className="w-full px-5 h-full flex flex-col items-start justify-center">
+    <h1 className="text-lg font-inter-semibold text-black mb-2">{label}</h1>
     <ResponsiveContainer width="100%" height="80%">
       <LineChart
         data={data}
@@ -68,19 +72,27 @@ const DashboardLineChart: React.FC<DashboardLineChartProps> = ({ data }) => (
             boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
           }}
           labelStyle={{
-            color: '#ffc300',
+            color: color,
             fontWeight: 600,
             fontFamily: 'inherit',
           }}
-          formatter={(value: number) => [`${value}`, 'Sales']}
+          formatter={(value: number) => {
+            // Extract what we're displaying from the label, or default to "Sales"
+            const metric = label.includes('Revenue')
+              ? 'Revenue'
+              : label.includes('Sales')
+                ? 'Sales'
+                : 'Value'
+            return [`${value}`, metric]
+          }}
         />
         <Line
           type="monotone"
           dataKey="sales"
-          stroke="#ffc300"
+          stroke={color}
           strokeWidth={3}
-          dot={{ r: 5, fill: '#fff', stroke: '#ffc300', strokeWidth: 2 }}
-          activeDot={{ r: 7, fill: '#ffc300', stroke: '#fff', strokeWidth: 2 }}
+          dot={{ r: 5, fill: '#fff', stroke: color, strokeWidth: 2 }}
+          activeDot={{ r: 7, fill: color, stroke: '#fff', strokeWidth: 2 }}
         />
       </LineChart>
     </ResponsiveContainer>

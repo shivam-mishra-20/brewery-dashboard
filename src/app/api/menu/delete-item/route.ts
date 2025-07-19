@@ -38,15 +38,31 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete all images from storage if they exist
-    if (menuItem.images && menuItem.images.length > 0) {
-      // Delete all images using the images array
-      for (const imagePath of menuItem.images) {
+    if (menuItem.imageURLs && menuItem.imageURLs.length > 0) {
+      // Use imageURLs instead of images for deletion since these contain the full storage paths
+      for (const imageUrl of menuItem.imageURLs) {
         try {
-          const imageRef = ref(storage, imagePath)
-          await deleteObject(imageRef)
+          // Extract the storage path from the URL
+          // This is necessary because Firebase Storage URLs contain token parameters
+          // The ref function needs the storage path, not the full download URL
+          
+          // Parse the URL to extract just the path
+          const parsedUrl = new URL(imageUrl);
+          const pathMatch = parsedUrl.pathname.match(/o\/([^?]+)/);
+          
+          if (pathMatch && pathMatch[1]) {
+            // Decode the URL-encoded path
+            const storagePath = decodeURIComponent(pathMatch[1]);
+            console.log(`Deleting image at storage path: ${storagePath}`);
+            
+            const imageRef = ref(storage, storagePath);
+            await deleteObject(imageRef);
+          } else {
+            console.error(`Could not parse storage path from URL: ${imageUrl}`);
+          }
         } catch (error) {
           console.error(
-            `Error deleting image ${imagePath} (continuing):`,
+            `Error deleting image URL ${imageUrl} (continuing):`,
             error,
           )
         }
@@ -54,10 +70,21 @@ export async function DELETE(request: NextRequest) {
     } else if (menuItem.imageURL) {
       // Fallback for legacy items that only have imageURL
       try {
-        const imageRef = ref(storage, menuItem.imageURL)
-        await deleteObject(imageRef)
+        // Parse the URL to extract just the path
+        const parsedUrl = new URL(menuItem.imageURL);
+        const pathMatch = parsedUrl.pathname.match(/o\/([^?]+)/);
+        
+        if (pathMatch && pathMatch[1]) {
+          const storagePath = decodeURIComponent(pathMatch[1]);
+          console.log(`Deleting legacy image at storage path: ${storagePath}`);
+          
+          const imageRef = ref(storage, storagePath);
+          await deleteObject(imageRef);
+        } else {
+          console.error(`Could not parse storage path from URL: ${menuItem.imageURL}`);
+        }
       } catch (error) {
-        console.error('Error deleting image (continuing):', error)
+        console.error('Error deleting legacy image (continuing):', error)
       }
     }
 

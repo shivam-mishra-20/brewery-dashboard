@@ -133,7 +133,8 @@ export default function OrdersPage() {
       return (
         order.customerName.toLowerCase().includes(query) ||
         order.id.toLowerCase().includes(query) ||
-        (order.tableNumber && order.tableNumber.toLowerCase().includes(query))
+        (order.tableNumber &&
+          order.tableNumber.toString().toLowerCase().includes(query))
       )
     }
 

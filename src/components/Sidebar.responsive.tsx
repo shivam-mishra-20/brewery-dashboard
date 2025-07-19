@@ -23,17 +23,6 @@ const menuSections = [
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: <DashboardOutlined /> },
       {
-        label: 'Orders',
-        href: '/dashboard/orders',
-        icon: <ShoppingCartOutlined />,
-      },
-      { label: 'Menu', href: '/dashboard/menu', icon: <CoffeeOutlined /> },
-      {
-        label: 'Tables',
-        href: '/dashboard/tables',
-        icon: <MdOutlineTableBar />,
-      },
-      {
         label: 'Inventory',
         href: '/dashboard/inventory',
         icon: <MdOutlineInventory />,
@@ -43,6 +32,18 @@ const menuSections = [
         href: '/dashboard/inventory/suppliers',
         icon: <LuUsers />,
       },
+
+      {
+        label: 'Orders',
+        href: '/dashboard/orders',
+        icon: <ShoppingCartOutlined />,
+      },
+      {
+        label: 'Tables',
+        href: '/dashboard/tables',
+        icon: <MdOutlineTableBar />,
+      },
+      { label: 'Menu', href: '/dashboard/menu', icon: <CoffeeOutlined /> },
     ],
   },
   {

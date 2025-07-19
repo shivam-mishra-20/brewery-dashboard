@@ -143,6 +143,26 @@ export const useMenu = () => {
     }
   }
 
+  const getMenuItemById = async (id: string): Promise<MenuItem | null> => {
+    try {
+      console.log('Fetching menu item with ID:', id)
+      const response = await fetch(`/api/menu/items/${id}`)
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('API error response:', errorData)
+        throw new Error(errorData.error || 'Failed to fetch menu item')
+      }
+
+      const data = await response.json()
+      console.log('Menu item data received:', data)
+      return data.menuItem
+    } catch (error) {
+      console.error('Error in getMenuItemById:', error)
+      throw error
+    }
+  }
+
   // Load menu items on mount
   useEffect(() => {
     loadMenuItems()
@@ -166,5 +186,6 @@ export const useMenu = () => {
     updateMenuItem: updateExistingMenuItem,
     deleteMenuItem: removeMenuItem,
     toggleAvailability,
+    getMenuItemById,
   }
 }

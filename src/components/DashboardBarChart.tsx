@@ -46,7 +46,7 @@ const DashboardBarChart: React.FC<DashboardBarChartProps> = ({ data }) => (
         Weekly Sales Analytics
       </h1>
       <div className="w-full h-full flex items-center justify-center">
-        <ResponsiveContainer width="70%" height="100%">
+        <ResponsiveContainer width="85%" height="100%">
           <BarChart data={data} barSize={48}>
             <defs>
               <pattern
