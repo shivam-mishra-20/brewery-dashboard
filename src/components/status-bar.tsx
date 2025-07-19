@@ -10,7 +10,7 @@ function decodeTableData(tabledata: string) {
     const bytes = CryptoJS.AES.decrypt(decoded, JWT_SECRET)
     const decrypted = bytes.toString(CryptoJS.enc.Utf8)
     return JSON.parse(decrypted)
-  } catch (err) {
+  } catch {
     return null
   }
 }

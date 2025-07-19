@@ -9,9 +9,10 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiCoffee,
-  FiImage,
+  FiMinus,
+  FiPlus,
+  FiShoppingBag,
 } from 'react-icons/fi'
-import { useOrder } from '@/hooks/useOrder'
 
 interface MenuItem {
   id: string
@@ -43,16 +44,12 @@ interface MenuItem {
 
 export default function ProductDetailPage() {
   // Cart and order state
+  // Cart state (local, not shown in UI)
   const [cart, setCart] = useState<any[]>([])
-  const [showCart, setShowCart] = useState(false)
-  const [placingOrder, setPlacingOrder] = useState(false)
-  const [orderFeedback, setOrderFeedback] = useState<string | null>(null)
-  const [orderStatus, setOrderStatus] = useState<string | null>(null)
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([])
   const [quantity, setQuantity] = useState(1)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { placeOrder } = useOrder()
 
   // Add to cart logic
   const addToCart = (item: any) => {
@@ -69,14 +66,7 @@ export default function ProductDetailPage() {
       }
       return [...prev, item]
     })
-    setShowCart(true)
-    setOrderFeedback('Added to cart!')
-    setTimeout(() => setOrderFeedback(null), 1500)
   }
-  const removeFromCart = (id: string) => {
-    setCart((prev) => prev.filter((ci) => ci.id !== id))
-  }
-  const clearCart = () => setCart([])
   const [item, setItem] = useState<MenuItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -95,6 +85,40 @@ export default function ProductDetailPage() {
   const [videoMuted, setVideoMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  const tabledata = searchParams.get('tabledata') || ''
+
+  // Check for tabledata parameter
+  useEffect(() => {
+    // If tabledata exists and we don't have table info in session storage
+    if (tabledata && !sessionStorage.getItem('tableInfo')) {
+      // Import the table utilities dynamically
+      import('@/lib/table').then(({ getTableDataFromUrl }) => {
+        try {
+          const tableData = getTableDataFromUrl(window.location.href)
+          if (tableData) {
+            // Store the table data in session storage for use across the app
+            sessionStorage.setItem('tableInfo', JSON.stringify(tableData))
+          } else {
+            // Store the raw encrypted data for verification
+            sessionStorage.setItem('pendingTableData', tabledata)
+            // Redirect to the verification page
+            router.push(
+              `/qr-verification?tabledata=${encodeURIComponent(tabledata)}`,
+            )
+          }
+        } catch (error) {
+          console.error('Error processing table data:', error)
+          // Store the raw encrypted data for verification
+          sessionStorage.setItem('pendingTableData', tabledata)
+          // Redirect to the verification page
+          router.push(
+            `/qr-verification?tabledata=${encodeURIComponent(tabledata)}`,
+          )
+        }
+      })
+    }
+  }, [tabledata, router])
+
   // Get id from Next.js dynamic route param
   const id =
     typeof window === 'undefined'
@@ -104,7 +128,6 @@ export default function ProductDetailPage() {
   // But for SSR/Next.js, use the segment from the params if available
   // We'll use searchParams.get('id') as fallback, but Next.js should pass params
   // If you want to use params, you can accept them as a prop
-  const tabledata = searchParams.get('tabledata') || ''
 
   // Handle add-on selection
   const handleAddOnToggle = (name: string) => {
@@ -124,41 +147,9 @@ export default function ProductDetailPage() {
       addOns: item.addOns?.filter((a) => selectedAddOns.includes(a.name)) || [],
       image: item.imageURLs?.[0] || item.imageURL || '',
     })
-    setShowCart(true)
-    setOrderFeedback('Added to cart!')
-    setTimeout(() => setOrderFeedback(null), 1500)
   }
 
-  // Place order logic (only from cart UI)
-  const handlePlaceOrder = async () => {
-    setPlacingOrder(true)
-    try {
-      const orderData = {
-        items: cart.map((cartItem) => ({
-          menuItemId: cartItem.id,
-          quantity: cartItem.quantity,
-          selectedAddOns:
-            cartItem.addOns?.map((a: any) => ({
-              name: a.name,
-              price: a.price,
-            })) || [],
-        })),
-        tabledata,
-        customerName: 'Guest',
-        tableId: tabledata,
-      }
-      await placeOrder(orderData)
-      setOrderFeedback('Order placed successfully!')
-      setOrderStatus('Order placed successfully!')
-      clearCart()
-    } catch {
-      setOrderFeedback('Failed to place order.')
-      setOrderStatus('Failed to place order.')
-    } finally {
-      setPlacingOrder(false)
-      setTimeout(() => setOrderFeedback(null), 2000)
-    }
-  }
+  // Place order logic removed (cart modal not shown)
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX)
   }
@@ -298,49 +289,46 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-amber-50 to-white relative pb-24">
-      {' '}
-      {/* Add bottom padding for navbar */}
-      {/* App-like header with back button */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg shadow-md">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 relative pb-24">
+      {/* Modern app-like header with back button */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl shadow-sm">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <button
-            className="p-2 rounded-full bg-white shadow-md hover:bg-amber-50 transition-colors"
+            className="p-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-colors flex items-center justify-center"
             onClick={() =>
               router.push(`/menu?tabledata=${encodeURIComponent(tabledata)}`)
             }
           >
-            <FiArrowLeft className="h-6 w-6 text-amber-700" />
+            <FiArrowLeft className="h-5 w-5 text-gray-800" />
           </button>
 
-          <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-800 to-amber-600">
+          <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary drop-shadow-sm">
             {item.name}
           </h1>
 
-          <div className="p-2 rounded-full bg-white shadow-md">
-            <FiCoffee className="h-6 w-6 text-amber-700" />
+          <div className="relative">
+            <button className="p-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-colors flex items-center justify-center">
+              <FiShoppingBag className="h-5 w-5 text-gray-800" />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                  {cart.reduce((total, item) => total + item.quantity, 0)}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </header>
-      {/* Immersive Image Carousel Header */}
+      {/* Modern Immersive Image Carousel Header */}
       <div
-        className="w-full flex justify-center items-center mt-28"
+        className="w-full flex justify-center items-center mt-24"
         style={{ zIndex: 10, position: 'relative' }}
         ref={carouselRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="relative flex flex-col items-center justify-center">
-          <div
-            className="relative bg-white rounded-3xl shadow-2xl p-8 flex items-center justify-center border border-amber-100"
-            style={{
-              width: '350px',
-              height: '350px',
-              boxShadow:
-                '0 12px 32px rgba(255,193,7,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-            }}
-          >
+        <div className="relative flex flex-col items-center justify-center w-full max-w-2xl mx-auto px-4">
+          <div className="relative bg-white rounded-3xl shadow-xl p-3 flex items-center justify-center border border-primary/10 w-full aspect-square max-w-md mx-auto overflow-hidden">
             <AnimatePresence initial={false}>
               {imageItems.length > 0 && (
                 <motion.div
@@ -359,13 +347,16 @@ export default function ProductDetailPage() {
                       src={imageItems[currentImageIndex]}
                       alt={`${item.name} - image ${currentImageIndex + 1}`}
                       fill
-                      className={`object-cover rounded-2xl transition-transform duration-300 border-2 border-amber-100 shadow-lg ${isZoomed ? 'scale-110' : 'scale-100'}`}
+                      className={`object-cover rounded-2xl transition-transform duration-300 ${isZoomed ? 'scale-110' : 'scale-100'}`}
                       priority={currentImageIndex === 0}
-                      style={{
-                        borderRadius: '1.5rem',
-                        boxShadow: '0 8px 24px rgba(255,193,7,0.18)',
-                      }}
                     />
+
+                    {/* Image number indicator */}
+                    {imageItems.length > 1 && (
+                      <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-medium">
+                        {currentImageIndex + 1}/{imageItems.length}
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 rounded-2xl"></div>
                   </div>
                 </motion.div>
@@ -377,17 +368,17 @@ export default function ProductDetailPage() {
               <>
                 <button
                   onClick={handlePrevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-amber-100 text-amber-700 p-3 rounded-full shadow-lg border border-amber-200 z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-primary/80 text-gray-800 hover:text-white p-2 rounded-full shadow-md backdrop-blur-sm border border-white/30 z-10 transition-all"
                   aria-label="Previous image"
                 >
-                  <FiChevronLeft className="w-7 h-7" />
+                  <FiChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={handleNextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-amber-100 text-amber-700 p-3 rounded-full shadow-lg border border-amber-200 z-10"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-primary/80 text-gray-800 hover:text-white p-2 rounded-full shadow-md backdrop-blur-sm border border-white/30 z-10 transition-all"
                   aria-label="Next image"
                 >
-                  <FiChevronRight className="w-7 h-7" />
+                  <FiChevronRight className="w-6 h-6" />
                 </button>
               </>
             )}
@@ -395,22 +386,16 @@ export default function ProductDetailPage() {
 
           {/* Image counter and dots below carousel */}
           <div className="flex flex-col items-center mt-6">
-            <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-md rounded-full px-5 py-2 text-amber-700 text-base shadow-lg border border-amber-100">
-              <FiImage className="mr-1 text-amber-400" />
-              <span>
-                {currentImageIndex + 1} / {imageItems.length}
-              </span>
-            </div>
             {imageItems.length > 1 && (
-              <div className="flex justify-center mt-3 gap-3">
+              <div className="flex justify-center mt-3 gap-2">
                 {imageItems.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCurrentImageIndex(idx)}
-                    className={`w-4 h-4 rounded-full border-2 transition-all ${
+                    className={`h-2 rounded-full transition-all ${
                       currentImageIndex === idx
-                        ? ' scale-110 shadow-lg'
-                        : 'bg-white border-amber-200'
+                        ? 'bg-primary w-6'
+                        : 'bg-gray-300 w-2'
                     }`}
                     aria-label={`Go to image ${idx + 1}`}
                   />
@@ -565,74 +550,84 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Category and availability indicators with improved styling */}
-        <div className="flex flex-wrap items-center gap-2 mb-4 product-category-row w-full justify-center">
-          <span className="bg-gradient-to-r from-amber-600 to-amber-500 shadow-white/[0.5] shadow-inner text-white text-sm px-4 py-1.5 rounded-full font-medium  border-amber-500/[0.1] border flex items-center gap-1">
-            <FiCoffee className="mr-1" />
-            {item.category}
-          </span>
-          {item.available ? (
-            <span className="bg-green-50 text-green-700 border border-green-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
-              Available
-            </span>
-          ) : (
-            <span className="bg-red-50 text-red-600 border border-red-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
-              <span className="w-2 h-2 bg-red-500 rounded-full mr-1.5 animate-pulse"></span>
-              Unavailable
-            </span>
-          )}
+        {/* Item title and price */}
+        <div className="w-full max-w-xl mx-auto px-4 mt-4">
+          <h2 className="text-2xl font-bold text-gray-800">{item.name}</h2>
+
+          <div className="flex items-center justify-between mt-2 mb-4">
+            <div className="flex items-center gap-2">
+              {/* Category badge */}
+              <span className="bg-gradient-to-r from-primary to-secondary shadow-white/[0.5] shadow-inner text-white text-sm px-4 py-1.5 rounded-full font-medium border-primary/10 border flex items-center gap-1">
+                <FiCoffee className="mr-1" />
+                {item.category}
+              </span>
+
+              {/* Availability indicator */}
+              {item.available ? (
+                <span className="bg-green-50 text-green-700 border border-green-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                  Available
+                </span>
+              ) : (
+                <span className="bg-red-50 text-red-600 border border-red-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-1.5 animate-pulse"></span>
+                  Unavailable
+                </span>
+              )}
+            </div>
+
+            {/* Price tag */}
+            <div className="font-bold text-white px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-secondary shadow-white/[0.5] shadow-inner border border-primary/[0.1] text-lg">
+              ₹{(item.price / 100).toFixed(2)}
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-gray-600 leading-relaxed mb-6">
+            {item.description}
+          </p>
         </div>
 
-        {/* Premium add to order button with quantity and feedback */}
-        <div className="mt-6 relative w-full flex flex-col items-center justify-center product-add-order-section">
-          {/* Decorative element */}
-          <div className="absolute -left-2 -bottom-2 w-16 h-16 bg-yellow-400/20 rounded-full blur-xl"></div>
-          <div className="absolute -right-2 -bottom-2 w-20 h-20 bg-amber-500/20 rounded-full blur-xl"></div>
+        {/* Modern quantity selector and add to cart */}
+        <div className="mt-4 relative w-full flex flex-col items-center justify-center product-add-order-section">
+          {/* Decorative elements */}
+          <div className="absolute -left-4 -bottom-4 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-secondary/10 rounded-full blur-xl"></div>
 
-          <div className="w-full flex flex-col items-center product-quantity-row">
-            <div className="flex items-center gap-4 mb-2 w-full justify-start">
-              <div className="flex items-center gap-2 w-1/2 justify-start">
-                <span className="font-semibold text-amber-700">Quantity:</span>
+          <div className="w-full max-w-xl mx-auto px-4 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <span className="font-semibold text-gray-800">Quantity</span>
+              <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-200">
                 <button
-                  className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-bold text-lg"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-700 hover:bg-gray-200 transition-colors"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={quantity <= 1}
                 >
-                  -
+                  <FiMinus size={18} />
                 </button>
-                <span className="font-bold text-lg px-2">{quantity}</span>
+                <span className="font-bold text-lg px-3 text-gray-900">
+                  {quantity}
+                </span>
                 <button
-                  className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-bold text-lg"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-700 hover:bg-gray-200 transition-colors"
                   onClick={() => setQuantity((q) => q + 1)}
                 >
-                  +
+                  <FiPlus size={18} />
                 </button>
               </div>
             </div>
-
-            {orderFeedback && (
-              <div className="mt-2 text-center text-amber-700 font-bold animate-fadein-card">
-                {orderFeedback}
-              </div>
-            )}
           </div>
         </div>
-        {/* Enhanced description with quote styling */}
-        <div className="relative mb-8 overflow-hidden product-description-row w-full flex justify-center">
-          <p className="text-lg text-gray-700 italic pt-6 pb-4 rounded-xl shadow-sm product-description w-full text-center">
-            &quot;{item.description}&quot;
-          </p>
-        </div>
+        {/* We'll remove this duplicate description since it's already shown above */}
 
         {/* Ingredients with enhanced visual styling */}
         {item.ingredients && item.ingredients.length > 0 && (
           <div className="mb-8 w-full product-ingredients-row flex flex-col items-center">
             <div className="flex items-center justify-center w-full my-4">
-              <h3 className="mx-4 text-xl font-bold text-amber-800 flex justify-center items-center">
+              <h3 className="mx-4 text-xl font-bold text-gray-800 flex justify-center items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
+                  className="h-5 w-5 mr-2 text-secondary"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -646,21 +641,21 @@ export default function ProductDetailPage() {
                 </svg>
                 Ingredients
               </h3>
-              <div className="h-px flex-grow bg-amber-200"></div>
+              <div className="h-px flex-grow bg-gradient-to-r from-primary/30 to-secondary/30"></div>
             </div>
             <div className="grid w-full items-start grid-cols-1 sm:grid-cols-2 gap-3">
               {item.ingredients.map((ingredient, idx) => (
                 <div
                   key={idx}
-                  className={`flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 shadow-md hover:shadow-lg transition-all duration-300 animate-fadein-card`}
+                  className={`flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 border border-gray-200 shadow-sm hover:shadow transition-all duration-300 animate-fadein-card`}
                 >
                   <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-2 bg-amber-400"></div>
+                    <div className="w-3 h-3 rounded-full mr-2 bg-secondary"></div>
                     <span className="font-medium text-gray-800 text-sm md:text-base">
                       {ingredient.inventoryItemName}
                     </span>
                   </div>
-                  <span className="ml-2 text-sm text-gray-600 font-semibold bg-white px-2 py-1 rounded border border-gray-200">
+                  <span className="ml-2 text-sm text-gray-600 font-semibold bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
                     {ingredient.quantity} {ingredient.unit}
                   </span>
                 </div>
@@ -672,10 +667,10 @@ export default function ProductDetailPage() {
         {item.addOns && item.addOns.length > 0 && (
           <div className="mb-8 w-full product-addons-row flex flex-col items-center">
             <div className="flex items-center justify-center w-full my-4">
-              <h3 className="mx-4 text-xl font-bold text-amber-800 flex justify-center items-center">
+              <h3 className="mx-4 text-xl font-bold text-gray-800 flex justify-center items-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
+                  className="h-5 w-5 mr-2 text-secondary"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -689,7 +684,7 @@ export default function ProductDetailPage() {
                 </svg>
                 Customizations
               </h3>
-              <div className="h-px flex-grow bg-amber-200"></div>
+              <div className="h-px flex-grow bg-gradient-to-r from-primary/30 to-secondary/30"></div>
             </div>
 
             <div className="grid grid-cols-1 w-full sm:grid-cols-2 gap-3">
@@ -722,7 +717,7 @@ export default function ProductDetailPage() {
                         addon.available
                           ? selectedAddOns.includes(addon.name)
                             ? 'bg-amber-600 text-white border-amber-700 border-2'
-                            : 'bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-white'
+                            : 'bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.4] border border-primary/[0.1] hover:from-amber-600 hover:to-amber-500 text-white'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                       disabled={!addon.available}
@@ -772,117 +767,7 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* Floating Cart UI */}
-        {showCart && (
-          <div
-            className="fixed bottom-24 right-0 z-[60] w-full max-w-md bg-white/95 shadow-2xl rounded-t-2xl border-t border-amber-200 p-6 animate-fadein-card product-cart-ui"
-            style={{ marginRight: '1rem' }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-amber-800">Your Cart</h2>
-              <button
-                className="text-amber-500 hover:text-amber-700 font-bold"
-                onClick={() => setShowCart(false)}
-                aria-label="Close cart"
-              >
-                ✕
-              </button>
-            </div>
-            {cart.length === 0 ? (
-              <div className="text-gray-500">Cart is empty.</div>
-            ) : (
-              <div className="space-y-4">
-                {cart.map((cartItem, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between bg-amber-50 rounded-xl p-3 shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={cartItem.image}
-                        alt={cartItem.name}
-                        width={48}
-                        height={48}
-                        className="rounded-lg border border-amber-200"
-                      />
-                      <div>
-                        <div className="font-bold text-amber-900">
-                          {cartItem.name}
-                        </div>
-                        <div className="text-sm text-gray-700">
-                          Qty: {cartItem.quantity}
-                        </div>
-                        {cartItem.addOns && cartItem.addOns.length > 0 && (
-                          <div className="text-xs text-amber-700">
-                            Add-ons:{' '}
-                            {cartItem.addOns.map((a: any) => a.name).join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="font-bold text-amber-700">
-                        ₹
-                        {(
-                          cartItem.price * cartItem.quantity +
-                          (cartItem.addOns?.reduce(
-                            (sum: number, a: any) => sum + a.price,
-                            0,
-                          ) || 0) *
-                            cartItem.quantity
-                        ).toFixed(2)}
-                      </span>
-                      <button
-                        className="text-xs text-red-500 hover:text-red-700 mt-1"
-                        onClick={() => removeFromCart(cartItem.id)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between mt-4">
-                  <span className="font-bold text-lg text-amber-900">
-                    Total:
-                  </span>
-                  <span className="font-extrabold text-xl text-amber-700">
-                    ₹
-                    {cart
-                      .reduce(
-                        (total, ci) =>
-                          total +
-                          (ci.price * ci.quantity +
-                            (ci.addOns?.reduce(
-                              (sum: number, a: any) => sum + a.price,
-                              0,
-                            ) || 0) *
-                              ci.quantity),
-                        0,
-                      )
-                      .toFixed(2)}
-                  </span>
-                </div>
-                <button
-                  className="w-full py-3 mt-4 rounded-xl font-bold text-lg bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-lg hover:from-amber-700 hover:to-yellow-600 transition-all product-cart-place-order-btn"
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                  onClick={handlePlaceOrder}
-                  disabled={placingOrder}
-                >
-                  {placingOrder ? 'Placing Order...' : 'Place Order'}
-                </button>
-                {orderStatus && (
-                  <div className="mt-2 text-center text-green-700 font-bold animate-fadein-card">
-                    {orderStatus}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Cart modal removed as per user request. All related logic and state removed for error-free code. */}
       </div>
       <div
         className="flex w-full pb-5 flex-row justify-center items-center product-add-to-order-row"
@@ -951,22 +836,7 @@ export default function ProductDetailPage() {
           </div>
         </button>
       </div>
-      {/* Enhanced background image when no video is available */}
-      {!item.videoUrl && item.imageURLs && item.imageURLs.length > 0 && (
-        <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-          <Image
-            src={item.imageURLs[currentImageIndex]}
-            alt={item.name}
-            fill
-            className="object-cover blur-md brightness-[0.65] scale-110 animate-slow-zoom"
-          />
-          <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/40 to-black/80" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-          <div className="absolute inset-0 backdrop-blur-[1.5px]" />
-          {/* Ambient particles effect */}
-          <div className="absolute inset-0 bg-noise opacity-[0.03]"></div>
-        </div>
-      )}
+
       {/* Enhanced decorative elements */}
       <div className="absolute top-8 right-8 z-30 animate-float">
         <FiCoffee className="text-amber-300 text-5xl md:text-6xl opacity-40" />

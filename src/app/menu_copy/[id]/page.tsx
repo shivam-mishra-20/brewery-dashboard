@@ -722,7 +722,7 @@ export default function ProductDetailPage() {
                         addon.available
                           ? selectedAddOns.includes(addon.name)
                             ? 'bg-amber-600 text-white border-amber-700 border-2'
-                            : 'bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-white'
+                            : 'bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.4] border border-primary/[0.1] hover:from-amber-600 hover:to-amber-500 text-white'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                       disabled={!addon.available}
@@ -863,7 +863,7 @@ export default function ProductDetailPage() {
                   </span>
                 </div>
                 <button
-                  className="w-full py-3 mt-4 rounded-xl font-bold text-lg bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-lg hover:from-amber-700 hover:to-yellow-600 transition-all product-cart-place-order-btn"
+                  className="w-full py-3 mt-4 rounded-xl font-bold text-lg bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.4] border border-primary/[0.1] text-white shadow-lg hover:from-amber-700 hover:to-yellow-600 transition-all product-cart-place-order-btn"
                   style={{
                     display: 'flex',
                     justifyContent: 'center',

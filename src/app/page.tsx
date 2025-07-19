@@ -1,8 +1,22 @@
 'use client'
 
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 import { FiCoffee, FiTruck } from 'react-icons/fi'
 
 export default function Home() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const tabledata = searchParams.get('tabledata')
+
+  useEffect(() => {
+    // If there's tabledata in the URL, redirect to our menu page
+    if (tabledata) {
+      // We'll let the menu page handle decryption and verification
+      router.push(`/menu?tabledata=${encodeURIComponent(tabledata)}`)
+    }
+  }, [router, tabledata])
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-white px-4">
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-10 flex flex-col items-center max-w-lg w-full">

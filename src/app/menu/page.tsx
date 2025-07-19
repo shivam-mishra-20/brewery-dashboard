@@ -1,9 +1,17 @@
 'use client'
 
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { FiCoffee, FiTruck } from 'react-icons/fi'
+import {
+  FiCoffee,
+  FiMinus,
+  FiPlus,
+  FiShoppingBag,
+  FiTruck,
+  FiX,
+} from 'react-icons/fi'
 import { useCart } from '@/context/CartContext'
 import { getAllMenuItems, getMenuItemsByCategory } from '@/services/menuService'
 
@@ -33,7 +41,50 @@ function MenuContent() {
   const [modalItem, setModalItem] = useState<MenuItem | null>(null)
   const [modalQuantity, setModalQuantity] = useState(1)
   const [modalAddOns, setModalAddOns] = useState<string[]>([])
-  const { addToCart } = useCart()
+  const { cart, addToCart } = useCart()
+  const [tableInfo, setTableInfo] = useState<{
+    tableId: string
+    tableName: string
+    tableNumber: string
+  } | null>(null)
+  const router = useRouter()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categories, setCategories] = useState<string[]>(['all'])
+
+  // Process table data from URL
+  useEffect(() => {
+    if (tableDataParam) {
+      // Import dynamically to avoid server-side issues
+      import('@/lib/table').then(({ getTableDataFromUrl }) => {
+        try {
+          const tableData = getTableDataFromUrl(window.location.href)
+          if (tableData) {
+            setTableInfo(tableData)
+
+            // Store in session storage for use across the app
+            sessionStorage.setItem('tableInfo', JSON.stringify(tableData))
+          } else {
+            // If decryption fails, redirect to verification page
+            router.push(
+              `/qr-verification?tabledata=${encodeURIComponent(tableDataParam)}`,
+            )
+          }
+        } catch (error) {
+          console.error('Error processing table data:', error)
+          // Redirect to verification page on error
+          router.push(
+            `/qr-verification?tabledata=${encodeURIComponent(tableDataParam)}`,
+          )
+        }
+      })
+    } else {
+      // Check if we have table info in session storage
+      const storedTableInfo = sessionStorage.getItem('tableInfo')
+      if (storedTableInfo) {
+        setTableInfo(JSON.parse(storedTableInfo))
+      }
+    }
+  }, [tableDataParam, router])
 
   useEffect(() => {
     async function fetchMenu() {
@@ -46,6 +97,13 @@ function MenuContent() {
           items = await getMenuItemsByCategory(activeCategory)
         }
         setMenuItems(items)
+
+        // Extract unique categories from menu items
+        const uniqueCategories = [
+          'all',
+          ...new Set(items.map((item) => item.category)),
+        ]
+        setCategories(uniqueCategories)
       } catch {
         setMenuItems([])
       } finally {
@@ -55,8 +113,8 @@ function MenuContent() {
     fetchMenu()
   }, [activeCategory])
 
-  // If no tabledata, show intro page
-  if (!tableDataParam) {
+  // If no tabledata and no stored table info, show intro page
+  if (!tableDataParam && !tableInfo) {
     return <IntroPage />
   }
 
@@ -65,6 +123,7 @@ function MenuContent() {
       ? menuItems
       : menuItems.filter((item) => item.category === activeCategory)
 
+  // Apply search filter if needed
   const openModal = (item: MenuItem) => {
     setModalItem(item)
     setModalQuantity(1)
@@ -93,164 +152,274 @@ function MenuContent() {
     closeModal()
   }
 
+  // Display the menu with table info in header
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 relative overflow-hidden">
-      {/* Beautiful BottomNavBar restored */}
-      <div className="sticky top-0 z-40">
-        {/* Import and render your BottomNavBar component here. Adjust import if needed. */}
+    <div>
+      <div className=" bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50">
+        {/* Header with table info */}
+        <div className="sticky top-0 z-40">
+          <header className="bg-white/80 backdrop-blur-lg shadow-md px-4 py-4">
+            <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 px-0 sm:px-2">
+              {/* Brand and table info */}
+              <div className="flex items-center w-full sm:w-auto justify-between sm:justify-start">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary/80 to-secondary/80 rounded-full flex items-center justify-center shadow-md">
+                  <FiCoffee className="text-secondary text-2xl" />
+                </div>
+                <div className="ml-3 flex flex-col">
+                  <h1 className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                    Work Brew Café
+                  </h1>
+                  {tableInfo && (
+                    <p className="text-xs sm:text-sm text-secondary font-medium mt-0.5">
+                      Table {tableInfo.tableNumber} • {tableInfo.tableName}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Search and cart */}
+              <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end mt-4 sm:mt-0 gap-2 sm:gap-4">
+                {/* Search input */}
+                <div className="relative flex-1 max-w-xs">
+                  <input
+                    type="text"
+                    placeholder="Search menu..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-3 pr-8 py-2 rounded-full text-sm border border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white/90 shadow-sm transition-all"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      aria-label="Clear search"
+                    >
+                      <FiX size={16} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Cart icon */}
+                <Link
+                  href={`/cart?tabledata=${tableDataParam || ''}`}
+                  className="ml-2"
+                >
+                  <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-full text-white relative hover:shadow-lg transition-all duration-200">
+                    <FiShoppingBag className="text-lg" />
+                    {/* Cart count indicator with actual cart count */}
+                    {cart.length > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse border-2 border-white">
+                        {cart.reduce((total, item) => total + item.quantity, 0)}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </header>
+        </div>
         {/* Example: */}
         {/* <BottomNavBar tabledata={tableDataParam} /> */}
         {/* ...existing header and category filter code... */}
       </div>
-      <main className="container mx-auto px-4 py-8 relative z-10">
-        {/* ...existing menu header... */}
-        {/* Enhanced menu items grid with premium styling */}
+      <main className="container mx-auto px-4 py-4 relative z-10">
+        {/* Categories scroll bar */}
+        <div className="mb-6 overflow-x-auto pb-3 hide-scrollbar">
+          <div className="flex gap-3 min-w-max">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-4 py-2.5 rounded-full whitespace-nowrap transition-all duration-300 ${
+                  activeCategory === category
+                    ? 'bg-primary text-white shadow-lg font-medium'
+                    : 'bg-amber-100 text-amber-800 hover:bg-amber-200 font-medium'
+                }`}
+              >
+                {category === 'all'
+                  ? 'All Items'
+                  : category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Menu items grid */}
         {loadingMenu ? (
           <div className="flex flex-col items-center justify-center py-20">
-            {/* ...existing loading spinner... */}
+            <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-amber-800 font-medium">Loading menu...</p>
           </div>
         ) : filteredItems.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredItems.map((item, idx) => {
-              // Get image: prefer imageURLs array, fallback to imageURL, then image, then placeholder
-              const imageSrc =
-                item.imageURLs?.[0] ||
-                item.imageURL ||
-                item.image ||
-                '/placeholder-food.jpg'
-              return (
-                <div
-                  key={item.id}
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                  className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-amber-100 hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer animate-fadein-card group"
-                  onClick={() => {
-                    // Navigate to /menu/[id]?tabledata=... on click
-                    window.location.href = `/menu/${item.id}${tableDataParam ? `?tabledata=${encodeURIComponent(tableDataParam)}` : ''}`
-                  }}
-                >
-                  {/* Image display */}
-                  <div className="w-full h-40 relative mb-2">
-                    <Image
-                      src={imageSrc}
-                      alt={item.name}
-                      fill
-                      className="object-cover rounded-t-2xl"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="p-5 relative">
-                    {/* Decorative element */}
-                    <div className="absolute -right-2 -bottom-2 w-12 h-12 bg-amber-400/10 rounded-full blur-xl"></div>
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-lg font-bold text-gray-800 group-hover:text-amber-700 transition-colors">
-                        {item.name}
-                      </h3>
-                      <span className="font-bold text-white px-3 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 shadow-sm">
-                        ₹{(item.price / 100).toFixed(2)}
-                      </span>
-                    </div>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
-                      {item.description}
-                    </p>
-                    {/* Premium add to order button */}
-                    <button
-                      className={`w-full font-medium py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                        item.available
-                          ? 'bg-gradient-to-r from-amber-100 to-yellow-100 hover:from-amber-200 hover:to-yellow-200 text-amber-800 border border-amber-200 shadow-sm hover:shadow'
-                          : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (item.available) {
-                          openModal(item)
-                        }
-                      }}
-                      disabled={!item.available}
-                    >
-                      {item.available ? (
-                        <>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                            />
-                          </svg>
-                          Add to Order
-                        </>
-                      ) : (
-                        <>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                          Unavailable
-                        </>
-                      )}
-                    </button>
-                    {/* Enhanced add-ons indicator */}
-                    {item.addOns && item.addOns.length > 0 && (
-                      <div className="mt-3 text-xs text-gray-500 flex items-center gap-1.5">
-                        <span className="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
-                        {item.addOns.length} Customizations available
-                      </div>
-                    )}
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Apply search filter */}
+            {filteredItems
+              .filter((item) =>
+                searchTerm
+                  ? item.name
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase()) ||
+                    item.description
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
+                  : true,
               )
-            })}
+              .map((item, idx) => {
+                // Get image: prefer imageURLs array, fallback to imageURL, then image, then placeholder
+                const imageSrc =
+                  item.imageURLs?.[0] ||
+                  item.imageURL ||
+                  item.image ||
+                  '/placeholder-food.jpg'
+
+                // Calculate if item is in cart
+                const itemInCart = cart.find(
+                  (cartItem) => cartItem.id === item.id,
+                )
+
+                return (
+                  <div
+                    key={item.id}
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden border border-amber-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer animate-fade-in group"
+                  >
+                    {/* Image display with category tag */}
+                    <div className="w-full h-48 relative">
+                      <Image
+                        src={imageSrc}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        priority={idx < 6} // Prioritize loading the first 6 images
+                      />
+                      <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
+                        {item.category.charAt(0).toUpperCase() +
+                          item.category.slice(1)}
+                      </div>
+                      {itemInCart && (
+                        <div className="absolute top-3 right-3 bg-amber-500 text-white text-xs px-3 py-1 rounded-full font-medium animate-pulse">
+                          In Cart: {itemInCart.quantity}
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className="p-5 relative"
+                      onClick={() => {
+                        // Navigate to details page on click of item info
+                        window.location.href = `/menu/${item.id}${tableDataParam ? `?tabledata=${encodeURIComponent(tableDataParam)}` : ''}`
+                      }}
+                    >
+                      {/* Decorative elements */}
+                      <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-amber-400/10 rounded-full blur-xl"></div>
+                      <div className="absolute -left-4 -top-4 w-8 h-8 bg-amber-400/10 rounded-full blur-lg"></div>
+
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-lg font-bold text-gray-800 group-hover:text-amber-700 transition-colors leading-tight">
+                          {item.name}
+                        </h3>
+                        <span className="font-bold text-white px-3 py-1 rounded-xl bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.5] border border-primary/[0.1] flex-shrink-0 ml-2">
+                          ₹{(item.price / 100).toFixed(2)}
+                        </span>
+                      </div>
+
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
+
+                      <div className="flex gap-2">
+                        {/* View details button */}
+                        <button
+                          className="flex-1 py-2.5 rounded-xl transition-all duration-300 bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 font-medium"
+                          onClick={() => {
+                            window.location.href = `/menu/${item.id}${tableDataParam ? `?tabledata=${encodeURIComponent(tableDataParam)}` : ''}`
+                          }}
+                        >
+                          Details
+                        </button>
+
+                        {/* Add to cart button */}
+                        <button
+                          className={`flex-1 py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
+                            item.available
+                              ? 'bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.8] border border-primary/[0.1] hover:from-amber-600 hover:to-amber-500 text-white '
+                              : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (item.available) {
+                              openModal(item)
+                            }
+                          }}
+                          disabled={!item.available}
+                        >
+                          {item.available ? (
+                            <>
+                              <FiPlus size={18} />
+                              Add
+                            </>
+                          ) : (
+                            <>Unavailable</>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Enhanced add-ons indicator */}
+                      {item.addOns && item.addOns.length > 0 && (
+                        <div className="mt-3 text-xs text-gray-500 flex items-center gap-1.5">
+                          <span className="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
+                          {item.addOns.length} Customization
+                          {item.addOns.length !== 1 ? 's' : ''} available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
           </div>
         ) : (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-10 text-center shadow-md border border-amber-100">
-            <div className="bg-amber-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 border border-amber-100">
-              <FiCoffee className="text-4xl text-amber-400" />
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-10 text-center shadow-md border border-amber-100 animate-fade-in">
+            <div className="bg-amber-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6 border border-amber-100 shadow-inner">
+              <FiCoffee className="text-5xl text-amber-400" />
             </div>
-            <h3 className="text-2xl font-semibold text-amber-800 mb-2">
-              No items found
+            <h3 className="text-2xl font-semibold text-amber-800 mb-3">
+              {searchTerm ? 'No matching items found' : 'No items available'}
             </h3>
-            <p className="text-gray-600">
-              No menu items are available in this category
+            <p className="text-gray-600 max-w-sm mx-auto">
+              {searchTerm
+                ? `We couldn't find any items matching "${searchTerm}". Try a different search term.`
+                : `No menu items are currently available in the ${activeCategory === 'all' ? 'menu' : activeCategory} category.`}
             </p>
-            <button
-              onClick={() => setActiveCategory('all')}
-              className="mt-4 px-6 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl border border-amber-200 transition-colors"
-            >
-              View all items
-            </button>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl border border-amber-600 transition-colors font-medium shadow-md"
+                >
+                  Clear Search
+                </button>
+              )}
+              {activeCategory !== 'all' && (
+                <button
+                  onClick={() => setActiveCategory('all')}
+                  className="px-6 py-3 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl border border-amber-200 transition-colors font-medium"
+                >
+                  View All Items
+                </button>
+              )}
+            </div>
           </div>
         )}
-        {/* Modal for quantity/add-ons selection */}
+        {/* Enhanced Modal for quantity/add-ons selection */}
         {showModal && modalItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
-              <button
-                className="absolute top-3 right-3 text-amber-500 hover:text-amber-700 font-bold text-xl"
-                onClick={closeModal}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-              <h2 className="text-2xl font-bold text-amber-900 mb-4 text-center">
-                Add to Cart
-              </h2>
-              <div className="flex flex-col items-center mb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-0 animate-fade-in">
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative overflow-hidden animate-slide-up"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal header with image background */}
+              <div className="relative h-40 w-full bg-gradient-to-b from-amber-800 to-amber-600">
                 <Image
                   src={
                     modalItem.imageURL ||
@@ -258,76 +427,155 @@ function MenuContent() {
                     '/placeholder-food.jpg'
                   }
                   alt={modalItem.name}
-                  width={80}
-                  height={80}
-                  className="rounded-xl border border-amber-200 mb-2"
+                  fill
+                  className="object-cover opacity-40"
                 />
-                <div className="font-bold text-lg text-amber-800 mb-1">
-                  {modalItem.name}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <div className="absolute bottom-4 left-6 right-6">
+                  <h2 className="text-2xl font-bold text-white mb-1">
+                    {modalItem.name}
+                  </h2>
+                  <p className="text-amber-100 font-medium line-clamp-1">
+                    {modalItem.description.substring(0, 80)}
+                  </p>
                 </div>
-                <div className="text-amber-700 font-semibold">
-                  ₹{modalItem.price.toFixed(2)}
-                </div>
+                <button
+                  className="absolute top-4 right-4 text-white hover:text-amber-200 rounded-full p-1 bg-black/30 hover:bg-black/50 transition-colors"
+                  onClick={closeModal}
+                  aria-label="Close"
+                >
+                  <FiX size={20} />
+                </button>
               </div>
-              <div className="mb-4">
-                <span className="font-semibold text-amber-700">Quantity:</span>
-                <div className="flex items-center gap-3 mt-2">
-                  <button
-                    className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-bold text-lg"
-                    onClick={() => setModalQuantity((q) => Math.max(1, q - 1))}
-                    disabled={modalQuantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span className="font-bold text-lg px-2">
-                    {modalQuantity}
+
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-5 bg-amber-50 rounded-lg p-3 border border-amber-100">
+                  <span className="font-bold text-amber-900">Price</span>
+                  <span className="font-bold text-lg text-amber-800">
+                    ₹{(modalItem.price / 100).toFixed(2)}
                   </span>
-                  <button
-                    className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-bold text-lg"
-                    onClick={() => setModalQuantity((q) => q + 1)}
-                  >
-                    +
-                  </button>
                 </div>
-              </div>
-              {modalItem.addOns && modalItem.addOns.length > 0 && (
-                <div className="mb-4">
-                  <span className="font-semibold text-amber-700">
-                    Customizations:
-                  </span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {modalItem.addOns.map((addon, idx) => (
+
+                {/* Quantity selector */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold text-amber-900">
+                      Quantity
+                    </span>
+                    <div className="flex items-center gap-1 bg-amber-50 p-1 rounded-lg border border-amber-100">
                       <button
-                        key={idx}
-                        className={`px-4 py-2 rounded-full font-medium border transition-all duration-200 ${
-                          modalAddOns.includes(addon.name)
-                            ? 'bg-amber-600 text-white border-amber-700'
-                            : 'bg-amber-100 text-amber-700 border-amber-200'
-                        }`}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-amber-700 hover:bg-amber-100 transition-colors"
                         onClick={() =>
-                          setModalAddOns((prev) =>
-                            prev.includes(addon.name)
-                              ? prev.filter((n) => n !== addon.name)
-                              : [...prev, addon.name],
-                          )
+                          setModalQuantity((q) => Math.max(1, q - 1))
                         }
+                        disabled={modalQuantity <= 1}
                       >
-                        {addon.name} (+₹{addon.price.toFixed(2)})
+                        <FiMinus size={18} />
                       </button>
-                    ))}
+                      <span className="font-bold text-lg px-3 text-amber-900">
+                        {modalQuantity}
+                      </span>
+                      <button
+                        className="w-8 h-8 flex items-center justify-center rounded-lg text-amber-700 hover:bg-amber-100 transition-colors"
+                        onClick={() => setModalQuantity((q) => q + 1)}
+                      >
+                        <FiPlus size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              )}
-              <button
-                className="w-full py-3 mt-2 rounded-xl font-bold text-lg bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-lg hover:from-amber-700 hover:to-yellow-600 transition-all"
-                onClick={handleAddToCart}
-              >
-                Add to Cart
-              </button>
+
+                {/* Customizations */}
+                {modalItem.addOns && modalItem.addOns.length > 0 && (
+                  <div className="mb-6">
+                    <span className="font-semibold text-amber-900 block mb-3">
+                      Customizations
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {modalItem.addOns.map((addon, idx) => (
+                        <button
+                          key={idx}
+                          className={`py-3 px-4 rounded-xl font-medium border transition-all duration-300 flex flex-col items-center ${
+                            modalAddOns.includes(addon.name)
+                              ? 'bg-amber-500 text-white border-amber-600 shadow-md'
+                              : 'bg-amber-50 text-amber-900 border-amber-100 hover:bg-amber-100'
+                          }`}
+                          onClick={() =>
+                            setModalAddOns((prev) =>
+                              prev.includes(addon.name)
+                                ? prev.filter((n) => n !== addon.name)
+                                : [...prev, addon.name],
+                            )
+                          }
+                        >
+                          <span className="text-sm">{addon.name}</span>
+                          <span
+                            className={`text-xs mt-1 ${modalAddOns.includes(addon.name) ? 'text-amber-100' : 'text-amber-600'}`}
+                          >
+                            +₹{(addon.price / 100).toFixed(2)}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Total calculation */}
+                <div className="bg-amber-50 p-4 rounded-xl mb-5 border border-amber-100">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-amber-700">Base price</span>
+                    <span className="font-medium text-amber-800">
+                      ₹{((modalItem.price / 100) * modalQuantity).toFixed(2)}
+                    </span>
+                  </div>
+
+                  {modalAddOns.length > 0 && (
+                    <div className="flex justify-between mb-2">
+                      <span className="text-amber-700">Add-ons</span>
+                      <span className="font-medium text-amber-800">
+                        ₹
+                        {(
+                          (modalItem.addOns || [])
+                            .filter((a) => modalAddOns.includes(a.name))
+                            .reduce(
+                              (sum, addon) => sum + addon.price / 100,
+                              0,
+                            ) * modalQuantity
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="border-t border-amber-200 my-2"></div>
+
+                  <div className="flex justify-between font-bold text-lg">
+                    <span className="text-amber-900">Total</span>
+                    <span className="text-amber-800">
+                      ₹
+                      {(
+                        (modalItem.price / 100) * modalQuantity +
+                        (modalItem.addOns || [])
+                          .filter((a) => modalAddOns.includes(a.name))
+                          .reduce((sum, addon) => sum + addon.price / 100, 0) *
+                          modalQuantity
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  className="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.4] border border-primary/[0.1] text-white shadow-lg hover:from-amber-700 hover:to-yellow-600 transition-all flex items-center justify-center gap-2"
+                  onClick={handleAddToCart}
+                >
+                  <FiShoppingBag />
+                  Add to Cart
+                </button>
+              </div>
             </div>
           </div>
         )}
       </main>
+
       {/* Decorative elements */}
       <div className="absolute top-10 right-10 z-0 animate-float-delay">
         <FiCoffee className="text-amber-300/30 text-5xl md:text-6xl" />
@@ -335,6 +583,7 @@ function MenuContent() {
       <div className="absolute bottom-10 left-10 z-0 animate-float">
         <FiCoffee className="text-amber-400/30 text-4xl md:text-5xl" />
       </div>
+
       {/* Add animations and styles */}
       <style jsx global>{`
         @keyframes fadein {
@@ -398,7 +647,7 @@ function IntroPage() {
         <p className="text-lg text-gray-700 mb-6 mt-3 text-center">
           Your favorite spot for coffee, comfort, and creativity.
         </p>
-        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-primary to-secondary border border-primary/[0.1] shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3 shadow-inner">
+        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-amber-500 to-amber-400 border border-amber-600/20 shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3">
           <FiTruck className="text-white text-2xl" />
           <span className="font-semibold text-white text-lg">
             Delivery &amp; Takeaway options are coming soon!

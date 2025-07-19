@@ -145,7 +145,7 @@ function MenuContent() {
                       <h3 className="text-lg font-bold text-gray-800 group-hover:text-amber-700 transition-colors">
                         {item.name}
                       </h3>
-                      <span className="font-bold text-white px-3 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 shadow-sm">
+                      <span className="font-bold text-white px-3 py-1 rounded-lg bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.4] border border-primary/[0.1]">
                         ₹{(item.price / 100).toFixed(2)}
                       </span>
                     </div>
@@ -319,7 +319,7 @@ function MenuContent() {
                 </div>
               )}
               <button
-                className="w-full py-3 mt-2 rounded-xl font-bold text-lg bg-gradient-to-r from-amber-600 to-yellow-500 text-white shadow-lg hover:from-amber-700 hover:to-yellow-600 transition-all"
+                className="w-full py-3 mt-2 rounded-xl font-bold text-lg bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.4] border border-primary/[0.1] text-white shadow-lg hover:from-amber-700 hover:to-yellow-600 transition-all"
                 onClick={handleAddToCart}
               >
                 Add to Cart

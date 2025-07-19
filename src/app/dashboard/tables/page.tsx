@@ -167,126 +167,180 @@ export default function TablesPage() {
         })
       } else {
         // Create new table with QR code
-        // Prepare table data for QR
-        const qrPayload = {
-          ...tableData,
-          timestamp: new Date().getTime(),
-        }
-        const encrypted = CryptoJS.AES.encrypt(
-          JSON.stringify(qrPayload),
-          QR_SECRET,
-        ).toString()
-        const qrString = encodeURIComponent(encrypted)
-        const qrLink = `${window.location.origin}/menu?tabledata=${qrString}`
-
         setLoading(true)
 
-        // Create a hidden QR code element with fancy styling
-        const qrElement = document.createElement('div')
-        qrElement.style.padding = '24px'
-        qrElement.style.background = '#ffffff'
-        qrElement.style.width = '400px'
-        qrElement.style.borderRadius = '16px'
-        qrElement.style.boxShadow = '0 4px 24px rgba(0, 0, 0, 0.1)'
-        qrElement.style.textAlign = 'center'
-        qrElement.style.fontFamily = 'Inter, sans-serif'
+        try {
+          // First create the table to get a valid ID
+          res = await fetch('/api/tables', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(tableData),
+          })
 
-        // Create header with cafe name
-        const header = document.createElement('div')
-        header.style.marginBottom = '12px'
-        header.innerHTML = `
+          if (!res.ok) {
+            const errorData = await res.json()
+            throw new Error(errorData.error || 'Failed to save table')
+          }
+
+          // Get the created table with its ID
+          const savedTableData = await res.json()
+          const tableId = savedTableData.table._id
+
+          if (!tableId) {
+            throw new Error('Failed to get table ID after creation')
+          }
+
+          // Now prepare QR code with the valid table ID
+          const qrPayload = {
+            tableId: tableId,
+            tableName: tableData.name,
+            tableNumber: tableData.number.toString(),
+            timestamp: new Date().getTime(),
+          }
+
+          const encrypted = CryptoJS.AES.encrypt(
+            JSON.stringify(qrPayload),
+            QR_SECRET,
+          ).toString()
+          const qrString = encodeURIComponent(encrypted)
+          const qrLink = `${window.location.origin}/menu?tabledata=${qrString}`
+
+          // Create a hidden QR code element with fancy styling
+          const qrElement = document.createElement('div')
+          qrElement.style.padding = '24px'
+          qrElement.style.background = '#ffffff'
+          qrElement.style.width = '400px'
+          qrElement.style.borderRadius = '16px'
+          qrElement.style.boxShadow = '0 4px 24px rgba(0, 0, 0, 0.1)'
+          qrElement.style.textAlign = 'center'
+          qrElement.style.fontFamily = 'Inter, sans-serif'
+
+          // Create header with cafe name
+          const header = document.createElement('div')
+          header.style.marginBottom = '12px'
+          header.innerHTML = `
           <div style="font-weight: 700; font-size: 22px; color: #000; margin-bottom: 4px;">Work Brew Cafe</div>
           <div style="font-weight: 600; font-size: 16px; color: #4b5563;">${tableData.name}</div>
         `
-        qrElement.appendChild(header)
+          qrElement.appendChild(header)
 
-        // Create QR container with styling
-        const qrContainer = document.createElement('div')
-        qrContainer.style.padding = '12px'
-        qrContainer.style.backgroundColor = 'white'
-        qrContainer.style.borderRadius = '12px'
-        qrContainer.style.margin = '0 auto'
-        qrContainer.style.width = '240px'
-        qrContainer.style.height = '240px'
-        qrContainer.style.display = 'flex'
-        qrContainer.style.alignItems = 'center'
-        qrContainer.style.justifyContent = 'center'
-        qrContainer.style.border = '1px solid #ffc30033'
-        qrContainer.style.boxShadow = '0 4px 12px #ffc30022'
+          // Create QR container with styling
+          const qrContainer = document.createElement('div')
+          qrContainer.style.padding = '12px'
+          qrContainer.style.backgroundColor = 'white'
+          qrContainer.style.borderRadius = '12px'
+          qrContainer.style.margin = '0 auto'
+          qrContainer.style.width = '240px'
+          qrContainer.style.height = '240px'
+          qrContainer.style.display = 'flex'
+          qrContainer.style.alignItems = 'center'
+          qrContainer.style.justifyContent = 'center'
+          qrContainer.style.border = '1px solid #ffc30033'
+          qrContainer.style.boxShadow = '0 4px 12px #ffc30022'
 
-        // Add QR code element to container
-        const qrCode = document.createElement('div')
-        qrContainer.appendChild(qrCode)
-        qrElement.appendChild(qrContainer)
+          // Add QR code element to container
+          const qrCode = document.createElement('div')
+          qrContainer.appendChild(qrCode)
+          qrElement.appendChild(qrContainer)
 
-        // Add table info
-        const tableInfo = document.createElement('div')
-        tableInfo.style.marginTop = '12px'
-        tableInfo.innerHTML = `
+          // Add table info
+          const tableInfo = document.createElement('div')
+          tableInfo.style.marginTop = '12px'
+          tableInfo.innerHTML = `
           <div style="font-weight: 600; font-size: 15px; color: #1f2937; margin-bottom: 4px;">Table #${tableData.number}</div>
           <div style="font-size: 13px; color: #6b7280;">Capacity: ${tableData.capacity} people</div>
           <div style="font-size: 12px; color: #9ca3af; margin-top: 12px;">Scan to view menu</div>
         `
-        qrElement.appendChild(tableInfo)
+          qrElement.appendChild(tableInfo)
 
-        document.body.appendChild(qrElement)
+          document.body.appendChild(qrElement)
 
-        // Render QR code in the container
-        const qrRendered = document.createElement('div')
-        // Use qrcode library to generate SVG markup
-        const qrSvgMarkup = await QRCode.toString(qrLink, {
-          type: 'svg',
-          width: 220,
-          errorCorrectionLevel: 'H',
-          color: {
-            dark: '#1e293b',
-            light: '#ffffff',
-          },
-        })
-        qrRendered.innerHTML = qrSvgMarkup
-        qrCode.appendChild(qrRendered.firstChild!)
-
-        // Capture the QR element as an image
-        try {
-          const canvas = await html2canvas(qrElement, {
-            backgroundColor: '#ffffff',
-            scale: 2, // Higher resolution
+          // Render QR code in the container
+          const qrRendered = document.createElement('div')
+          // Use qrcode library to generate SVG markup
+          const qrSvgMarkup = await QRCode.toString(qrLink, {
+            type: 'svg',
+            width: 220,
+            errorCorrectionLevel: 'H',
+            color: {
+              dark: '#1e293b',
+              light: '#ffffff',
+            },
           })
-          document.body.removeChild(qrElement)
+          qrRendered.innerHTML = qrSvgMarkup
+          qrCode.appendChild(qrRendered.firstChild!)
 
-          // Get the PNG data URL
-          const qrDataUrl = canvas.toDataURL('image/png')
+          // Capture the QR element as an image
+          try {
+            const canvas = await html2canvas(qrElement, {
+              backgroundColor: '#ffffff',
+              scale: 2, // Higher resolution
+            })
+            document.body.removeChild(qrElement)
 
-          // Upload QR image to Firebase Storage
-          const fileName = `table-qr-${tableData.number}-${Date.now()}.png`
-          const firebaseRef = storageRef(storage, `tableQRCodes/${fileName}`)
-          await uploadString(firebaseRef, qrDataUrl, 'data_url')
-          const qrImageUrl = await getDownloadURL(firebaseRef)
+            // Get the PNG data URL
+            const qrDataUrl = canvas.toDataURL('image/png')
 
-          // Add QR image URL to table data
-          tableData.qrCode = qrImageUrl
+            // Upload QR image to Firebase Storage
+            const fileName = `table-qr-${tableData.number}-${Date.now()}.png`
+            const firebaseRef = storageRef(storage, `tableQRCodes/${fileName}`)
+            await uploadString(firebaseRef, qrDataUrl, 'data_url')
+            const qrImageUrl = await getDownloadURL(firebaseRef)
+
+            // Update the table with the QR code URL
+            const updateRes = await fetch(`/api/tables/${tableId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ qrCode: qrImageUrl }),
+            })
+
+            if (!updateRes.ok) {
+              throw new Error('Failed to update table with QR code')
+            }
+
+            // Return the update response as our final result
+            res = updateRes
+          } catch (err) {
+            console.error('Error generating fancy QR:', err)
+            // Fallback to simple QR code if fancy one fails
+            try {
+              const qrDataUrl = await QRCode.toDataURL(qrLink, { width: 400 })
+
+              // Upload QR image to Firebase Storage
+              const fileName = `table-qr-${tableData.number}-${Date.now()}.png`
+              const firebaseRef = storageRef(
+                storage,
+                `tableQRCodes/${fileName}`,
+              )
+              await uploadString(firebaseRef, qrDataUrl, 'data_url')
+              const qrImageUrl = await getDownloadURL(firebaseRef)
+
+              // Update the table with the QR code URL
+              const updateRes = await fetch(`/api/tables/${tableId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ qrCode: qrImageUrl }),
+              })
+
+              if (!updateRes.ok) {
+                throw new Error('Failed to update table with QR code')
+              }
+
+              // Return the update response as our final result
+              res = updateRes
+            } catch (innerErr) {
+              console.error('Fallback QR generation failed:', innerErr)
+              throw new Error(
+                'Failed to generate QR code after multiple attempts',
+              )
+            }
+          } finally {
+            setLoading(false)
+          }
         } catch (err) {
-          console.error('Error generating fancy QR:', err)
-          // Fallback to simple QR code if fancy one fails
-          const qrDataUrl = await QRCode.toDataURL(qrLink, { width: 400 })
-
-          // Upload QR image to Firebase Storage
-          const fileName = `table-qr-${tableData.number}-${Date.now()}.png`
-          const firebaseRef = storageRef(storage, `tableQRCodes/${fileName}`)
-          await uploadString(firebaseRef, qrDataUrl, 'data_url')
-          const qrImageUrl = await getDownloadURL(firebaseRef)
-
-          // Add QR image URL to table data
-          tableData.qrCode = qrImageUrl
-        } finally {
-          setLoading(false)
+          console.error('Error in table creation process:', err)
+          throw err
         }
-
-        res = await fetch('/api/tables', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(tableData),
-        })
       }
 
       if (!res.ok) {
