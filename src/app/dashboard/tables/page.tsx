@@ -203,7 +203,8 @@ export default function TablesPage() {
             QR_SECRET,
           ).toString()
           const qrString = encodeURIComponent(encrypted)
-          const qrLink = `${window.location.origin}/menu?tabledata=${qrString}`
+          // Direct to qr-verification instead of menu to ensure proper verification
+          const qrLink = `${window.location.origin}/qr-verification?tabledata=${qrString}`
 
           // Create a hidden QR code element with fancy styling
           const qrElement = document.createElement('div')

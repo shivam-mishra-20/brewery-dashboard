@@ -63,10 +63,13 @@ function MenuContent() {
   // Process table data from URL
   useEffect(() => {
     if (tableDataParam) {
-      // Import dynamically to avoid server-side issues
-      import('@/lib/table').then(({ getTableDataFromUrl }) => {
+      // Import the correct decryption function from tableEncryption.ts
+      import('@/utils/tableEncryption').then(({ decryptTableData }) => {
         try {
-          const tableData = getTableDataFromUrl(window.location.href)
+          // First URL decode the data if needed
+          const decodedData = decodeURIComponent(tableDataParam)
+          const tableData = decryptTableData(decodedData)
+
           if (tableData) {
             setTableInfo(tableData)
 
