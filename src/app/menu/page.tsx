@@ -13,7 +13,7 @@ import {
   FiX,
 } from 'react-icons/fi'
 import { useCart } from '@/context/CartContext'
-import { getAllMenuItems, getMenuItemsByCategory } from '@/services/menuService'
+import { getAllMenuItems } from '@/services/menuService'
 
 interface MenuItem {
   id: string
@@ -36,6 +36,7 @@ function MenuContent() {
 
   const [activeCategory, setActiveCategory] = useState('all')
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+  const [allCategories, setAllCategories] = useState<string[]>(['all'])
   const [loadingMenu, setLoadingMenu] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [modalItem, setModalItem] = useState<MenuItem | null>(null)
@@ -49,7 +50,15 @@ function MenuContent() {
   } | null>(null)
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
-  const [categories, setCategories] = useState<string[]>(['all'])
+
+  // Helper function to normalize add-ons for consistent comparison (same as in CartContext)
+  const normalizeAddOns = (addOns?: { name: string; price: number }[]) => {
+    if (!addOns || addOns.length === 0) return ''
+    return addOns
+      .map((a) => `${a.name}:${a.price}`)
+      .sort()
+      .join('|')
+  }
 
   // Process table data from URL
   useEffect(() => {
@@ -86,32 +95,27 @@ function MenuContent() {
     }
   }, [tableDataParam, router])
 
+  // Fetch all menu items and categories once
   useEffect(() => {
-    async function fetchMenu() {
+    async function fetchAllMenu() {
       setLoadingMenu(true)
       try {
-        let items
-        if (activeCategory === 'all') {
-          items = await getAllMenuItems()
-        } else {
-          items = await getMenuItemsByCategory(activeCategory)
-        }
+        const items = await getAllMenuItems()
         setMenuItems(items)
-
-        // Extract unique categories from menu items
         const uniqueCategories = [
           'all',
-          ...new Set(items.map((item) => item.category)),
+          ...Array.from(new Set(items.map((item) => item.category))),
         ]
-        setCategories(uniqueCategories)
+        setAllCategories(uniqueCategories)
       } catch {
         setMenuItems([])
+        setAllCategories(['all'])
       } finally {
         setLoadingMenu(false)
       }
     }
-    fetchMenu()
-  }, [activeCategory])
+    fetchAllMenu()
+  }, [])
 
   // If no tabledata and no stored table info, show intro page
   if (!tableDataParam && !tableInfo) {
@@ -138,17 +142,74 @@ function MenuContent() {
     setModalAddOns([])
   }
 
+  // Helper function to check if an item with specific add-ons exists in the cart
+  const checkItemInCart = (
+    id: string,
+    selectedAddOns: string[] = [],
+    itemAddOns: any[] = [],
+  ) => {
+    // Filter the add-ons based on selected ones
+    const filteredAddOns =
+      itemAddOns.filter((a) => selectedAddOns.includes(a.name)) || []
+
+    // Create a key for the current item configuration
+    const itemKey = `${id}|${normalizeAddOns(filteredAddOns)}`
+
+    // Find matching item in cart based on exact ID and add-on configuration
+    return cart.find((cartItem) => {
+      const cartItemKey = `${cartItem.id}|${normalizeAddOns(cartItem.addOns)}`
+      return cartItemKey === itemKey
+    })
+  }
+
+  // Helper function for debugging
+  const logCartState = () => {
+    console.log(
+      'Current cart state:',
+      cart.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        addOns: item.addOns?.map((a) => a.name) || 'none',
+      })),
+    )
+  }
+
   const handleAddToCart = () => {
     if (!modalItem) return
+
+    // Debug cart state before adding
+    console.log('Before adding to cart:')
+    logCartState()
+
+    // Check if this exact item configuration is in the cart
+    const existingItem = checkItemInCart(
+      modalItem.id,
+      modalAddOns,
+      modalItem.addOns,
+    )
+
+    if (existingItem) {
+      console.log(`Item found in cart with quantity: ${existingItem.quantity}`)
+      console.log(`Adding quantity: ${modalQuantity}`)
+    }
+
+    // Filter the add-ons based on selected ones
+    const selectedItemAddOns =
+      modalItem.addOns?.filter((a) => modalAddOns.includes(a.name)) || []
+
+    // Add to cart with the selected quantity and add-ons
     addToCart({
       id: modalItem.id,
       name: modalItem.name,
       price: modalItem.price,
-      quantity: modalQuantity,
-      addOns:
-        modalItem.addOns?.filter((a) => modalAddOns.includes(a.name)) || [],
+      quantity: modalQuantity, // This is the quantity user selected in the modal
+      addOns: selectedItemAddOns,
       image: modalItem.imageURL || modalItem.imageURLs?.[0] || '',
     })
+
+    // Debug cart state after adding (will be seen in the effect in CartContext)
+
+    // Close the modal after adding to cart
     closeModal()
   }
 
@@ -201,7 +262,7 @@ function MenuContent() {
 
                 {/* Cart icon */}
                 <Link
-                  href={`/cart?tabledata=${tableDataParam || ''}`}
+                  href={`/cart?tabledata=${tableDataParam ? encodeURIComponent(tableDataParam) : ''}`}
                   className="ml-2"
                 >
                   <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-full text-white relative hover:shadow-lg transition-all duration-200">
@@ -226,7 +287,7 @@ function MenuContent() {
         {/* Categories scroll bar */}
         <div className="mb-6 overflow-x-auto pb-3 hide-scrollbar">
           <div className="flex gap-3 min-w-max">
-            {categories.map((category) => (
+            {allCategories.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
@@ -272,10 +333,10 @@ function MenuContent() {
                   item.image ||
                   '/placeholder-food.jpg'
 
-                // Calculate if item is in cart
-                const itemInCart = cart.find(
-                  (cartItem) => cartItem.id === item.id,
-                )
+                // Calculate total quantity of this item in the cart (across all add-on variations)
+                const totalItemQuantity = cart
+                  .filter((cartItem) => cartItem.id === item.id)
+                  .reduce((total, cartItem) => total + cartItem.quantity, 0)
 
                 return (
                   <div
@@ -297,9 +358,9 @@ function MenuContent() {
                         {item.category.charAt(0).toUpperCase() +
                           item.category.slice(1)}
                       </div>
-                      {itemInCart && (
+                      {totalItemQuantity > 0 && (
                         <div className="absolute top-3 right-3 bg-amber-500 text-white text-xs px-3 py-1 rounded-full font-medium animate-pulse">
-                          In Cart: {itemInCart.quantity}
+                          In Cart: {totalItemQuantity}
                         </div>
                       )}
                     </div>
@@ -520,6 +581,33 @@ function MenuContent() {
                   </div>
                 )}
 
+                {/* Display current cart status for this exact item if it exists */}
+                {modalItem && (
+                  <div className="mb-4">
+                    {(() => {
+                      // Check if this exact configuration exists in cart
+                      const existingItem = checkItemInCart(
+                        modalItem.id,
+                        modalAddOns,
+                        modalItem.addOns,
+                      )
+
+                      if (existingItem) {
+                        return (
+                          <div className="bg-amber-100 border border-amber-300 rounded-lg p-3 text-amber-800 text-sm">
+                            <strong>
+                              Currently in cart: {existingItem.quantity}
+                            </strong>{' '}
+                            of this item with the same options. Adding{' '}
+                            {modalQuantity} more.
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
+                  </div>
+                )}
+
                 {/* Total calculation */}
                 <div className="bg-amber-50 p-4 rounded-xl mb-5 border border-amber-100">
                   <div className="flex justify-between mb-2">
@@ -568,7 +656,19 @@ function MenuContent() {
                   onClick={handleAddToCart}
                 >
                   <FiShoppingBag />
-                  Add to Cart
+                  {(() => {
+                    // Check if this exact configuration exists in cart
+                    const existingItem = checkItemInCart(
+                      modalItem.id,
+                      modalAddOns,
+                      modalItem.addOns,
+                    )
+
+                    if (existingItem) {
+                      return `Add ${modalQuantity} More`
+                    }
+                    return `Add to Cart (${modalQuantity})`
+                  })()}
                 </button>
               </div>
             </div>

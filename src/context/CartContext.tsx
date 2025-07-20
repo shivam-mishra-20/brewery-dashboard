@@ -1,6 +1,12 @@
 'use client'
 
-import React, { createContext, ReactNode, useContext, useState } from 'react'
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 
 export interface CartItem {
   id: string
@@ -34,22 +40,112 @@ export const useCart = () => {
   return context
 }
 
+// Helper function to normalize add-ons for consistent comparison
+const normalizeAddOns = (addOns?: { name: string; price: number }[]) => {
+  if (!addOns || addOns.length === 0) return ''
+  return addOns
+    .map((a) => `${a.name}:${a.price}`)
+    .sort()
+    .join('|')
+}
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([])
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('cart')
+        // Ensure all items have valid quantities when loading from storage
+        const parsedCart = stored ? JSON.parse(stored) : []
+        return parsedCart.map((item: CartItem) => ({
+          ...item,
+          quantity: Math.max(1, parseInt(String(item.quantity)) || 1), // Ensure valid quantity
+        }))
+      } catch (error) {
+        console.error('Error loading cart from storage:', error)
+        return []
+      }
+    }
+    return []
+  })
+
+  // Persist cart to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cart', JSON.stringify(cart))
+
+      // Debug cart state whenever it changes
+      console.log(
+        'Cart updated:',
+        cart.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          addOns: item.addOns,
+        })),
+      )
+    }
+  }, [cart])
 
   const addToCart = (item: CartItem) => {
-    setCart((prev) => {
-      const idx = prev.findIndex(
-        (ci) =>
-          ci.id === item.id &&
-          JSON.stringify(ci.addOns) === JSON.stringify(item.addOns),
+    // Make sure quantity is a valid number
+    const quantityToAdd = Math.max(1, parseInt(String(item.quantity)) || 1)
+
+    // Create a clean item with validated quantity
+    const cleanItem = {
+      ...item,
+      quantity: quantityToAdd,
+    }
+
+    // Log the operation
+    console.log(`Adding to cart: ${cleanItem.name}, Quantity: ${quantityToAdd}`)
+
+    setCart((previousCart) => {
+      // Create a unique key for this item configuration (ID + add-ons)
+      const itemKey = `${cleanItem.id}|${normalizeAddOns(cleanItem.addOns)}`
+
+      // Log existing cart items
+      console.log(
+        'Previous cart items:',
+        previousCart.map(
+          (i) =>
+            `${i.name} (${i.id}): ${i.quantity} - AddOns: ${normalizeAddOns(i.addOns)}`,
+        ),
       )
-      if (idx !== -1) {
-        const updated = [...prev]
-        updated[idx].quantity += item.quantity
-        return updated
+
+      // Find existing item index
+      const existingIndex = previousCart.findIndex((cartItem) => {
+        const cartItemKey = `${cartItem.id}|${normalizeAddOns(cartItem.addOns)}`
+        return cartItemKey === itemKey
+      })
+
+      // If item doesn't exist in cart
+      if (existingIndex === -1) {
+        console.log(
+          `Item not in cart. Adding as new with quantity ${quantityToAdd}`,
+        )
+        return [...previousCart, cleanItem]
       }
-      return [...prev, item]
+
+      // If item exists, create a new cart array
+      const updatedCart = [...previousCart]
+
+      // Calculate the new quantity
+      const existingQuantity = updatedCart[existingIndex].quantity
+      const newTotalQuantity = existingQuantity + quantityToAdd
+
+      console.log(
+        `Item found in cart at index ${existingIndex}. Current quantity: ${existingQuantity}`,
+      )
+      console.log(
+        `Adding ${quantityToAdd} more for new total: ${newTotalQuantity}`,
+      )
+
+      // Update the existing item
+      updatedCart[existingIndex] = {
+        ...updatedCart[existingIndex],
+        quantity: newTotalQuantity,
+      }
+
+      return updatedCart
     })
   }
 
@@ -57,13 +153,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     id: string,
     addOns?: Array<{ name: string; price: number }>,
   ) => {
-    setCart((prev) =>
-      prev.filter(
-        (ci) =>
-          ci.id !== id ||
-          (addOns && JSON.stringify(ci.addOns) !== JSON.stringify(addOns)),
-      ),
-    )
+    setCart((prev) => {
+      const removeKey = `${id}|${normalizeAddOns(addOns)}`
+
+      return prev.filter((ci) => {
+        const ciKey = `${ci.id}|${normalizeAddOns(ci.addOns)}`
+        return ciKey !== removeKey
+      })
+    })
   }
 
   const clearCart = () => setCart([])
@@ -73,13 +170,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     quantity: number,
     addOns?: Array<{ name: string; price: number }>,
   ) => {
-    setCart((prev) =>
-      prev.map((ci) =>
-        ci.id === id && JSON.stringify(ci.addOns) === JSON.stringify(addOns)
-          ? { ...ci, quantity }
-          : ci,
-      ),
-    )
+    setCart((prev) => {
+      const updateKey = `${id}|${normalizeAddOns(addOns)}`
+
+      return prev.map((ci) => {
+        const ciKey = `${ci.id}|${normalizeAddOns(ci.addOns)}`
+        return ciKey === updateKey ? { ...ci, quantity } : ci
+      })
+    })
   }
 
   return (

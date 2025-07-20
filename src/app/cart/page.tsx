@@ -1,9 +1,9 @@
 'use client'
 
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { FiShoppingBag } from 'react-icons/fi'
 import { useCart } from '@/context/CartContext'
 
 export default function CartPage() {
@@ -30,14 +30,10 @@ export default function CartPage() {
       </h1>
       {cart.length === 0 ? (
         <div className="text-center text-gray-500 mt-20">
-          <div className="mb-6">
-            <DotLottieReact
-              src="https://lottie.host/2ffcbed2-9837-494e-8f6e-5744e35e1c65/arpXHdZRfb.lottie"
-              loop
-              height={300}
-              width={300}
-              autoplay
-            />
+          <div className="mb-6 flex justify-center">
+            <div className="flex items-center justify-center w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg aspect-square">
+              <FiShoppingBag className="w-24 h-24 text-amber-300" />
+            </div>
           </div>
           <div className="text-xl font-semibold mb-2">Your cart is empty.</div>
           <div className="mb-6 text-sm text-gray-400">
@@ -137,12 +133,12 @@ export default function CartPage() {
             >
               Continue Shopping
             </Link>
-            <button
+            <Link
+              href={`/checkout?tabledata=${tableDataParam ? encodeURIComponent(tableDataParam) : ''}`}
               className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-secondary to-primary text-white font-bold shadow hover:from-primary hover:to-secondary transition-colors border border-secondary/30 text-center"
-              onClick={() => alert('Proceed to checkout (implement logic)')}
             >
               Checkout
-            </button>
+            </Link>
             <button
               className="flex-1 px-4 py-3 rounded-xl bg-red-100 text-red-700 font-bold shadow hover:bg-red-200 transition-colors border border-red-200 text-center"
               onClick={clearCart}
@@ -161,12 +157,12 @@ export default function CartPage() {
           >
             Menu
           </Link>
-          <button
+          <Link
+            href={`/checkout?tabledata=${tableDataParam ? encodeURIComponent(tableDataParam) : ''}`}
             className="flex-1 px-3 py-2 rounded-lg bg-gradient-to-r from-secondary to-primary text-white font-bold shadow hover:from-primary hover:to-secondary transition-colors border border-secondary/30 text-center text-sm"
-            onClick={() => alert('Proceed to checkout (implement logic)')}
           >
             Checkout
-          </button>
+          </Link>
           <button
             className="flex-1 px-3 py-2 rounded-lg bg-red-100 text-red-700 font-bold shadow hover:bg-red-200 transition-colors border border-red-200 text-center text-sm"
             onClick={clearCart}

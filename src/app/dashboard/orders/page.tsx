@@ -175,6 +175,50 @@ export default function OrdersPage() {
       },
     },
     {
+      title: 'Payment',
+      key: 'payment',
+      render: (_: any, record: any) => (
+        <div>
+          {record.paymentStatus ? (
+            <Tag
+              color={
+                record.paymentStatus === 'paid'
+                  ? 'green'
+                  : record.paymentStatus === 'pending'
+                    ? 'gold'
+                    : record.paymentStatus === 'unpaid'
+                      ? 'red'
+                      : 'default'
+              }
+              style={{ marginBottom: 2 }}
+            >
+              {record.paymentStatus.charAt(0).toUpperCase() +
+                record.paymentStatus.slice(1)}
+            </Tag>
+          ) : (
+            <Tag color="default">N/A</Tag>
+          )}
+          <br />
+          {record.paymentMethod ? (
+            <Tag
+              color={
+                record.paymentMethod === 'online'
+                  ? 'blue'
+                  : record.paymentMethod === 'cash'
+                    ? 'orange'
+                    : 'default'
+              }
+            >
+              {record.paymentMethod.charAt(0).toUpperCase() +
+                record.paymentMethod.slice(1)}
+            </Tag>
+          ) : (
+            <Tag color="default">-</Tag>
+          )}
+        </div>
+      ),
+    },
+    {
       title: 'Items',
       dataIndex: 'items',
       key: 'items',
@@ -493,6 +537,89 @@ export default function OrdersPage() {
             })}
 
             <Divider />
+            {/* Payment Information Section */}
+            <Divider orientation="left">Payment Information</Divider>
+            <Descriptions bordered column={1} size="small" className="mb-4">
+              <Descriptions.Item label="Payment Status">
+                {selectedOrder.paymentStatus ? (
+                  <Tag
+                    color={
+                      selectedOrder.paymentStatus === 'paid'
+                        ? 'green'
+                        : selectedOrder.paymentStatus === 'pending'
+                          ? 'gold'
+                          : selectedOrder.paymentStatus === 'unpaid'
+                            ? 'red'
+                            : 'default'
+                    }
+                  >
+                    {selectedOrder.paymentStatus.charAt(0).toUpperCase() +
+                      selectedOrder.paymentStatus.slice(1)}
+                  </Tag>
+                ) : (
+                  <Text type="secondary">Not Available</Text>
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Payment Method">
+                {selectedOrder.paymentMethod ? (
+                  <Tag
+                    color={
+                      selectedOrder.paymentMethod === 'online'
+                        ? 'blue'
+                        : selectedOrder.paymentMethod === 'cash'
+                          ? 'orange'
+                          : 'default'
+                    }
+                  >
+                    {selectedOrder.paymentMethod.charAt(0).toUpperCase() +
+                      selectedOrder.paymentMethod.slice(1)}
+                  </Tag>
+                ) : (
+                  <Text type="secondary">Not Available</Text>
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Amount Paid">
+                {typeof selectedOrder.amountPaid === 'number' ? (
+                  <Text strong>₹{selectedOrder.amountPaid.toFixed(2)}</Text>
+                ) : (
+                  <Text type="secondary">-</Text>
+                )}
+              </Descriptions.Item>
+              <Descriptions.Item label="Total Amount">
+                <Text strong>₹{selectedOrder.totalAmount.toFixed(2)}</Text>
+              </Descriptions.Item>
+              {selectedOrder.razorpayOrderId && (
+                <Descriptions.Item label="Razorpay Order ID">
+                  <Text code copyable>
+                    {selectedOrder.razorpayOrderId}
+                  </Text>
+                </Descriptions.Item>
+              )}
+              {selectedOrder.razorpayPaymentId && (
+                <Descriptions.Item label="Razorpay Payment ID">
+                  <Text code copyable>
+                    {selectedOrder.razorpayPaymentId}
+                  </Text>
+                </Descriptions.Item>
+              )}
+              {selectedOrder.razorpaySignature && (
+                <Descriptions.Item label="Razorpay Signature">
+                  <Text code copyable>
+                    {selectedOrder.razorpaySignature}
+                  </Text>
+                </Descriptions.Item>
+              )}
+              {selectedOrder.paymentTimestamp && (
+                <Descriptions.Item label="Payment Time">
+                  {format(new Date(selectedOrder.paymentTimestamp), 'PPpp')}
+                </Descriptions.Item>
+              )}
+              {selectedOrder.paymentNotes && (
+                <Descriptions.Item label="Payment Notes">
+                  {selectedOrder.paymentNotes}
+                </Descriptions.Item>
+              )}
+            </Descriptions>
 
             <div className="mt-4">
               <Space>

@@ -4,10 +4,11 @@ import { OrderModel } from '@/models/OrderModel'
 
 export async function POST(request: NextRequest) {
   try {
-    const { id, status, paymentStatus, notes } = await request.json()
+    const { id, status, paymentStatus, paymentMethod, notes } =
+      await request.json()
 
     // Validate required fields
-    if (!id || (!status && !paymentStatus)) {
+    if (!id || (!status && !paymentStatus && !paymentMethod)) {
       return NextResponse.json(
         {
           success: false,
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     // Validate paymentStatus if provided
     if (paymentStatus) {
-      const validPaymentStatuses = ['unpaid', 'paid']
+      const validPaymentStatuses = ['unpaid', 'paid', 'pending']
       if (!validPaymentStatuses.includes(paymentStatus)) {
         return NextResponse.json(
           {
@@ -69,10 +70,12 @@ export async function POST(request: NextRequest) {
       const updateData: {
         status?: string
         paymentStatus?: string
+        paymentMethod?: string
         notes?: string
       } = {}
       if (status) updateData.status = status
       if (paymentStatus) updateData.paymentStatus = paymentStatus
+      if (paymentMethod) updateData.paymentMethod = paymentMethod
       if (notes) updateData.notes = notes
 
       const updatedOrder = await OrderModel.findByIdAndUpdate(id, updateData, {

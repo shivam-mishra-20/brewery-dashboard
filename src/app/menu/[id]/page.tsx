@@ -13,6 +13,7 @@ import {
   FiPlus,
   FiShoppingBag,
 } from 'react-icons/fi'
+import { useCart } from '@/context/CartContext'
 
 interface MenuItem {
   id: string
@@ -44,29 +45,13 @@ interface MenuItem {
 
 export default function ProductDetailPage() {
   // Cart and order state
-  // Cart state (local, not shown in UI)
-  const [cart, setCart] = useState<any[]>([])
+  const { cart, addToCart } = useCart()
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([])
   const [quantity, setQuantity] = useState(1)
+  const [isAdding, setIsAdding] = useState(false)
+
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  // Add to cart logic
-  const addToCart = (item: any) => {
-    setCart((prev) => {
-      const idx = prev.findIndex(
-        (ci) =>
-          ci.id === item.id &&
-          JSON.stringify(ci.addOns) === JSON.stringify(item.addOns),
-      )
-      if (idx !== -1) {
-        const updated = [...prev]
-        updated[idx].quantity += item.quantity
-        return updated
-      }
-      return [...prev, item]
-    })
-  }
   const [item, setItem] = useState<MenuItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -136,19 +121,64 @@ export default function ProductDetailPage() {
     )
   }
 
+  // Helper function to normalize add-ons for consistent comparison across the app
+  const normalizeAddOns = (addOns?: { name: string; price: number }[]) => {
+    if (!addOns || addOns.length === 0) return ''
+    return addOns
+      .map((a) => `${a.name}:${a.price}`)
+      .sort()
+      .join('|')
+  }
+
+  // Function to check if item is already in cart
+  const getCartQuantity = () => {
+    if (!item || !cart) return 0
+
+    // Create the current item's key
+    const currentItemAddOns =
+      item.addOns?.filter((a) => selectedAddOns.includes(a.name)) || []
+    const currentItemKey = `${item.id}|${normalizeAddOns(currentItemAddOns)}`
+
+    // Find matching items in cart with exact add-on configuration
+    return cart.reduce((total, cartItem) => {
+      const cartItemKey = `${cartItem.id}|${normalizeAddOns(cartItem.addOns)}`
+
+      // If keys match exactly, add the quantity to the total
+      if (cartItemKey === currentItemKey) {
+        return total + cartItem.quantity
+      }
+      return total
+    }, 0)
+  }
+
   // Add to cart logic
   const handleAddToCart = () => {
     if (!item) return
+
+    // Set isAdding to true to show loading state
+    setIsAdding(true)
+
+    // Filter add-ons based on selected ones
+    const selectedItemAddOns =
+      item.addOns?.filter((a) => selectedAddOns.includes(a.name)) || []
+
+    // Add to cart with the selected quantity
     addToCart({
       id: item.id,
       name: item.name,
       price: item.price,
-      quantity,
-      addOns: item.addOns?.filter((a) => selectedAddOns.includes(a.name)) || [],
-      image: item.imageURLs?.[0] || item.imageURL || '',
+      quantity: quantity, // Use the selected quantity
+      addOns: selectedItemAddOns,
+      image: item.imageURL || item.imageURLs?.[0] || '',
     })
-  }
 
+    // Reset state after adding
+    setTimeout(() => {
+      setQuantity(1) // Reset quantity to 1
+      setSelectedAddOns([]) // Clear selected add-ons
+      setIsAdding(false) // End loading state
+    }, 500) // Short delay for visual feedback
+  }
   // Place order logic removed (cart modal not shown)
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX)
@@ -307,9 +337,14 @@ export default function ProductDetailPage() {
           </h1>
 
           <div className="relative">
-            <button className="p-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-colors flex items-center justify-center">
+            <button
+              className="p-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-colors flex items-center justify-center"
+              onClick={() =>
+                router.push(`/cart?tabledata=${encodeURIComponent(tabledata)}`)
+              }
+            >
               <FiShoppingBag className="h-5 w-5 text-gray-800" />
-              {cart.length > 0 && (
+              {cart && cart.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
                   {cart.reduce((total, item) => total + item.quantity, 0)}
                 </span>
@@ -775,7 +810,7 @@ export default function ProductDetailPage() {
       >
         <button
           className={`w-[95%] max-w-md py-4 shadow-inner shadow-white/[0.5] rounded-2xl font-extrabold text-lg tracking-wide font-inter relative overflow-hidden transition-all duration-300 product-add-to-order-btn ${
-            item.available
+            item.available && !isAdding
               ? 'bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-700 hover:via-amber-600 hover:to-yellow-600 text-white hover:scale-[1.02]'
               : 'bg-gray-300 cursor-not-allowed text-gray-500'
           }`}
@@ -785,11 +820,11 @@ export default function ProductDetailPage() {
             alignItems: 'center',
             margin: '0 auto',
           }}
-          disabled={!item.available}
+          disabled={!item.available || isAdding}
           onClick={handleAddToCart}
         >
           {/* Add shine effect for available items */}
-          {item.available && (
+          {item.available && !isAdding && (
             <span className="absolute inset-0 overflow-hidden">
               <span className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 animate-shine"></span>
             </span>
@@ -797,23 +832,51 @@ export default function ProductDetailPage() {
 
           <div className="flex items-center justify-center">
             {item.available ? (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-                Add to Order
-              </>
+              isAdding ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  {getCartQuantity() > 0
+                    ? `In Cart: ${getCartQuantity()} | Add ${quantity} More`
+                    : `Add to Order (${quantity})`}
+                </>
+              )
             ) : (
               <>
                 <svg

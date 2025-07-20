@@ -40,7 +40,7 @@ export function getTableDataFromUrl(
 const SECRET_KEY =
   process.env.NEXT_PUBLIC_QR_SECRET || 'your-fallback-secret-key'
 
-function decryptTableData(
+export function decryptTableData(
   encoded: string,
 ): { tableId: string; tableName: string; tableNumber: string } | null {
   try {

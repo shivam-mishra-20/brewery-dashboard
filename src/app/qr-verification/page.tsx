@@ -4,7 +4,7 @@ import axios from 'axios'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi'
 import { decryptTableData } from '@/utils/tableEncryption'
 
@@ -17,7 +17,10 @@ interface TableInfo {
 
 export default function QrCodeVerification() {
   const searchParams = useSearchParams()
-  const encryptedTableData = searchParams.get('tabledata')
+  const encryptedTableDataRaw = searchParams.get('tabledata')
+  const encryptedTableData = encryptedTableDataRaw
+    ? decodeURIComponent(encryptedTableDataRaw)
+    : null
   const router = useRouter()
 
   const [loading, setLoading] = useState(true)
@@ -26,7 +29,9 @@ export default function QrCodeVerification() {
   const [countdown, setCountdown] = useState(5)
   const [redirecting, setRedirecting] = useState(false)
 
+  const countdownRef = useRef<NodeJS.Timeout | null>(null)
   useEffect(() => {
+    let isMounted = true
     const processTableData = async () => {
       if (!encryptedTableData) {
         setError(
@@ -37,8 +42,12 @@ export default function QrCodeVerification() {
       }
 
       try {
+        // Debug: log the encryptedTableData
+        console.log('Encrypted tabledata param:', encryptedTableData)
         // Decrypt the table data
         const tableData = decryptTableData(encryptedTableData)
+        // Debug: log the decrypted tableData
+        console.log('Decrypted tableData:', tableData)
 
         if (!tableData || !tableData.tableId) {
           setError(
@@ -81,18 +90,15 @@ export default function QrCodeVerification() {
           // Start countdown for automatic redirect
           setRedirecting(true)
           let timeLeft = 5
-          const countdownInterval = setInterval(() => {
+          countdownRef.current = setInterval(() => {
             timeLeft -= 1
             setCountdown(timeLeft)
 
             if (timeLeft <= 0) {
-              clearInterval(countdownInterval)
-              router.push('/customer/menu')
+              if (countdownRef.current) clearInterval(countdownRef.current)
+              if (isMounted) router.push('/customer/menu')
             }
           }, 1000)
-
-          // Clean up interval if component unmounts
-          return () => clearInterval(countdownInterval)
         }
       } catch (err) {
         console.error('Error processing table data:', err)
@@ -105,6 +111,10 @@ export default function QrCodeVerification() {
     }
 
     processTableData()
+    return () => {
+      isMounted = false
+      if (countdownRef.current) clearInterval(countdownRef.current)
+    }
   }, [encryptedTableData])
 
   const handleContinue = () => {

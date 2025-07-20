@@ -28,7 +28,10 @@ export interface IOrder extends Document {
   items: OrderItem[]
   totalAmount: number
   status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled'
-  paymentStatus: 'unpaid' | 'paid'
+  paymentStatus: 'unpaid' | 'paid' | 'pending'
+  paymentMethod?: 'online' | 'cash'
+  razorpayOrderId?: string
+  razorpayPaymentId?: string
   notes?: string
   createdAt: Date
   updatedAt: Date
@@ -82,9 +85,16 @@ const OrderSchema: Schema<IOrder> = new Schema(
     paymentStatus: {
       type: String,
       required: true,
-      enum: ['unpaid', 'paid'],
+      enum: ['unpaid', 'paid', 'pending'],
       default: 'unpaid',
     },
+    paymentMethod: {
+      type: String,
+      enum: ['online', 'cash'],
+      default: 'cash',
+    },
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
     notes: { type: String },
   },
   { timestamps: true },
