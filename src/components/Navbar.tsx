@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
 import { HiOutlineBell, HiOutlineEnvelope } from 'react-icons/hi2'
@@ -14,24 +14,45 @@ const Navbar: React.FC = () => {
   const { user, loading, logout } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [filteredPages, setFilteredPages] = useState<any[]>([])
+
+  // List of available dashboard pages
+  const pages = [
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'Orders', path: '/dashboard/orders' },
+    { name: 'Tables', path: '/dashboard/tables' },
+    { name: 'Menu', path: '/dashboard/menu' },
+    { name: 'Settings', path: '/dashboard/settings' },
+  ]
   const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   // Handle search submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (searchQuery.trim()) {
-      // Determine which page we're on to route appropriately
-      if (pathname === '/orders') {
-        router.push(`/orders?search=${encodeURIComponent(searchQuery.trim())}`)
-      } else {
-        // General search across dashboard
-        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-      }
+    if (filteredPages.length > 0) {
+      router.push(filteredPages[0].path)
+      setShowDropdown(false)
+      setSearchQuery('')
     }
+  }
+
+  // Handle input change for dashboard page search
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    if (value.trim() === '') {
+      setFilteredPages([])
+      setShowDropdown(false)
+      return
+    }
+    const filtered = pages.filter((page) =>
+      page.name.toLowerCase().includes(value.toLowerCase()),
+    )
+    setFilteredPages(filtered)
+    setShowDropdown(filtered.length > 0)
   }
 
   // Initialize search query from URL if present
@@ -101,19 +122,50 @@ const Navbar: React.FC = () => {
       >
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none transition-all duration-200">
           <CiSearch
-            className={`font-bold ${isSearchFocused ? 'text-blue-500' : 'text-black'}`}
+            className={`font-bold ${isSearchFocused ? 'text-primary' : 'text-black'}`}
             style={{ fontSize: 24 }}
           />
         </span>
         <input
           ref={searchInputRef}
-          className={`bg-white border-none text-gray-800 py-3 ring-2 ${isSearchFocused ? 'ring-blue-300' : 'ring-transparent'} outline-none active:outline-none pl-12 pr-12 rounded-full w-full text-sm sm:text-base transition-all duration-200 shadow-sm hover:shadow-md focus:shadow-md`}
-          placeholder="Search..."
+          className={`bg-white border-none text-gray-800 py-3 ring-2 ${isSearchFocused ? 'ring-[#ffc400d5]' : 'ring-transparent'} outline-none active:outline-none pl-12 pr-12 rounded-full w-full text-sm sm:text-base transition-all duration-200 shadow-sm hover:shadow-md focus:shadow-md`}
+          style={{
+            boxShadow: isSearchFocused ? '0 0 0 2px #ffc300' : undefined,
+            borderColor: '#ffc300',
+          }}
+          placeholder="Search pages..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsSearchFocused(true)}
-          onBlur={() => setIsSearchFocused(false)}
+          onChange={handleInputChange}
+          onFocus={() => {
+            setIsSearchFocused(true)
+            if (filteredPages.length > 0) setShowDropdown(true)
+          }}
+          onBlur={() => setTimeout(() => setIsSearchFocused(false), 100)}
+          autoComplete="off"
         />
+        {/* Dropdown for dashboard page search */}
+        {showDropdown && (
+          <div className="absolute left-0 top-12 w-full bg-white border border-[#ffc300] rounded-xl shadow-lg z-50">
+            {filteredPages.map((page) => (
+              <button
+                key={page.path}
+                className="w-full text-left px-4 py-2 hover:bg-[#ffc300]/10 focus:bg-[#ffc300]/20 focus:outline-none text-base"
+                tabIndex={0}
+                style={{ color: '#222' }}
+                onMouseDown={() => {
+                  router.push(page.path)
+                  setShowDropdown(false)
+                  setSearchQuery('')
+                }}
+              >
+                {page.name}
+              </button>
+            ))}
+            {filteredPages.length === 0 && (
+              <div className="px-4 py-2 text-gray-400">No pages found</div>
+            )}
+          </div>
+        )}
         {searchQuery && (
           <button
             type="button"
@@ -127,8 +179,15 @@ const Navbar: React.FC = () => {
         <button
           type="submit"
           className={`absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full ${
-            searchQuery.trim() ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300'
+            searchQuery.trim()
+              ? 'bg-[#ffc300] hover:bg-[#e6b800]'
+              : 'bg-gray-300'
           } transition-colors`}
+          style={
+            searchQuery.trim()
+              ? { background: '#ffc300', borderColor: '#ffc300' }
+              : {}
+          }
           disabled={!searchQuery.trim()}
           aria-label="Search"
         >
