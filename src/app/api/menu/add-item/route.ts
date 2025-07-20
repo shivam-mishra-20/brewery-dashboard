@@ -11,67 +11,69 @@ import { MenuItemModel } from '@/models/MenuItemModel'
 // This handler accepts both form data with files and JSON data
 export async function POST(request: NextRequest) {
   try {
-    const contentType = request.headers.get('content-type') || '';
-    
+    const contentType = request.headers.get('content-type') || ''
+
     // Variables to store our menu item data
-    let name = '';
-    let description = '';
-    let price = 0;
-    let category = '';
-    let available = true;
-    let images: File[] = [];
-    let videoFile: File | null = null;
-    let ingredients: MenuItemIngredient[] = [];
-    let addOns = [];
-    let imageURLs: string[] = []; // For direct URLs from JSON
+    let name = ''
+    let description = ''
+    let price = 0
+    let category = ''
+    let available = true
+    const images: File[] = []
+    let videoFile: File | null = null
+    let ingredients: MenuItemIngredient[] = []
+    let addOns = []
+    let imageURLs: string[] = [] // For direct URLs from JSON
 
     // Handle different content types (multipart/form-data vs application/json)
     if (contentType.includes('multipart/form-data')) {
       // Get form data (multipart/form-data for file uploads)
-      console.log('Processing form data with files');
-      const formData = await request.formData();
+      console.log('Processing form data with files')
+      const formData = await request.formData()
 
       // Extract fields from form data
-      name = formData.get('name') as string;
-      description = formData.get('description') as string;
-      price = parseFloat(formData.get('price') as string);
-      category = formData.get('category') as string;
-      available = formData.get('available') === 'true';
-      
+      name = formData.get('name') as string
+      description = formData.get('description') as string
+      price = parseFloat(formData.get('price') as string)
+      category = formData.get('category') as string
+      available = formData.get('available') === 'true'
+
       // Support up to 3 images
       for (let i = 0; i < 3; i++) {
-        const img = formData.get(`image${i}`) as File | null;
-        if (img && img.size > 0) images.push(img);
+        const img = formData.get(`image${i}`) as File | null
+        if (img && img.size > 0) images.push(img)
       }
 
       // Get the video file if provided
-      videoFile = formData.get('video') as File | null;
+      videoFile = formData.get('video') as File | null
 
       // Get the ingredients if provided
-      const ingredientsStr = formData.get('ingredients') as string | null;
-      ingredients = ingredientsStr ? JSON.parse(ingredientsStr) : [];
+      const ingredientsStr = formData.get('ingredients') as string | null
+      ingredients = ingredientsStr ? JSON.parse(ingredientsStr) : []
 
       // Get the add-ons if provided
-      const addOnsStr = formData.get('addOns') as string | null;
-      addOns = addOnsStr ? JSON.parse(addOnsStr) : [];
-    } 
-    else {
+      const addOnsStr = formData.get('addOns') as string | null
+      addOns = addOnsStr ? JSON.parse(addOnsStr) : []
+    } else {
       // Handle JSON data
-      console.log('Processing JSON data');
-      const jsonData = await request.json();
-      
-      name = jsonData.name;
-      description = jsonData.description;
-      price = typeof jsonData.price === 'string' ? parseFloat(jsonData.price) : jsonData.price;
-      category = jsonData.category;
-      available = !!jsonData.available;
-      
+      console.log('Processing JSON data')
+      const jsonData = await request.json()
+
+      name = jsonData.name
+      description = jsonData.description
+      price =
+        typeof jsonData.price === 'string'
+          ? parseFloat(jsonData.price)
+          : jsonData.price
+      category = jsonData.category
+      available = !!jsonData.available
+
       // For JSON requests, we're dealing with image URLs directly, not files
-      imageURLs = jsonData.imageURLs || [];
-      
+      imageURLs = jsonData.imageURLs || []
+
       // Get other fields
-      ingredients = jsonData.ingredients || [];
-      addOns = jsonData.addOns || [];
+      ingredients = jsonData.ingredients || []
+      addOns = jsonData.addOns || []
     }
 
     // Validate required fields
@@ -87,89 +89,90 @@ export async function POST(request: NextRequest) {
           },
         },
         { status: 400 },
-      );
+      )
     }
 
-    const uploadedImageURLs: string[] = [...imageURLs]; // Start with direct URLs if any
-    const uploadedImageNames: string[] = [];
+    const uploadedImageURLs: string[] = [...imageURLs] // Start with direct URLs if any
+    const uploadedImageNames: string[] = []
 
     // Upload images to Firebase Storage if they exist
     if (images.length > 0) {
       try {
         for (const image of images) {
-          const imageName = image.name;
-          const filename = `${uuidv4()}_${imageName}`;
-          const storageRef = ref(storage, `menu-items/${filename}`);
-          const buffer = await image.arrayBuffer();
-          
+          const imageName = image.name
+          const filename = `${uuidv4()}_${imageName}`
+          const storageRef = ref(storage, `menu-items/${filename}`)
+          const buffer = await image.arrayBuffer()
+
           // Detect content-type from file name
-          const contentType = mime.lookup(imageName) || 'application/octet-stream';
-          
-          await uploadBytes(storageRef, buffer, { contentType });
-          const imageURL = await getDownloadURL(storageRef);
-          
-          uploadedImageURLs.push(imageURL);
-          uploadedImageNames.push(imageName);
+          const contentType =
+            mime.lookup(imageName) || 'application/octet-stream'
+
+          await uploadBytes(storageRef, buffer, { contentType })
+          const imageURL = await getDownloadURL(storageRef)
+
+          uploadedImageURLs.push(imageURL)
+          uploadedImageNames.push(imageName)
         }
       } catch (uploadError) {
-        console.error('Error uploading image:', uploadError);
+        console.error('Error uploading image:', uploadError)
         return NextResponse.json(
           { error: 'Failed to upload image' },
           { status: 500 },
-        );
+        )
       }
     }
 
     // Video upload handling
-    let videoUrl = '';
-    let videoThumbnailUrl = '';
+    let videoUrl = ''
+    let videoThumbnailUrl = ''
 
     if (videoFile && videoFile.size > 0) {
       try {
         // Upload video to Firebase Storage
-        const videoName = videoFile.name;
-        const videoFilename = `${uuidv4()}_${videoName}`;
-        const videoStorageRef = ref(storage, `menu-videos/${videoFilename}`);
-        const videoBuffer = await videoFile.arrayBuffer();
-        const videoContentType = mime.lookup(videoName) || 'video/mp4';
+        const videoName = videoFile.name
+        const videoFilename = `${uuidv4()}_${videoName}`
+        const videoStorageRef = ref(storage, `menu-videos/${videoFilename}`)
+        const videoBuffer = await videoFile.arrayBuffer()
+        const videoContentType = mime.lookup(videoName) || 'video/mp4'
 
         await uploadBytes(videoStorageRef, videoBuffer, {
           contentType: videoContentType,
-        });
-        videoUrl = await getDownloadURL(videoStorageRef);
+        })
+        videoUrl = await getDownloadURL(videoStorageRef)
 
         // Generate a thumbnail URL (using the video URL for now)
         // In a production system, you might want to generate an actual thumbnail
-        videoThumbnailUrl = videoUrl;
+        videoThumbnailUrl = videoUrl
       } catch (uploadError) {
-        console.error('Error uploading video:', uploadError);
+        console.error('Error uploading video:', uploadError)
         return NextResponse.json(
           { error: 'Failed to upload video' },
           { status: 500 },
-        );
+        )
       }
     }
 
     // Validate that all ingredients exist in inventory
     if (ingredients.length > 0) {
       const validationResult = await withDBRetry(async () => {
-        const missingItems = [];
+        const missingItems = []
 
         for (const ingredient of ingredients) {
           const inventoryItem = await InventoryItem.findById(
             ingredient.inventoryItemId,
-          );
+          )
 
           if (!inventoryItem) {
             missingItems.push({
               name: ingredient.inventoryItemName || 'Unknown item',
               error: 'Item not found in inventory',
-            });
+            })
           }
         }
 
-        return missingItems;
-      });
+        return missingItems
+      })
 
       if (validationResult.length > 0) {
         return NextResponse.json(
@@ -178,7 +181,7 @@ export async function POST(request: NextRequest) {
             details: validationResult,
           },
           { status: 400 },
-        );
+        )
       }
     }
 
@@ -199,28 +202,28 @@ export async function POST(request: NextRequest) {
         available,
         ingredients: ingredients.length > 0 ? ingredients : [],
         addOns: addOns.length > 0 ? addOns : [],
-      });
-      
+      })
+
       console.log('Creating menu item with data:', {
         name,
         imageCount: uploadedImageURLs.length,
-        imageURLs: uploadedImageURLs
-      });
-      
-      await newMenuItem.save();
-      return newMenuItem;
-    });
+        imageURLs: uploadedImageURLs,
+      })
+
+      await newMenuItem.save()
+      return newMenuItem
+    })
 
     return NextResponse.json({
       success: true,
       id: menuItem._id,
       message: 'Menu item created successfully',
-    });
+    })
   } catch (error) {
-    console.error('Error adding menu item:', error);
+    console.error('Error adding menu item:', error)
     return NextResponse.json(
       { error: 'Failed to add menu item', details: (error as Error).message },
       { status: 500 },
-    );
+    )
   }
 }

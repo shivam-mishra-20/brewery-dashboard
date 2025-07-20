@@ -7,7 +7,7 @@ import { CartProvider } from '@/context/CartContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 
 export const metadata: Metadata = {
-  title: 'Dashboard',
+  title: 'Work Brew Cafe',
   description:
     'Order management, analytics, and operations for cafes & restaurants.',
 }
@@ -19,6 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/coffee.png" type="image/png" />
+      </head>
       <body>
         <div style={{ minHeight: '100vh', paddingBottom: '4.5rem' }}>
           <ThemeProvider>
