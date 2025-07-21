@@ -24,6 +24,8 @@ const Navbar: React.FC = () => {
     { name: 'Tables', path: '/dashboard/tables' },
     { name: 'Menu', path: '/dashboard/menu' },
     { name: 'Settings', path: '/dashboard/settings' },
+    { name: 'Suppliers', path: '/dashboard/inventory/suppliers' },
+    { name: 'Inventory', path: '/dashboard/inventory' },
   ]
   const router = useRouter()
   const searchParams = useSearchParams()

@@ -302,6 +302,7 @@ export default function Dashboard() {
     barChartData,
     lineChartData,
     monthlyRevenueData,
+    fetchDashboardData,
   } = useDashboardData()
 
   const statsData = [
@@ -691,6 +692,7 @@ export default function Dashboard() {
                     notes,
                   })
                   setEditOrderModal(false)
+                  fetchDashboardData() // <-- Add this line to refresh data after edit
                   router.refresh()
                 }}
               >

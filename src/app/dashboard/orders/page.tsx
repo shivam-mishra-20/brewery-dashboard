@@ -20,7 +20,7 @@ import {
   Typography,
 } from 'antd'
 import { format, formatDistanceToNow } from 'date-fns'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { BsPlusLg, BsSearch } from 'react-icons/bs'
 import { CiCircleMore } from 'react-icons/ci'
 import NewOrderForm from '@/components/NewOrderForm'
@@ -80,6 +80,7 @@ export default function OrdersPage() {
   const [showNewOrderForm, setShowNewOrderForm] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [drawerVisible, setDrawerVisible] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1) // <-- Add this line
 
   // Fetch orders on component mount
   useEffect(() => {
@@ -140,6 +141,16 @@ export default function OrdersPage() {
 
     return true
   })
+
+  // When orders change, if current page is out of range, reset to last page
+  useEffect(() => {
+    if (filteredOrders && filteredOrders.length > 0) {
+      const totalPages = Math.ceil(filteredOrders.length / 10)
+      if (currentPage > totalPages) {
+        setCurrentPage(totalPages)
+      }
+    }
+  }, [filteredOrders])
 
   // Show order details in drawer
   const showOrderDetails = (order: any) => {
@@ -405,7 +416,11 @@ export default function OrdersPage() {
               columns={columns}
               dataSource={filteredOrders}
               rowKey="id"
-              pagination={{ pageSize: 10 }}
+              pagination={{
+                pageSize: 10,
+                current: currentPage, // <-- Add this line
+                onChange: (page) => setCurrentPage(page), // <-- Add this line
+              }}
               className="custom-table min-w-[700px]"
               scroll={{ x: true }}
             />

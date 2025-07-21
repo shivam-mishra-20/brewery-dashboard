@@ -593,12 +593,12 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     async (id: string, available: boolean): Promise<void> => {
       try {
         setLoading(true)
-        const res = await fetch(`/api/menu/toggle-availability?id=${id}`, {
-          method: 'PUT',
+        const res = await fetch('/api/menu/toggle-availability', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ available }),
+          body: JSON.stringify({ id, available }), // <-- send both in body
         })
 
         if (!res.ok) {
