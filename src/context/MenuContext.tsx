@@ -9,32 +9,44 @@ import React, {
   useState,
 } from 'react'
 import { MenuItem, MenuItemFormData } from '@/models/MenuItem'
+import {
+  addMenuCategory,
+  deleteMenuCategory,
+  editMenuCategory,
+  getMenuCategories,
+} from '@/services/menuService'
 
-type MenuContextType = {
+export type MenuContextType = {
   menuItems: MenuItem[]
-  categories: string[]
   loading: boolean
   error: string | null
-  selectedMenuItem: MenuItem | null
+  categories: string[]
+  selectedMenuItem: MenuItem | null // <-- Add this line
+  setSelectedMenuItem: (item: MenuItem | null) => void // <-- Add this line
   loadMenuItemsByCategory: (category: string) => Promise<void>
   loadMenuItemById: (id: string) => Promise<void>
   addMenuItem: (formData: MenuItemFormData) => Promise<void>
   updateMenuItem: (id: string, formData: MenuItemFormData) => Promise<void>
   deleteMenuItem: (id: string) => Promise<void>
   toggleAvailability: (id: string, available: boolean) => Promise<void>
-  setSelectedMenuItem: (item: MenuItem | null) => void
+  addCategory: (name: string) => Promise<void>
+  editCategory: (oldName: string, newName: string) => Promise<void>
+  removeCategory: (name: string) => Promise<void>
+  loadCategories: () => Promise<void>
+  // ...other properties
 }
 
 const MenuContext = createContext<MenuContextType | undefined>(undefined)
 
 export function MenuProvider({ children }: { children: React.ReactNode }) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
-  const [categories, setCategories] = useState<string[]>(['All'])
+
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem | null>(
     null,
   )
+  const [categories, setCategories] = useState<string[]>(['All'])
 
   // Load menu items by category
   const loadMenuItemsByCategory = useCallback(async (category: string) => {
@@ -102,15 +114,6 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         `Setting ${filteredItems.length} filtered items for category '${category}'`,
       )
       setMenuItems(filteredItems)
-
-      // Extract unique categories
-      const allCategories = ['All']
-      formattedItems.forEach((item: MenuItem) => {
-        if (item.category && !allCategories.includes(item.category)) {
-          allCategories.push(item.category)
-        }
-      })
-      setCategories(allCategories)
     } catch (err) {
       console.error('Error loading menu items:', err)
       setError(err instanceof Error ? err.message : 'Failed to load menu items')
@@ -215,15 +218,6 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         }))
 
         setMenuItems(formattedItems)
-
-        // Extract unique categories
-        const allCategories = ['All']
-        formattedItems.forEach((item: MenuItem) => {
-          if (item.category && !allCategories.includes(item.category)) {
-            allCategories.push(item.category)
-          }
-        })
-        setCategories(allCategories)
       } catch (err) {
         console.error('Error loading menu item by ID:', err)
         setError(
@@ -636,9 +630,35 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     [selectedMenuItem],
   )
 
+  // Category management
+  const loadCategories = async (): Promise<void> => {
+    try {
+      const categoryList = await getMenuCategories()
+      setCategories(['All', ...categoryList.filter((c) => c !== 'All')])
+    } catch (err) {
+      setCategories(['All'])
+    }
+  }
+
+  const addCategory = async (name: string) => {
+    await addMenuCategory(name)
+    await loadCategories()
+  }
+
+  const editCategory = async (oldName: string, newName: string) => {
+    await editMenuCategory(oldName, newName)
+    await loadCategories()
+  }
+
+  const removeCategory = async (name: string) => {
+    await deleteMenuCategory(name)
+    await loadCategories()
+  }
+
   // Load initial data
   useEffect(() => {
     loadMenuItemsByCategory('All')
+    loadCategories()
   }, [loadMenuItemsByCategory])
 
   const value = {
@@ -654,9 +674,36 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     deleteMenuItem,
     toggleAvailability,
     setSelectedMenuItem,
+    addCategory,
+    editCategory,
+    removeCategory,
+    loadCategories,
   }
 
-  return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>
+  return (
+    <MenuContext.Provider
+      value={{
+        menuItems,
+        loading,
+        error,
+        categories,
+        selectedMenuItem,
+        loadMenuItemsByCategory,
+        loadMenuItemById,
+        addMenuItem,
+        updateMenuItem,
+        deleteMenuItem,
+        toggleAvailability,
+        setSelectedMenuItem,
+        addCategory,
+        editCategory,
+        removeCategory,
+        loadCategories,
+      }}
+    >
+      {children}
+    </MenuContext.Provider>
+  )
 }
 
 export function useMenu() {

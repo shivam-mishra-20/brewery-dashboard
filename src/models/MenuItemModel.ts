@@ -35,11 +35,7 @@ const MenuItemSchema: Schema<IMenuItem> = new Schema(
     name: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    category: {
-      type: String,
-      required: true,
-      enum: [...DEFAULT_CATEGORIES, 'Other'],
-    },
+    category: { type: String, required: true }, // <-- NO ENUM HERE
     image: { type: String, default: '' },
     imageURL: { type: String, default: '' },
     images: { type: [String], required: true, default: [] },

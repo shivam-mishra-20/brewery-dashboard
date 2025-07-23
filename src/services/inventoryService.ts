@@ -932,3 +932,23 @@ export const toggleAutoReorder = async (
     throw error
   }
 }
+
+export const addInventoryCategory = async (name: string) => {
+  try {
+    await axios.post('/api/categories', { name, type: 'inventory' })
+  } catch (err: any) {
+    if (err.response?.status === 409) {
+      // Show a friendly message
+      throw new Error('Category already exists')
+    }
+    throw err
+  }
+}
+
+export const editInventoryCategory = async (oldName: string, newName: string): Promise<void> => {
+  await axios.put('/api/categories', { oldName, newName, type: 'inventory' })
+}
+
+export const deleteInventoryCategory = async (name: string): Promise<void> => {
+  await axios.delete('/api/categories', { data: { name, type: 'inventory' } })
+}

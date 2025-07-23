@@ -1,4 +1,5 @@
 import { MenuItem, MenuItemFormData } from '@/models/MenuItem'
+import axios from 'axios'
 
 export const getAllMenuItems = async (): Promise<MenuItem[]> => {
   try {
@@ -211,7 +212,24 @@ export const toggleMenuItemAvailability = async (
       throw new Error(errorData.error || 'Failed to update availability')
     }
   } catch (error) {
-    console.error('Error toggling menu item availability:', error)
+    console.error('Error updating menu item availability:', error)
     throw error
   }
+}
+
+export const getMenuCategories = async (): Promise<string[]> => {
+  const res = await axios.get('/api/categories?type=menu')
+  return res.data.categories.map((cat: any) => cat.name)
+}
+
+export const addMenuCategory = async (name: string) => {
+  await axios.post('/api/categories', { name, type: 'menu' })
+}
+
+export const editMenuCategory = async (oldName: string, newName: string): Promise<void> => {
+  await axios.put('/api/categories', { oldName, newName, type: 'menu' })
+}
+
+export const deleteMenuCategory = async (name: string): Promise<void> => {
+  await axios.delete('/api/categories', { data: { name, type: 'menu' } })
 }

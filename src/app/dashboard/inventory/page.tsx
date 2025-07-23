@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { BsPlusCircle, BsSearch } from 'react-icons/bs'
 import { TbLoader3 } from 'react-icons/tb'
 import AutoReorderSettings from '@/components/AutoReorderSettings'
+import CategoryManagerModal from '@/components/CategoryManagerModal'
 import ConfirmationDialog from '@/components/ConfirmationDialog'
 import InventoryItemCard from '@/components/InventoryItemCard'
 import InventoryItemForm from '@/components/InventoryItemForm'
@@ -30,6 +31,8 @@ export default function InventoryPage() {
     getLowStockItems,
     setAutoReorder,
     addCategory,
+    editCategory,
+    removeCategory,
     loadCategories,
   } = useInventory()
 
@@ -41,6 +44,7 @@ export default function InventoryPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | null>(null)
   const [showLowStockOnly, setShowLowStockOnly] = useState(false)
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false)
 
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -240,6 +244,20 @@ export default function InventoryPage() {
   // Count of low stock items
   const [lowStockCount, setLowStockCount] = useState(0)
 
+  // CRUD handlers for categories
+  const handleAddCategory = async (name: string) => {
+    await addCategory(name)
+    await loadCategories()
+  }
+  const handleEditCategory = async (oldName: string, newName: string) => {
+    await editCategory(oldName, newName)
+    await loadCategories()
+  }
+  const handleDeleteCategory = async (name: string) => {
+    await removeCategory(name)
+    await loadCategories()
+  }
+
   return (
     <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#f7f7f7] rounded-2xl shadow-inner custom-scrollbar">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -252,19 +270,21 @@ export default function InventoryPage() {
             your menu.
           </p>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative w-full md:w-64">
-            <input
-              className="w-full py-2 pl-10 pr-4 rounded-xl border border-yellow-300 bg-white text-black text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
-              placeholder="Search inventory..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500">
-              <BsSearch className="text-xl" />
-            </span>
+        <div className="flex flex-col gap-2 w-full md:w-auto">
+          <div className="flex items-center gap-2 w-full md:w-64">
+            <div className="relative w-full">
+              <input
+                className="w-full py-2 pl-10 pr-4 rounded-xl border border-yellow-300 bg-white text-black text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
+                placeholder="Search inventory..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500">
+                <BsSearch className="text-xl" />
+              </span>
+            </div>
           </div>
-          <div className="flex   items-center gap-2">
+          <div className="flex flex-wrap gap-2 items-center w-full">
             <a
               href="/dashboard/inventory/suppliers"
               className="flex items-center gap-1 px-4 py-2 rounded-xl whitespace-nowrap border border-primary text-primary hover:bg-primary hover:text-white text-sm transition"
@@ -272,13 +292,21 @@ export default function InventoryPage() {
               Manage Suppliers
             </a>
             <button
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
               onClick={() => {
                 setEditingItem(null)
                 setIsFormOpen(true)
               }}
-              className="flex flex-nowrap whitespace-nowrap items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
             >
               <BsPlusCircle className="text-lg" /> Add Item
+            </button>
+            {/* Show Manage Categories inline on desktop, below on mobile */}
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-yellow-400 to-yellow-500 text-white font-medium shadow-inner border border-yellow-900/[0.1] text-sm hover:scale-105 transition w-full md:w-auto md:ml-2"
+              onClick={() => setIsCategoryManagerOpen(true)}
+              type="button"
+            >
+              Manage Categories
             </button>
           </div>
         </div>
@@ -409,6 +437,16 @@ export default function InventoryPage() {
           isSubmitting={isSubmitting}
         />
       )}
+
+      {/* Category Manager Modal */}
+      <CategoryManagerModal
+        open={isCategoryManagerOpen}
+        categories={categories}
+        onClose={() => setIsCategoryManagerOpen(false)}
+        onAdd={handleAddCategory}
+        onEdit={handleEditCategory}
+        onDelete={handleDeleteCategory}
+      />
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { withDBRetry } from '@/lib/mongodb'
 import InventoryItem from '@/models/db/InventoryItem'
 import { MenuItemIngredient } from '@/models/InventoryItem'
 import { MenuItemModel } from '@/models/MenuItemModel'
+import Category from '@/models/db/Category'
 
 // This handler accepts both form data with files and JSON data
 export async function POST(request: NextRequest) {
@@ -88,6 +89,18 @@ export async function POST(request: NextRequest) {
             category: !category ? 'Category is required' : null,
           },
         },
+        { status: 400 },
+      )
+    }
+
+    // Check if category exists
+    const categoryExists = await Category.findOne({
+      name: category,
+      type: 'menu',
+    })
+    if (!categoryExists) {
+      return NextResponse.json(
+        { error: 'Category does not exist' },
         { status: 400 },
       )
     }
@@ -219,10 +232,10 @@ export async function POST(request: NextRequest) {
       id: menuItem._id,
       message: 'Menu item created successfully',
     })
-  } catch (error) {
-    console.error('Error adding menu item:', error)
+  } catch (err) {
+    console.error('Add menu item error:', err)
     return NextResponse.json(
-      { error: 'Failed to add menu item', details: (error as Error).message },
+      { error: 'Failed to add menu item', details: (err as Error).message },
       { status: 500 },
     )
   }

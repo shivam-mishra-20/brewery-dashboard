@@ -480,7 +480,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
                 className="w-full rounded-xl shadow-sm !h-10"
                 size="large"
                 style={{ borderRadius: 12 }}
-                placeholder="Select or type category"
+                placeholder="Select category"
                 showSearch
                 allowClear={false}
                 filterOption={(input, option) =>
@@ -488,35 +488,6 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
                     .toLowerCase()
                     .includes(input.toLowerCase())
                 }
-                onInputKeyDown={(e) => {
-                  // Allow user to type and press Enter to set as category
-                  if (e.key === 'Enter' && e.currentTarget.value) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      category: e.currentTarget.value,
-                    }))
-                  }
-                }}
-                dropdownRender={(menu) => (
-                  <>
-                    {menu}
-                    <div className="px-3 py-2 border-t border-gray-100">
-                      <span className="text-xs text-gray-400">
-                        Type to add a new category
-                      </span>
-                    </div>
-                  </>
-                )}
-                notFoundContent={
-                  <span className="text-gray-400">
-                    Type to add new category
-                  </span>
-                }
-                // Let user type a new category and select it
-                // This enables free text entry
-                open={undefined}
-                // This disables tokenSeparators to avoid value array
-                mode={undefined}
               />
             </div>
 

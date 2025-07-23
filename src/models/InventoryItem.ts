@@ -40,3 +40,4 @@ export interface MenuItemIngredient {
   quantity: number
   unit: string
 }
+

@@ -7,7 +7,12 @@ import {
   getMenuItemsByCategory,
   toggleMenuItemAvailability,
   updateMenuItem,
+  getMenuCategories,
+  addMenuCategory,
+  editMenuCategory,
+  deleteMenuCategory,
 } from '@/services/menuService'
+import axios from 'axios'
 
 export const useMenu = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
@@ -163,8 +168,71 @@ export const useMenu = () => {
     }
   }
 
+  const addCategory = async (name: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      await addMenuCategory(name)
+      await loadCategories()
+      return true
+    } catch (err) {
+      setError('Failed to add category')
+      console.error('Error adding category:', err)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const editCategory = async (oldName: string, newName: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      await editMenuCategory(oldName, newName)
+      await loadCategories()
+      return true
+    } catch (err) {
+      setError('Failed to edit category')
+      console.error('Error editing category:', err)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const removeCategory = async (name: string) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      await deleteMenuCategory(name)
+      await loadCategories()
+      return true
+    } catch (err) {
+      setError('Failed to delete category')
+      console.error('Error deleting category:', err)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch categories from DB
+  const loadCategories = async () => {
+    try {
+      const res = await axios.get('/api/categories?type=menu')
+      setCategories(['All', ...res.data.categories.map((cat: any) => cat.name)])
+      return res.data.categories
+    } catch (err) {
+      setCategories(['All'])
+    }
+  }
+
   // Load menu items on mount
   useEffect(() => {
+    loadCategories()
     loadMenuItems()
   }, [])
 
@@ -187,5 +255,9 @@ export const useMenu = () => {
     deleteMenuItem: removeMenuItem,
     toggleAvailability,
     getMenuItemById,
+    addCategory,
+    editCategory,
+    removeCategory,
+    loadCategories,
   }
 }

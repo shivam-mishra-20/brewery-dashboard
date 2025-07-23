@@ -1,11 +1,14 @@
 'use client'
 
+import { message } from 'antd'
+import axios from 'axios'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { BsPlusCircle, BsSearch } from 'react-icons/bs'
 import { TbLoader3 } from 'react-icons/tb'
+import CategoryManagerModal from '@/components/CategoryManagerModal'
 import ConfirmationDialog from '@/components/ConfirmationDialog'
 import MenuItemCard from '@/components/MenuItemCard'
 import { useMenu } from '@/context/MenuContext'
@@ -21,6 +24,10 @@ export default function MenuPage() {
     loadMenuItemsByCategory,
     deleteMenuItem,
     toggleAvailability,
+    addCategory,
+    editCategory,
+    removeCategory,
+    loadCategories, // <-- Import loadCategories
   } = useMenu()
 
   // Local state
@@ -29,12 +36,19 @@ export default function MenuPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false)
 
   // Load menu items when the component mounts
   useEffect(() => {
     loadMenuItemsByCategory(selectedCategory)
     console.log('MenuPage loaded, selected category:', selectedCategory)
   }, []) // Empty dependency array ensures this only runs once on mount
+
+  // Load categories on mount
+  useEffect(() => {
+    loadCategories()
+    loadMenuItemsByCategory('All')
+  }, [])
 
   // Handle category change
   useEffect(() => {
@@ -96,6 +110,37 @@ export default function MenuPage() {
     }
   }
 
+  // CRUD handlers for categories (implement as needed)
+  const handleAddCategory = async (name: string) => {
+    if (categories.includes(name)) {
+      message.error('Category already exists!')
+      return
+    }
+    try {
+      await addCategory(name)
+      await loadCategories() // <-- Refresh categories after add
+      setSelectedCategory(name) // <-- Optionally select the new category
+      message.success('Category added!')
+    } catch (err: any) {
+      if (err.response?.status === 409) {
+        message.error('Category already exists!')
+        await loadCategories()
+      } else {
+        message.error('Failed to add category')
+      }
+    }
+  }
+  const handleEditCategory = async (oldName: string, newName: string) => {
+    await editCategory(oldName, newName)
+    await loadCategories() // <-- Refresh categories after edit
+    setSelectedCategory(newName) // <-- Optionally select the edited category
+  }
+  const handleDeleteCategory = async (name: string) => {
+    await removeCategory(name)
+    await loadCategories() // <-- Refresh categories after delete
+    setSelectedCategory('All') // <-- Optionally reset selection
+  }
+
   console.log('Rendering MenuPage with:', {
     menuItemsCount: menuItems?.length || 0,
     filteredItemsCount: filteredItems?.length || 0,
@@ -115,27 +160,37 @@ export default function MenuPage() {
             Manage your restaurant menu items
           </p>
         </div>
-
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative w-full md:w-64">
-            <input
-              className="w-full py-2 pl-10 pr-4 rounded-xl border border-yellow-300 bg-white text-black text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
-              placeholder="Search menu..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500">
-              <BsSearch className="text-xl" />
-            </span>
+        <div className="flex md:flex-row flex-col gap-2 w-full md:w-auto">
+          <div className="flex items-center gap-2 w-full md:w-64">
+            <div className="relative w-full">
+              <input
+                className="w-full py-2 pl-10 pr-4 rounded-xl border border-yellow-300 bg-white text-black text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
+                placeholder="Search menu..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500">
+                <BsSearch className="text-xl" />
+              </span>
+            </div>
           </div>
-          <Link href="/dashboard/menu/add" passHref>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
+          <div className="flex flex-wrap gap-2 items-center w-full">
+            <Link href="/dashboard/menu/add" passHref>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
+              >
+                <BsPlusCircle className="text-lg" /> Add Item
+              </motion.button>
+            </Link>
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-yellow-400 to-yellow-500 text-white font-medium shadow-inner border border-yellow-900/[0.1] text-sm hover:scale-105 transition w-full md:w-auto md:ml-2"
+              onClick={() => setIsCategoryManagerOpen(true)}
+              type="button"
             >
-              <BsPlusCircle className="text-lg" /> Add Item
-            </motion.button>
-          </Link>
+              Manage Categories
+            </button>
+          </div>
         </div>
       </div>
 
@@ -251,6 +306,16 @@ export default function MenuPage() {
         cancelText="Cancel"
         isLoading={isDeleting}
         danger
+      />
+
+      {/* Category Manager Modal */}
+      <CategoryManagerModal
+        open={isCategoryManagerOpen}
+        categories={categories.filter((cat) => cat !== 'All')}
+        onClose={() => setIsCategoryManagerOpen(false)}
+        onAdd={handleAddCategory}
+        onEdit={handleEditCategory}
+        onDelete={handleDeleteCategory}
       />
     </div>
   )

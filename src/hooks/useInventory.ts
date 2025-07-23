@@ -27,7 +27,11 @@ import {
   updateReorderNotificationStatus,
   updateSupplier as updateSupplierService,
   validateCategory,
+  addInventoryCategory,
+  editInventoryCategory,
+  deleteInventoryCategory,
 } from '@/services/inventoryService'
+import axios from 'axios'
 
 export const useInventory = () => {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
@@ -87,9 +91,10 @@ export const useInventory = () => {
   // Load all categories from the API
   const loadCategories = async () => {
     try {
-      const categoryList = await getInventoryCategories()
-      setCategories(categoryList)
-      return categoryList
+      const res = await axios.get('/api/categories?type=inventory')
+      // Make sure to extract just the names:
+      setCategories(res.data.categories.map((cat: any) => cat.name))
+      return res.data.categories
     } catch (err) {
       console.error('Error loading categories:', err)
       message.error('Failed to load categories')
@@ -430,29 +435,39 @@ export const useInventory = () => {
   // Add a new category
   const addCategory = async (name: string): Promise<boolean> => {
     try {
-      const isValid = await validateCategory(name)
-      if (isValid) {
-        // Update the local categories state (but don't add duplicates)
-        setCategories((prev) => {
-          if (prev.includes(name)) return prev
-          const newCategories = [...prev]
-          if (name !== 'All' && !newCategories.includes(name)) {
-            newCategories.push(name)
-            newCategories.sort()
-            // Always keep 'All' at the beginning
-            if (newCategories[0] !== 'All') {
-              newCategories.splice(newCategories.indexOf('All'), 1)
-              newCategories.unshift('All')
-            }
-          }
-          return newCategories
-        })
-        return true
-      }
-      return false
+      await addInventoryCategory(name)
+      await loadCategories()
+      return true
     } catch (err) {
       console.error('Error adding category:', err)
       message.error('Failed to add category')
+      return false
+    }
+  }
+
+  const editCategory = async (
+    oldName: string,
+    newName: string,
+  ): Promise<boolean> => {
+    try {
+      await editInventoryCategory(oldName, newName)
+      await loadCategories()
+      return true
+    } catch (err) {
+      console.error('Error editing category:', err)
+      message.error('Failed to edit category')
+      return false
+    }
+  }
+
+  const removeCategory = async (name: string): Promise<boolean> => {
+    try {
+      await deleteInventoryCategory(name)
+      await loadCategories()
+      return true
+    } catch (err) {
+      console.error('Error removing category:', err)
+      message.error('Failed to remove category')
       return false
     }
   }
@@ -513,5 +528,7 @@ export const useInventory = () => {
     loadTransactions,
     setAutoReorder,
     addCategory,
+    editCategory,
+    removeCategory,
   }
 }
