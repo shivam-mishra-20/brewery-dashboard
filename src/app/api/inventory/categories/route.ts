@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/utils/dbConnect'
 import Category from '@/models/db/Category' // Adjust path if needed
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   await dbConnect()
   const categories = await Category.find({ type: 'inventory' }).sort({ name: 1 })
   return NextResponse.json({ categories })

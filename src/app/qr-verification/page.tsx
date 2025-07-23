@@ -115,7 +115,7 @@ export default function QrCodeVerification() {
       isMounted = false
       if (countdownRef.current) clearInterval(countdownRef.current)
     }
-  }, [encryptedTableData])
+  }, [router, encryptedTableData])
 
   const handleContinue = () => {
     router.push('/customer/menu')

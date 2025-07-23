@@ -142,7 +142,6 @@ export default function MenuPage() {
   }
 
   console.log('Rendering MenuPage with:', {
-    menuItemsCount: menuItems?.length || 0,
     filteredItemsCount: filteredItems?.length || 0,
     loading,
     error,

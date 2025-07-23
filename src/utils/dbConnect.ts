@@ -14,7 +14,7 @@ if (!MONGO_URI) {
 
 // Add a type declaration for global.mongoose
 declare global {
-  // eslint-disable-next-line no-var
+  // ...existing code...
   var mongoose:
     | { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null }
     | undefined

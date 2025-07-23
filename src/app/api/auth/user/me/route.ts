@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// ...existing code...
 import jwt from 'jsonwebtoken'
 import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/mongodb'

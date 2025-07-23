@@ -114,9 +114,9 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         `Setting ${filteredItems.length} filtered items for category '${category}'`,
       )
       setMenuItems(filteredItems)
-    } catch (err) {
-      console.error('Error loading menu items:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load menu items')
+    } catch {
+      console.error('Error loading menu items')
+      setError('Failed to load menu items')
       setMenuItems([]) // Reset menu items on error
     } finally {
       setLoading(false)

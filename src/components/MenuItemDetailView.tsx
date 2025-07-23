@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import React from 'react'
 import { BsXLg } from 'react-icons/bs'
 import { InventoryItem } from '@/models/InventoryItem'
@@ -71,10 +72,14 @@ const MenuItemDetailView: React.FC<MenuItemDetailViewProps> = ({
           {/* Item image */}
           {item.imageURL && (
             <div className="mb-5">
-              <img
+              <Image
                 src={item.imageURL}
                 alt={item.name}
+                width={800}
+                height={300}
                 className="w-full h-48 object-cover rounded-lg"
+                style={{ objectFit: 'cover', borderRadius: '0.5rem' }}
+                priority
               />
             </div>
           )}

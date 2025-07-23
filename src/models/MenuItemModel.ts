@@ -1,6 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose'
 import { MenuItemIngredient } from './InventoryItem'
-import { DEFAULT_CATEGORIES } from './MenuItem'
+// ...existing code...
 
 // Interface for add-on items that can be added to menu items
 export interface AddOnItem {

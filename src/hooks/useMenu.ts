@@ -7,7 +7,7 @@ import {
   getMenuItemsByCategory,
   toggleMenuItemAvailability,
   updateMenuItem,
-  getMenuCategories,
+  // ...existing code...
   addMenuCategory,
   editMenuCategory,
   deleteMenuCategory,
@@ -34,9 +34,9 @@ export const useMenu = () => {
         ...Array.from(new Set(items.map((item) => item.category))),
       ]
       setCategories(uniqueCategories)
-    } catch (err) {
+    } catch {
       setError('Failed to load menu items')
-      console.error('Error loading menu items:', err)
+      console.error('Error loading menu items')
     } finally {
       setLoading(false)
     }
