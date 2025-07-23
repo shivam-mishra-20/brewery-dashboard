@@ -39,7 +39,7 @@ export default function EditMenuItemPage() {
         ? params.id[0]
         : params.id
       : ''
-  }, []) // Empty dependency array to create stable reference
+  }, [params.id]) // Add params.id to dependency array
 
   // Use the menu context to load the menu item by ID
   useEffect(() => {

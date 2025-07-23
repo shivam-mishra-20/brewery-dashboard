@@ -1,7 +1,7 @@
 'use client'
 
 import { message } from 'antd'
-import axios from 'axios'
+// import axios from 'axios'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -38,22 +38,16 @@ export default function MenuPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false)
 
-  // Load menu items when the component mounts
-  useEffect(() => {
-    loadMenuItemsByCategory(selectedCategory)
-    console.log('MenuPage loaded, selected category:', selectedCategory)
-  }, []) // Empty dependency array ensures this only runs once on mount
-
   // Load categories on mount
   useEffect(() => {
     loadCategories()
-    loadMenuItemsByCategory('All')
   }, [])
 
-  // Handle category change
+  // Load menu items when selectedCategory changes
   useEffect(() => {
     if (selectedCategory) {
       loadMenuItemsByCategory(selectedCategory)
+      console.log('MenuPage loaded, selected category:', selectedCategory)
     }
   }, [selectedCategory, loadMenuItemsByCategory])
 

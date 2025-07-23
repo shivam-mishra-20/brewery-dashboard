@@ -225,7 +225,7 @@ export const useMenu = () => {
       const res = await axios.get('/api/categories?type=menu')
       setCategories(['All', ...res.data.categories.map((cat: any) => cat.name)])
       return res.data.categories
-    } catch (err) {
+    } catch {
       setCategories(['All'])
     }
   }

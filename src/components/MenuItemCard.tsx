@@ -106,7 +106,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
       const interval = setInterval(nextSlide, 5000)
       return () => clearInterval(interval)
     }
-  }, [isHovering, images.length, isShowingVideo])
+  }, [isHovering, images.length, isShowingVideo, nextSlide])
 
   // Animation variants
   const cardVariants = {

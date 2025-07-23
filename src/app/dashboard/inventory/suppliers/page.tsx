@@ -29,10 +29,28 @@ export default function SuppliersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
+  const loadSuppliers = async () => {
+    setIsLoading(true)
+    try {
+      const allSuppliers = await getAllSuppliers(false) // Get all suppliers including inactive ones
+      setSuppliers(allSuppliers)
+      setFilteredSuppliers(
+        showInactive
+          ? allSuppliers
+          : allSuppliers.filter((supplier) => supplier.isActive),
+      )
+    } catch (error) {
+      console.error('Failed to load suppliers:', error)
+      // Handle error (show toast, etc.)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // Load suppliers on mount
   useEffect(() => {
     loadSuppliers()
-  }, [])
+  }, [loadSuppliers])
 
   // Filter suppliers when search term changes
   useEffect(() => {
@@ -60,24 +78,6 @@ export default function SuppliersPage() {
 
     setFilteredSuppliers(filtered)
   }, [searchTerm, suppliers, showInactive])
-
-  const loadSuppliers = async () => {
-    setIsLoading(true)
-    try {
-      const allSuppliers = await getAllSuppliers(false) // Get all suppliers including inactive ones
-      setSuppliers(allSuppliers)
-      setFilteredSuppliers(
-        showInactive
-          ? allSuppliers
-          : allSuppliers.filter((supplier) => supplier.isActive),
-      )
-    } catch (error) {
-      console.error('Failed to load suppliers:', error)
-      // Handle error (show toast, etc.)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleAddSupplier = async (formData: SupplierFormData) => {
     setIsSubmitting(true)

@@ -30,7 +30,7 @@ export default function CategoryManagerModal({
       await onAdd(newCategory.trim())
       setNewCategory('')
       message.success('Category added')
-    } catch (e) {
+    } catch {
       message.error('Failed to add category')
     }
     setLoading(false)
@@ -45,7 +45,7 @@ export default function CategoryManagerModal({
     try {
       await onEdit(oldName, editValue.trim())
       message.success('Category updated')
-    } catch (e) {
+    } catch {
       message.error('Failed to update category')
     }
     setEditing(null)
@@ -57,7 +57,7 @@ export default function CategoryManagerModal({
     try {
       await onDelete(name)
       message.success('Category deleted')
-    } catch (e) {
+    } catch {
       message.error('Failed to delete category')
     }
     setLoading(false)

@@ -635,7 +635,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     try {
       const categoryList = await getMenuCategories()
       setCategories(['All', ...categoryList.filter((c) => c !== 'All')])
-    } catch (err) {
+    } catch {
       setCategories(['All'])
     }
   }
@@ -661,24 +661,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     loadCategories()
   }, [loadMenuItemsByCategory])
 
-  const value = {
-    menuItems,
-    categories,
-    loading,
-    error,
-    selectedMenuItem,
-    loadMenuItemsByCategory,
-    loadMenuItemById,
-    addMenuItem,
-    updateMenuItem,
-    deleteMenuItem,
-    toggleAvailability,
-    setSelectedMenuItem,
-    addCategory,
-    editCategory,
-    removeCategory,
-    loadCategories,
-  }
+  // ...existing code...
 
   return (
     <MenuContext.Provider

@@ -150,7 +150,7 @@ export default function OrdersPage() {
         setCurrentPage(totalPages)
       }
     }
-  }, [filteredOrders])
+  }, [filteredOrders, currentPage])
 
   // Show order details in drawer
   const showOrderDetails = (order: any) => {
