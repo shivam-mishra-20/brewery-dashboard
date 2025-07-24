@@ -35,6 +35,18 @@ body {
   font-family: 'Inter';
 }
 
+/* Enable scrolling for specific functional pages */
+body:has(.allow-scroll) {
+  overflow-y: auto !important;
+}
+
+/* Disable scrolling only for home page */
+body:has([data-page='home']) {
+  overflow: hidden !important;
+  height: 100vh;
+  width: 100vw;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }

@@ -10,11 +10,16 @@ export default function LayoutClient({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const isDashboard = pathname.startsWith('/dashboard')
+  const hideBottomNav =
+    pathname.startsWith('/dashboard') ||
+    pathname === '/login' ||
+    pathname === '/' ||
+    pathname === '/not-found' ||
+    pathname === '/signup'
   return (
     <>
       <main className="w-full mx-auto light">{children}</main>
-      {!isDashboard && <BottomNavBar />}
+      {!hideBottomNav && <BottomNavBar />}
     </>
   )
 }

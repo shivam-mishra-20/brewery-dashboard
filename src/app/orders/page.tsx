@@ -781,7 +781,7 @@ function OrdersContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 px-4 py-8 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 px-4 py-8 pb-24 allow-scroll">
       {/* Notification toast */}
       {notification && (
         <div
@@ -960,7 +960,7 @@ function OrdersContent() {
 
         {/* Main content */}
         {loading && orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-amber-100 p-6">
+          <div className="flex flex-col overflow-auto overflow-y-scroll h-full items-center justify-center py-16 bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-amber-100 p-6">
             <div className="w-24 h-24 mb-4 relative">
               <div className="absolute inset-0 rounded-full border-4 border-amber-100"></div>
               <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-b-4 border-amber-500"></div>
@@ -976,7 +976,7 @@ function OrdersContent() {
             </p>
           </div>
         ) : error ? (
-          <div className="text-center bg-red-50 border border-red-200 rounded-xl shadow-sm p-8 mt-4">
+          <div className="text-center  bg-red-50 border border-red-200 rounded-xl shadow-sm p-8 mt-4">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-500 mb-4">
               <FiAlertCircle size={32} />
             </div>
@@ -992,7 +992,7 @@ function OrdersContent() {
             </button>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="text-center bg-white/80 backdrop-blur-sm border border-amber-100 rounded-xl shadow-sm p-8 mt-4">
+          <div className="text-center overflow-auto overflow-y-scroll h-full bg-white/80 backdrop-blur-sm border border-amber-100 rounded-xl shadow-sm p-8 mt-4">
             <div className="w-40 h-40 mx-auto mb-6">
               <DotLottieReact
                 src="https://lottie.host/8f640ecf-517b-4af2-a0d7-5f64686db407/aEH8wUJWWD.lottie"

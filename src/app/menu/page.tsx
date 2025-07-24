@@ -738,7 +738,7 @@ function MenuContent() {
 
 function IntroPage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-white px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 to-white px-4 allow-scroll">
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-10 flex flex-col items-center max-w-lg w-full">
         <FiCoffee className="text-amber-600 text-6xl mb-4 animate-bounce" />
         <h1 className="text-3xl md:text-4xl font-extrabold text-amber-900 mb-2 text-center">

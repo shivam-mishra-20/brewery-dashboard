@@ -38,10 +38,10 @@ function LoginPage() {
       <div className="min-h-screen flex items-center justify-center relative">
         {/* Blurred background image */}
         <div
-          className="absolute inset-0 bg-blend-multiply  bg-[#000000a5] w-full h-full z-0 bg-center bg-cover"
+          className="absolute inset-0 bg-blend-multiply backdrop-blur-md  bg-[#000000a5] w-full h-full z-0 bg-center bg-cover"
           style={{
             backgroundImage:
-              "url('https://plus.unsplash.com/premium_vector-1739541763086-14483f8e5865?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+              "url('https://plus.unsplash.com/premium_photo-1750590746718-1fcce88540a3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}

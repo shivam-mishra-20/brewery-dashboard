@@ -47,7 +47,7 @@ export default function Signup() {
           className="absolute inset-0 bg-blend-multiply  bg-[#000000a5] w-full h-full z-0 bg-center bg-cover"
           style={{
             backgroundImage:
-              "url('https://plus.unsplash.com/premium_vector-1739541763086-14483f8e5865?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+              "url('https://images.unsplash.com/photo-1586982469023-9f3e18321fc7?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8eWVsbG93JTIwYmFja2dyb3VuZCUyMGFic3RyYWN0fGVufDB8fDB8fHww')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}

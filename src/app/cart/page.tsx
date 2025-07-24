@@ -24,7 +24,7 @@ export default function CartPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 pt-8 pb-32 px-2 sm:px-0">
+    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 pt-8 pb-32 px-2 sm:px-0 allow-scroll">
       <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary text-center mb-8 tracking-tight">
         Your Cart
       </h1>

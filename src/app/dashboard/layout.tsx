@@ -51,13 +51,13 @@ export default function DashboardLayout({
         }}
       >
         <div
-          className="min-h-[95vh] overflow-x-hidden px-0 md:px-5 flex bg-background text-foreground"
+          className="min-h-[95vh] overflow-x-hidden px-0 md:px-5 flex bg-background text-foreground allow-scroll"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <Sidebar />
           <div
             className="flex-1 flex flex-col min-h-[95vh]"
-            style={{ overflow: 'hidden' }}
+            style={{ overflow: '' }}
           >
             <main className="flex-1 px-5 md:px-0 pb-6">
               <Navbar />
