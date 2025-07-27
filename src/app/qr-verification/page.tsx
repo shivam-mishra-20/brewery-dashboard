@@ -96,7 +96,12 @@ export default function QrCodeVerification() {
 
             if (timeLeft <= 0) {
               if (countdownRef.current) clearInterval(countdownRef.current)
-              if (isMounted) router.push('/customer/menu')
+              if (isMounted) {
+                // Preserve the original encrypted table data in the URL
+                router.push(
+                  `/menu?tabledata=${encodeURIComponent(encryptedTableDataRaw || '')}`,
+                )
+              }
             }
           }, 1000)
         }
@@ -118,7 +123,10 @@ export default function QrCodeVerification() {
   }, [router, encryptedTableData])
 
   const handleContinue = () => {
-    router.push('/customer/menu')
+    // Preserve the original encrypted table data in the URL
+    router.push(
+      `/menu?tabledata=${encodeURIComponent(encryptedTableDataRaw || '')}`,
+    )
   }
 
   if (loading) {
