@@ -131,8 +131,8 @@ export default function QrCodeVerification() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 border-t-4 border-indigo-600 border-solid rounded-full animate-spin mb-6"></div>
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white flex flex-col items-center justify-center p-4">
+        <div className="w-16 h-16 border-t-4 border-yellow-600 border-solid rounded-full animate-spin mb-6"></div>
         <p className="text-gray-600">Verifying table information...</p>
       </div>
     )
@@ -140,7 +140,7 @@ export default function QrCodeVerification() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white flex flex-col items-center justify-center p-4">
         <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
           <FiAlertCircle className="text-red-500 text-5xl mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -148,7 +148,7 @@ export default function QrCodeVerification() {
           </h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <Link href="/">
-            <span className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium">
+            <span className="inline-block bg-yellow-600 text-white px-6 py-3 rounded-lg font-medium">
               Go to Homepage
             </span>
           </Link>
@@ -158,7 +158,7 @@ export default function QrCodeVerification() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white flex flex-col items-center justify-center p-4">
       <motion.div
         className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center"
         initial={{ opacity: 0, y: 20 }}
@@ -177,12 +177,12 @@ export default function QrCodeVerification() {
           Table Verified!
         </h1>
 
-        <div className="bg-indigo-50 rounded-lg p-6 mb-8 mt-4">
+        <div className="bg-yellow-50 rounded-lg p-6 mb-8 mt-4">
           <p className="text-gray-600 mb-2">You are seated at:</p>
-          <h2 className="text-2xl font-semibold text-indigo-600">
+          <h2 className="text-2xl font-semibold text-yellow-600">
             Table {tableInfo?.number}
           </h2>
-          <p className="text-indigo-500 text-sm mt-1">{tableInfo?.name}</p>
+          <p className="text-yellow-500 text-sm mt-1">{tableInfo?.name}</p>
         </div>
 
         <p className="text-gray-600 mb-8">
@@ -197,8 +197,8 @@ export default function QrCodeVerification() {
         ) : null}
 
         <motion.button
-          className="w-full py-4 bg-indigo-600 text-white rounded-lg font-medium text-lg shadow-md"
-          whileHover={{ scale: 1.02, backgroundColor: '#4338ca' }}
+          className="w-full py-4 bg-yellow-600 text-white rounded-lg font-medium text-lg shadow-md"
+          whileHover={{ scale: 1.02, backgroundColor: '#ca8a04 ' }}
           whileTap={{ scale: 0.98 }}
           onClick={handleContinue}
         >
