@@ -72,26 +72,28 @@ const TableStats: React.FC<TableStatsProps> = ({ tables }) => {
           key={index}
           className={
             index === 0
-              ? 'gap-5 bg-gradient-to-bl from-primary to-secondary text-white p-5 rounded-2xl shadow-inner shadow-white/[.4] flex flex-col items-start justify-center border-2 border-primary/30 overflow-hidden'
-              : 'gap-5 bg-white p-5 rounded-2xl flex flex-col items-start justify-center'
+              ? 'gap-5 bg-gradient-to-bl from-[#04B851] to-[#039f45] text-white p-5 rounded-2xl shadow-inner shadow-[#e6f9f0]/[.4] flex flex-col items-start justify-center border-2 border-[#04B851]/30 overflow-hidden'
+              : 'gap-5 bg-[#FFFFFF] p-5 rounded-2xl flex flex-col items-start justify-center border border-[#E0E0E0]'
           }
         >
           <p
-            className={`${index === 0 ? 'text-white/90' : 'text-black'} flex items-center justify-between w-full text-md md:text-lg`}
+            className={`${index === 0 ? 'text-white/90' : 'text-[#1A1A1A]'} flex items-center justify-between w-full text-md md:text-lg font-inter-semibold`}
           >
             {stat.header}
             {index === 0 ? (
-              <BsArrowUpRightCircleFill className="text-3xl" />
+              <BsArrowUpRightCircleFill className="text-3xl text-[#e6f9f0]" />
             ) : (
-              <BsArrowUpRightCircle className="text-3xl" />
+              <BsArrowUpRightCircle className="text-3xl text-[#04B851]" />
             )}
           </p>
-          <h2 className="lg:text-5xl text-2xl md:text-4xl font-bold">
+          <h2
+            className={`lg:text-5xl text-2xl md:text-4xl font-bold ${index === 0 ? 'text-white' : 'text-[#04B851]'}`}
+          >
             {stat.value}
           </h2>
           <span
             className={
-              index === 0 ? 'text-sm text-white/80' : 'text-sm text-[#ffc300]'
+              index === 0 ? 'text-sm text-white/80' : 'text-sm text-[#4D4D4D]'
             }
           >
             {stat.description}

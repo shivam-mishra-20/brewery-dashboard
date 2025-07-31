@@ -66,8 +66,8 @@ const InventoryUsage: React.FC<InventoryUsageProps> = ({
 
   if (!menuItem.ingredients || menuItem.ingredients.length === 0) {
     return (
-      <div className="p-4 bg-gray-50 rounded-lg mt-4">
-        <p className="text-gray-500 text-sm">
+      <div className="p-4 bg-[#e6f9f0] rounded-2xl mt-4 border border-[#E0E0E0]">
+        <p className="text-[#4D4D4D] text-sm">
           No ingredients defined for this menu item.
         </p>
       </div>
@@ -75,17 +75,19 @@ const InventoryUsage: React.FC<InventoryUsageProps> = ({
   }
 
   return (
-    <div className="bg-gray-50 rounded-lg mt-4 overflow-hidden">
+    <div className="bg-[#e6f9f0] rounded-2xl mt-4 overflow-hidden border border-[#E0E0E0]">
       <div className="p-4">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">
-            <MdOutlineInventory2 className="text-yellow-600" />
-            <h3 className="font-medium">Inventory Impact</h3>
+            <MdOutlineInventory2 className="text-[#04B851]" />
+            <h3 className="font-inter-semibold text-[#1A1A1A]">
+              Inventory Impact
+            </h3>
           </div>
 
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="text-sm text-blue-500 hover:text-blue-700"
+            className="text-sm text-[#04B851] hover:text-[#039f45] font-inter-semibold"
           >
             {showDetails ? 'Hide Details' : 'Show Details'}
           </button>
@@ -93,20 +95,24 @@ const InventoryUsage: React.FC<InventoryUsageProps> = ({
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <p className="text-sm text-gray-500">Max Can Make</p>
-            <p className="font-medium">
+            <p className="text-sm text-[#4D4D4D]">Max Can Make</p>
+            <p className="font-inter-semibold text-[#1A1A1A]">
               {impact.maxCanMake === Infinity ? '∞' : impact.maxCanMake}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Cost Per Item</p>
-            <p className="font-medium">{formatCurrency(impact.totalCost)}</p>
+            <p className="text-sm text-[#4D4D4D]">Cost Per Item</p>
+            <p className="font-inter-semibold text-[#1A1A1A]">
+              {formatCurrency(impact.totalCost)}
+            </p>
           </div>
         </div>
 
         {showDetails && (
-          <div className="mt-4 border-t border-gray-200 pt-3">
-            <h4 className="font-medium mb-2 text-sm">Ingredients Impact</h4>
+          <div className="mt-4 border-t border-[#E0E0E0] pt-3">
+            <h4 className="font-inter-semibold mb-2 text-sm text-[#1A1A1A]">
+              Ingredients Impact
+            </h4>
             <ul className="space-y-2">
               {menuItem.ingredients.map((ing) => {
                 const inventoryItem = inventoryItems.find(
@@ -127,14 +133,13 @@ const InventoryUsage: React.FC<InventoryUsageProps> = ({
                     key={ing.inventoryItemId}
                     className="text-sm flex justify-between"
                   >
-                    <span>
+                    <span className="text-[#4D4D4D]">
                       {ing.inventoryItemName}: {ing.quantity} {ing.unit}
                     </span>
                     <span
-                      className={`
-                        ${isOutOfStock ? 'text-red-600 font-medium' : ''}
-                        ${isLowStock ? 'text-orange-500 font-medium' : ''}
-                      `}
+                      className={`font-inter-semibold ${
+                        isOutOfStock ? 'text-[#EB5757]' : ''
+                      } ${isLowStock ? 'text-[#F2C94C]' : 'text-[#04B851]'}`}
                     >
                       {inventoryItem.quantity} →{' '}
                       {remainingAfter < 0 ? 0 : remainingAfter}{' '}
@@ -153,7 +158,7 @@ const InventoryUsage: React.FC<InventoryUsageProps> = ({
           <div className="flex-1">
             <label
               htmlFor="quantity"
-              className="block text-sm text-gray-500 mb-1"
+              className="block text-sm text-[#4D4D4D] mb-1"
             >
               Quantity
             </label>
@@ -163,16 +168,16 @@ const InventoryUsage: React.FC<InventoryUsageProps> = ({
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none"
+              className="w-full p-2 border border-[#E0E0E0] rounded-xl focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none text-[#1A1A1A] bg-[#F9FAFB]"
             />
           </div>
           <button
             onClick={handleDeductFromInventory}
             disabled={isDeducting || !impact.canMake}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-inter-semibold text-white transition border ${
               !impact.canMake
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700'
+                ? 'bg-[#E0E0E0] cursor-not-allowed border-[#E0E0E0] text-[#4D4D4D]'
+                : 'bg-[#04B851] hover:bg-[#039f45] border-[#04B851]'
             }`}
           >
             {isDeducting ? (
@@ -185,7 +190,7 @@ const InventoryUsage: React.FC<InventoryUsageProps> = ({
         </div>
 
         {impact.outOfStockIngredients.length > 0 && (
-          <div className="mt-3 text-sm text-red-600">
+          <div className="mt-3 text-sm text-[#EB5757] font-inter-semibold">
             Not enough inventory for {quantity} {menuItem.name}(s).
           </div>
         )}

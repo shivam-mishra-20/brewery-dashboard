@@ -329,8 +329,8 @@ export default function Dashboard() {
   ]
   // Removed unused statsData2
   return (
-    <div className="flex-col  gap-4 h-[85vh] w-full flex justify-start items-start px-2 sm:px-4 md:px-6 lg:px-8 pb-3 md:pb-5 rounded-2xl bg-[#f7f7f7] overflow-y-auto custom-scrollbar relative">
-      <div className=" z-20 w-full bg-[#f7f7f7] py-2 md:py-4">
+    <div className="flex-col gap-4 h-[85vh] w-full flex justify-start items-start px-2 sm:px-4 md:px-6 lg:px-8 pb-3 md:pb-5 rounded-2xl bg-[#F9FAFB] overflow-y-auto custom-scrollbar relative">
+      <div className="z-20 w-full bg-[#F9FAFB] py-2 md:py-4">
         <DashboardHeader
           title="Dashboard"
           subtitle="Plan, prioritize, and accomplish your task with ease."
@@ -383,12 +383,12 @@ export default function Dashboard() {
                 }}
                 className={
                   index === 0
-                    ? 'group cursor-pointer hover:scale-[1.02] active:scale-[0.98] gap-5 bg-gradient-to-bl from-primary to-secondary text-white p-5 rounded-2xl shadow-inner shadow-white/[.4] flex flex-col items-start justify-center border-2 border-primary/30 overflow-hidden min-h-[170px] transition-all duration-500'
-                    : 'group cursor-pointer hover:scale-[1.02] active:scale-[0.98] gap-5 bg-white p-5 rounded-2xl flex flex-col items-start justify-center min-h-[170px] transition-all duration-500'
+                    ? 'group cursor-pointer hover:scale-[1.02] active:scale-[0.98] gap-5 bg-gradient-to-bl from-[#04B851] to-[#039f45] text-white p-5 rounded-2xl shadow-inner shadow-white/[.4] flex flex-col items-start justify-center border-2 border-[#04B851]/30 overflow-hidden min-h-[170px] transition-all duration-500'
+                    : 'group cursor-pointer hover:scale-[1.02] active:scale-[0.98] gap-5 bg-white p-5 rounded-2xl flex flex-col items-start justify-center min-h-[170px] transition-all duration-500 border border-[#E0E0E0]'
                 }
               >
                 <p
-                  className={`${index === 0 ? 'text-white/90' : 'text-black'} flex items-center justify-between w-full text-md md:text-lg`}
+                  className={`${index === 0 ? 'text-white/90' : 'text-[#1A1A1A]'} flex items-center justify-between w-full text-md md:text-lg`}
                 >
                   {stat.header}
                   <span className="relative w-10 h-8 flex items-center justify-center">
@@ -448,7 +448,7 @@ export default function Dashboard() {
                   className={
                     index === 0
                       ? 'text-sm text-white/80'
-                      : 'text-sm text-[#ffc300]'
+                      : 'text-sm text-[#04B851]'
                   }
                 >
                   {stat.description}
@@ -459,7 +459,7 @@ export default function Dashboard() {
       {/* Bento grid layout */}
       <div className="grid w-full pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {/* Top left: Bar chart */}
-        <div className="col-span-1 sm:col-span-2 bg-white p-3 sm:p-4 md:p-5 h-[300px] rounded-2xl shadow-inner flex flex-col items-start justify-center overflow-hidden md:col-start-1 md:col-span-2 md:row-span-1 lg:row-start-1">
+        <div className="col-span-1 sm:col-span-2 bg-white p-3 sm:p-4 md:p-5 h-[300px] rounded-2xl shadow-inner flex flex-col items-start justify-center overflow-hidden md:col-start-1 md:col-span-2 md:row-span-1 lg:row-start-1 border border-[#E0E0E0]">
           {loading ? (
             <div className="w-full h-full flex flex-col">
               <div className="flex justify-between items-center mb-4">
@@ -495,7 +495,7 @@ export default function Dashboard() {
           )}
         </div>
         {/* Top middle: History */}
-        <div className="gap-2 sm:gap-3 bg-white p-3 sm:p-4 md:p-5 h-[300px] rounded-2xl flex flex-col items-start justify-between py-4 sm:py-6 w-full md:col-start-3 md:col-span-1 lg:row-start-1">
+        <div className="gap-2 sm:gap-3 bg-white p-3 sm:p-4 md:p-5 h-[300px] rounded-2xl flex flex-col items-start justify-between py-4 sm:py-6 w-full md:col-start-3 md:col-span-1 lg:row-start-1 border border-[#E0E0E0]">
           <div className="flex items-center justify-between w-full">
             <h1 className="text-base sm:text-lg font-inter-semibold text-black">
               History
@@ -564,7 +564,7 @@ export default function Dashboard() {
           <div className="flex w-full pt-2 px-1 sm:px-2 justify-center items-center ">
             <button
               onClick={() => router.push('/dashboard/orders')}
-              className="text-white w-full flex-nowrap whitespace-nowrap flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm bg-gradient-to-tr from-secondary to-primary shadow-white/[.4] border border-primary/[0.1] shadow-inner py-2 rounded-2xl px-3 sm:px-5"
+              className="text-white w-full flex-nowrap whitespace-nowrap flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm bg-gradient-to-tr from-[#04B851] to-[#039f45] shadow-white/[.4] border border-[#04B851]/10 shadow-inner py-2 rounded-2xl px-3 sm:px-5"
             >
               Get More <CiCircleMore className="text-xl sm:text-2xl" />
             </button>
@@ -572,7 +572,7 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom: Line chart */}
-        <div className="col-span-1 sm:col-span-3 bg-white mt-3 p-3 sm:p-4 md:p-5 rounded-2xl flex flex-col items-start justify-center overflow-hidden md:row-start-2 md:col-start-1 md:col-span-3 lg:row-start-2 lg:col-start-1 lg:col-span-3 h-[300px]">
+        <div className="col-span-1 sm:col-span-3 bg-white mt-3 p-3 sm:p-4 md:p-5 rounded-2xl flex flex-col items-start justify-center overflow-hidden md:row-start-2 md:col-start-1 md:col-span-3 lg:row-start-2 lg:col-start-1 lg:col-span-3 h-[300px] border border-[#E0E0E0]">
           {lineChartData && lineChartData.some((d) => d.sales > 0) ? (
             <DashboardLineChart data={lineChartData} />
           ) : (
@@ -765,7 +765,7 @@ export default function Dashboard() {
             exit={{ scale: 0.9, y: 20 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
           >
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-primary to-secondary text-white">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-[#E0E0E0] bg-gradient-to-r from-[#04B851] to-[#039f45] text-white">
               <h2 className="text-xl font-semibold">Total Sales</h2>
               <button
                 onClick={() => setSalesModal(false)}
@@ -777,7 +777,7 @@ export default function Dashboard() {
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
               <div className="flex flex-col md:flex-row gap-6 mb-6">
-                <div className="bg-white rounded-xl p-4 shadow flex-1 border border-gray-100">
+                <div className="bg-white rounded-xl p-4 shadow flex-1 border border-[#E0E0E0]">
                   <h3 className="text-lg font-semibold mb-2">
                     Total Completed Orders
                   </h3>
@@ -785,7 +785,7 @@ export default function Dashboard() {
                     {stats.totalSales}
                   </p>
                 </div>
-                <div className="bg-white rounded-xl p-4 shadow flex-1 border border-gray-100">
+                <div className="bg-white rounded-xl p-4 shadow flex-1 border border-[#E0E0E0]">
                   <h3 className="text-lg font-semibold mb-2">
                     Average Order Value
                   </h3>
@@ -799,7 +799,7 @@ export default function Dashboard() {
               </div>
 
               {/* Line Chart */}
-              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-[#E0E0E0]">
                 <h3 className="text-lg font-semibold mb-4">
                   Monthly Sales Trend
                 </h3>
@@ -817,7 +817,7 @@ export default function Dashboard() {
               </div>
 
               {/* Recent Sales */}
-              <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
                 <h3 className="text-lg font-semibold mb-4">
                   Recent Completed Sales
                 </h3>
@@ -886,7 +886,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => setSalesModal(false)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-[#04B851] to-[#039f45] text-white font-medium shadow-inner shadow-white/[0.5] border border-[#04B851]/10"
                 >
                   Close
                 </motion.button>
@@ -910,7 +910,7 @@ export default function Dashboard() {
             exit={{ scale: 0.9, y: 20 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
           >
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-[#E0E0E0] bg-gradient-to-r from-[#04B851] to-[#e6f9f0] text-[#1A1A1A]">
               <h2 className="text-xl font-semibold">Active Customers</h2>
               <button
                 onClick={() => setCustomersModal(false)}
@@ -921,7 +921,7 @@ export default function Dashboard() {
               </button>
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-[#E0E0E0]">
                 <h3 className="text-lg font-semibold mb-4">
                   Customers with Pending Orders
                 </h3>
@@ -954,10 +954,10 @@ export default function Dashboard() {
                               <span
                                 className={`px-2 py-1 rounded-full text-xs ${
                                   customer.status === 'ready'
-                                    ? 'bg-green-100 text-green-700'
+                                    ? 'bg-[#e6f9f0] text-[#04B851] border border-[#04B851]/30'
                                     : customer.status === 'preparing'
-                                      ? 'bg-yellow-100 text-yellow-700'
-                                      : 'bg-blue-100 text-blue-700'
+                                      ? 'bg-[#F2C94C]/20 text-[#F2C94C] border border-[#F2C94C]/30'
+                                      : 'bg-[#e6f9f0] text-[#4D4D4D] border border-[#E0E0E0]'
                                 }`}
                               >
                                 {customer.status.charAt(0).toUpperCase() +
@@ -991,7 +991,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => setCustomersModal(false)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-500 text-white font-medium shadow-inner shadow-white/[0.5] border border-blue-900/[0.1]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-[#04B851] to-[#e6f9f0] text-[#1A1A1A] font-medium shadow-inner shadow-white/[0.5] border border-[#04B851]/10"
                 >
                   Close
                 </motion.button>
@@ -1015,7 +1015,7 @@ export default function Dashboard() {
             exit={{ scale: 0.9, y: 20 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
           >
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-orange-500 to-yellow-500 text-white">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-[#E0E0E0] bg-gradient-to-r from-[#04B851] to-[#F2C94C] text-[#1A1A1A]">
               <h2 className="text-xl font-semibold">Pending Orders</h2>
               <button
                 onClick={() => setPendingOrdersModal(false)}
@@ -1027,36 +1027,36 @@ export default function Dashboard() {
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
-                  <h3 className="text-lg font-semibold text-orange-600 mb-2">
+                <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
+                  <h3 className="text-lg font-semibold text-[#04B851] mb-2">
                     Pending
                   </h3>
-                  <p className="text-4xl font-bold">
+                  <p className="text-4xl font-bold text-[#04B851]">
                     {pendingOrders.filter((o) => o.status === 'pending').length}
                   </p>
                 </div>
-                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
-                  <h3 className="text-lg font-semibold text-yellow-600 mb-2">
+                <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
+                  <h3 className="text-lg font-semibold text-[#F2C94C] mb-2">
                     Preparing
                   </h3>
-                  <p className="text-4xl font-bold">
+                  <p className="text-4xl font-bold text-[#F2C94C]">
                     {
                       pendingOrders.filter((o) => o.status === 'preparing')
                         .length
                     }
                   </p>
                 </div>
-                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
-                  <h3 className="text-lg font-semibold text-green-600 mb-2">
+                <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
+                  <h3 className="text-lg font-semibold text-[#2ECC71] mb-2">
                     Ready
                   </h3>
-                  <p className="text-4xl font-bold">
+                  <p className="text-4xl font-bold text-[#2ECC71]">
                     {pendingOrders.filter((o) => o.status === 'ready').length}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
                 <h3 className="text-lg font-semibold mb-4">
                   All Pending Orders
                 </h3>
@@ -1067,10 +1067,10 @@ export default function Dashboard() {
                         key={order.id}
                         className={`rounded-xl p-4 ${
                           order.status === 'ready'
-                            ? 'bg-green-50'
+                            ? 'bg-[#e6f9f0] border border-[#2ECC71]/30'
                             : order.status === 'preparing'
-                              ? 'bg-yellow-50'
-                              : 'bg-gray-50'
+                              ? 'bg-[#F2C94C]/20 border border-[#F2C94C]/30'
+                              : 'bg-[#F9FAFB] border border-[#E0E0E0]'
                         }`}
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -1097,10 +1097,10 @@ export default function Dashboard() {
                           <span
                             className={`px-2 py-1 rounded-full text-xs ${
                               order.status === 'ready'
-                                ? 'bg-green-100 text-green-700'
+                                ? 'bg-[#e6f9f0] text-[#2ECC71] border border-[#2ECC71]/30'
                                 : order.status === 'preparing'
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : 'bg-blue-100 text-blue-700'
+                                  ? 'bg-[#F2C94C]/20 text-[#F2C94C] border border-[#F2C94C]/30'
+                                  : 'bg-[#e6f9f0] text-[#04B851] border border-[#04B851]/30'
                             }`}
                           >
                             {order.status.charAt(0).toUpperCase() +
@@ -1110,7 +1110,7 @@ export default function Dashboard() {
 
                         <div className="flex justify-end items-center gap-2 mt-3">
                           <button
-                            className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
+                            className="text-xs bg-white border border-[#E0E0E0] rounded px-2 py-1 text-[#1A1A1A] hover:bg-[#e6f9f0]"
                             onClick={() => {
                               setSelectedOrder(order)
                               setViewOrderModal(true)
@@ -1120,7 +1120,7 @@ export default function Dashboard() {
                             View
                           </button>
                           <button
-                            className="text-xs bg-white border border-gray-200 rounded px-2 py-1 text-gray-600 hover:bg-gray-50"
+                            className="text-xs bg-white border border-[#E0E0E0] rounded px-2 py-1 text-[#1A1A1A] hover:bg-[#e6f9f0]"
                             onClick={() => {
                               setSelectedOrder(order)
                               setEditOrderModal(true)
@@ -1147,7 +1147,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => router.push('/dashboard/orders')}
-                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 border border-[#E0E0E0] rounded-xl text-[#1A1A1A] hover:bg-[#e6f9f0] flex items-center gap-2"
                 >
                   <span>Manage All Orders</span>
                 </motion.button>
@@ -1156,7 +1156,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => setPendingOrdersModal(false)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-orange-500 to-yellow-500 text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-[#04B851] to-[#F2C94C] text-[#1A1A1A] font-medium shadow-inner shadow-white/[0.5] border border-[#04B851]/10"
                 >
                   Close
                 </motion.button>
@@ -1180,7 +1180,7 @@ export default function Dashboard() {
             exit={{ scale: 0.9, y: 20 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden"
           >
-            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-500 to-teal-500 text-white">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-[#E0E0E0] bg-gradient-to-r from-[#04B851] to-[#e6f9f0] text-[#1A1A1A]">
               <h2 className="text-xl font-semibold">Revenue Details</h2>
               <button
                 onClick={() => setRevenueModal(false)}
@@ -1192,27 +1192,29 @@ export default function Dashboard() {
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
-                  <h3 className="text-lg font-semibold mb-2">Total Revenue</h3>
-                  <p className="text-4xl font-bold text-green-600">
+                <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
+                  <h3 className="text-lg font-semibold mb-2 text-[#04B851]">
+                    Total Revenue
+                  </h3>
+                  <p className="text-4xl font-bold text-[#04B851]">
                     ₹{stats.revenue.toLocaleString()}
                   </p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
-                  <h3 className="text-lg font-semibold mb-2">
+                <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
+                  <h3 className="text-lg font-semibold mb-2 text-[#04B851]">
                     Completed Orders
                   </h3>
-                  <p className="text-4xl font-bold text-green-600">
+                  <p className="text-4xl font-bold text-[#04B851]">
                     {stats.totalSales}
                   </p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow border border-gray-100">
-                  <h3 className="text-lg font-semibold mb-2">
+                <div className="bg-white rounded-xl p-4 shadow border border-[#E0E0E0]">
+                  <h3 className="text-lg font-semibold mb-2 text-[#04B851]">
                     Avg. Order Value
                   </h3>
-                  <p className="text-4xl font-bold text-green-600">
+                  <p className="text-4xl font-bold text-[#04B851]">
                     ₹
                     {completedOrders.length
                       ? (stats.revenue / completedOrders.length).toFixed(2)
@@ -1222,7 +1224,7 @@ export default function Dashboard() {
               </div>
 
               {/* Monthly Revenue Chart */}
-              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-[#E0E0E0]">
                 <h3 className="text-lg font-semibold mb-4">
                   Monthly Revenue Trend
                 </h3>
@@ -1248,7 +1250,7 @@ export default function Dashboard() {
               </div>
 
               {/* Top Selling Items */}
-              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow mb-6 border border-[#E0E0E0]">
                 <h3 className="text-lg font-semibold mb-4">
                   Top Revenue Generating Items
                 </h3>
@@ -1335,7 +1337,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => setRevenueModal(false)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-green-500 to-teal-500 text-white font-medium shadow-inner shadow-white/[0.5] border border-green-900/[0.1]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-[#04B851] to-[#e6f9f0] text-[#1A1A1A] font-medium shadow-inner shadow-white/[0.5] border border-[#04B851]/10"
                 >
                   Close
                 </motion.button>
@@ -1350,7 +1352,7 @@ export default function Dashboard() {
           width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #f3f4f6;
+          background: #e6f9f0;
           border-radius: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
@@ -1358,7 +1360,7 @@ export default function Dashboard() {
         }
         .custom-scrollbar {
           scrollbar-width: thin;
-          scrollbar-color: #f3f4f6 transparent;
+          scrollbar-color: #e6f9f0 transparent;
         }
       `}</style>
     </div>

@@ -31,13 +31,13 @@ import { OrderItem } from '@/models/OrderModel'
 const { Title, Text } = Typography
 const { Option } = Select
 
-// Status colors for different order statuses
+// Status colors for different order statuses (green palette)
 const statusColors = {
-  pending: 'gold',
-  preparing: 'processing',
-  ready: 'green',
-  completed: 'success',
-  cancelled: 'error',
+  pending: '#F2C94C', // warning (unchanged)
+  preparing: '#039f45', // primary hover (green)
+  ready: '#04B851', // brand green
+  completed: '#2ECC71', // success
+  cancelled: '#EB5757', // error
 }
 
 function TableInfo({ tableId }: { tableId: string }) {
@@ -59,12 +59,13 @@ function TableInfo({ tableId }: { tableId: string }) {
       <Tag
         color={
           table.status === 'available'
-            ? 'green'
+            ? '#04B851'
             : table.status === 'occupied'
-              ? 'red'
-              : 'gold'
+              ? '#EB5757'
+              : '#F2C94C'
         }
         className="ml-2"
+        style={{ borderRadius: 8, fontWeight: 500 }}
       >
         {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
       </Tag>
@@ -356,41 +357,43 @@ export default function OrdersPage() {
   ]
 
   return (
-    <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#f7f7f7] rounded-2xl shadow-inner custom-scrollbar">
+    <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#F9FAFB] rounded-2xl shadow-inner custom-scrollbar">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-inter-semibold text-black">
+          <h1 className="text-2xl md:text-3xl font-inter-semibold text-[#04B851]">
             Orders
           </h1>
-          <p className="text-gray-600 text-xs md:text-sm mt-1">
+          <p className="text-[#4D4D4D] text-xs md:text-sm mt-1">
             Track, manage, and update all cafe orders in real time.
           </p>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
           <Input
             placeholder="Search orders..."
-            prefix={<BsSearch className="text-gray-400" />}
+            prefix={<BsSearch className="text-[#04B851]" />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-64"
+            className="w-full md:w-64 border border-[#E0E0E0] rounded-xl bg-[#FFFFFF] text-[#1A1A1A]"
           />
           <Button
             type="primary"
             icon={<BsPlusLg />}
             onClick={() => setShowNewOrderForm(true)}
-            className="bg-gradient-to-tr from-primary to-secondary"
+            className="bg-gradient-to-tr from-[#04B851] to-[#039f45] text-white font-inter-semibold border border-[#04B851] hover:bg-[#039f45] rounded-xl"
           >
             New Order
           </Button>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-xl shadow-sm">
+      <div className="bg-[#FFFFFF] p-4 rounded-xl shadow-sm border border-[#E0E0E0]">
         <div className="mb-4">
           <Select
             value={filter}
             onChange={(value) => setFilter(value)}
             style={{ width: 140 }}
+            className="border border-[#E0E0E0] rounded-xl bg-[#F9FAFB] text-[#1A1A1A]"
+            dropdownStyle={{ background: '#F9FAFB', borderRadius: 12 }}
           >
             <Option value="all">All Orders</Option>
             <Option value="pending">Pending</Option>
@@ -404,10 +407,10 @@ export default function OrdersPage() {
         <div className="w-full overflow-x-auto">
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
-              <Spin size="large" />
+              <Spin size="large" className="text-[#04B851]" />
             </div>
           ) : error ? (
-            <div className="col-span-full bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl">
+            <div className="col-span-full bg-[#e6f9f0] border border-[#EB5757] text-[#EB5757] p-4 rounded-xl">
               <p className="font-semibold">Error loading orders</p>
               <p className="text-sm mt-1">Please try refreshing the page.</p>
             </div>
@@ -427,7 +430,7 @@ export default function OrdersPage() {
           ) : (
             <Empty
               description={
-                <span className="text-gray-500">
+                <span className="text-[#4D4D4D]">
                   No orders found.{' '}
                   {filter !== 'all' && 'Try changing the filter or '}
                   Create a new order to get started.
@@ -515,7 +518,7 @@ export default function OrdersPage() {
                       <div className="flex flex-wrap gap-1">
                         {item.ingredients.map(
                           (ing: MenuItemIngredient, idx: number) => (
-                            <Tag key={idx} color="blue">
+                            <Tag key={idx} color="#039f45">
                               {ing.inventoryItemName}: {ing.quantity} {ing.unit}
                             </Tag>
                           ),
@@ -535,10 +538,10 @@ export default function OrdersPage() {
                       </Text>
                       <div className="flex flex-wrap gap-1">
                         {item.selectedAddOns.map((addon: any, idx: number) => (
-                          <Tag key={idx} color="green">
+                          <Tag key={idx} color="#04B851">
                             {addon.name}: +₹{addon.price.toFixed(2)}
                             {addon.quantity && addon.unit && (
-                              <span className="ml-1 text-gray-700">
+                              <span className="ml-1 text-[#1A1A1A]">
                                 ({addon.quantity} {addon.unit})
                               </span>
                             )}
@@ -560,11 +563,11 @@ export default function OrdersPage() {
                   <Tag
                     color={
                       selectedOrder.paymentStatus === 'paid'
-                        ? 'green'
+                        ? '#04B851'
                         : selectedOrder.paymentStatus === 'pending'
-                          ? 'gold'
+                          ? '#F2C94C'
                           : selectedOrder.paymentStatus === 'unpaid'
-                            ? 'red'
+                            ? '#EB5757'
                             : 'default'
                     }
                   >
@@ -580,9 +583,9 @@ export default function OrdersPage() {
                   <Tag
                     color={
                       selectedOrder.paymentMethod === 'online'
-                        ? 'blue'
+                        ? '#039f45'
                         : selectedOrder.paymentMethod === 'cash'
-                          ? 'orange'
+                          ? '#F2C94C'
                           : 'default'
                     }
                   >
@@ -640,6 +643,7 @@ export default function OrdersPage() {
               <Space>
                 <Button
                   type="primary"
+                  style={{ background: '#04B851', borderColor: '#04B851' }}
                   disabled={selectedOrder.status === 'completed'}
                   onClick={() => {
                     handleStatusChange(
@@ -662,6 +666,11 @@ export default function OrdersPage() {
                 </Button>
                 <Button
                   danger
+                  style={{
+                    background: '#EB5757',
+                    borderColor: '#EB5757',
+                    color: '#fff',
+                  }}
                   disabled={
                     selectedOrder.status === 'cancelled' ||
                     selectedOrder.status === 'completed'
@@ -680,11 +689,12 @@ export default function OrdersPage() {
 
       {/* New Order Modal */}
       <Modal
-        title="Place New Order"
+        title={<span style={{ color: '#04B851' }}>Place New Order</span>}
         open={showNewOrderForm}
         footer={null}
         onCancel={() => setShowNewOrderForm(false)}
         width={800}
+        bodyStyle={{ background: '#F9FAFB' }}
       >
         <NewOrderForm
           onSuccess={handleOrderSuccess}

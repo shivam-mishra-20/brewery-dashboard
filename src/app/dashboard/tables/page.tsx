@@ -66,10 +66,10 @@ export default function TablesPage() {
   })
 
   const statusColors = {
-    available: 'bg-[#fede31] text-yellow-900',
-    occupied: 'bg-red-400 text-white',
-    reserved: 'bg-blue-400 text-white',
-    maintenance: 'bg-gray-300 text-gray-700',
+    available: 'bg-[#04B851] text-white', // brand green
+    occupied: 'bg-[#EB5757] text-white', // error
+    reserved: 'bg-[#2ECC71] text-white', // success
+    maintenance: 'bg-[#e6f9f0] text-[#039f45]', // primary light
   }
 
   // Fetch tables
@@ -447,15 +447,15 @@ export default function TablesPage() {
 
   // Uniform button class for all buttons
   const uniformButtonClass =
-    'uniform-btn text-white  flex-nowrap whitespace-nowrap flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm bg-gradient-to-tr from-secondary to-primary shadow-white/[.4] border border-primary/[0.1] shadow-inner py-2 rounded-2xl px-3 sm:px-5'
+    'uniform-btn text-white flex-nowrap whitespace-nowrap flex items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm bg-gradient-to-tr from-[#04B851] to-[#039f45] shadow-[#e6f9f0]/[.4] border border-[#04B851]/[0.1] shadow-inner py-2 rounded-2xl px-3 sm:px-5'
   return (
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: '#ffc300',
-          colorPrimaryHover: '#fede31',
-          colorBorder: '#e5e7eb',
-          colorBgContainer: '#fff',
+          colorPrimary: '#04B851',
+          colorPrimaryHover: '#039f45',
+          colorBorder: '#E0E0E0',
+          colorBgContainer: '#FFFFFF',
           borderRadius: 12,
           controlHeight: 40,
           fontFamily: 'Inter, inter, sans-serif',
@@ -465,12 +465,12 @@ export default function TablesPage() {
             borderRadius: 12,
             controlHeight: 40,
             fontSize: 15,
-            colorPrimary: '#ffc300',
-            colorPrimaryHover: '#fede31',
-            colorBgContainer: '#fff',
-            colorBorder: '#e5e7eb',
-            colorText: '#1e293b',
-            colorTextPlaceholder: '#bdbdbd',
+            colorPrimary: '#04B851',
+            colorPrimaryHover: '#039f45',
+            colorBgContainer: '#FFFFFF',
+            colorBorder: '#E0E0E0',
+            colorText: '#1A1A1A',
+            colorTextPlaceholder: '#4D4D4D',
             fontFamily: 'Inter, inter, sans-serif',
           },
         },
@@ -485,17 +485,17 @@ export default function TablesPage() {
           font-family: 'Inter', inter, sans-serif !important;
         }
       `}</style>
-      <div className="flex flex-col gap-6 h-[85vh] w-full justify-start items-start px-2 sm:px-4 md:px-6 lg:px-8 pb-3 md:pb-5 rounded-2xl bg-[#f7f7f7] overflow-y-auto custom-scrollbar relative">
+      <div className="flex flex-col gap-6 h-[85vh] w-full justify-start items-start px-2 sm:px-4 md:px-6 lg:px-8 pb-3 md:pb-5 rounded-2xl bg-[#F9FAFB] overflow-y-auto custom-scrollbar relative">
         {/* Header - bento style */}
-        <div className=" z-20 w-full bg-[#f7f7f7] py-4">
+        <div className="z-20 w-full bg-[#F9FAFB] py-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center tracking-tight">
-                <MdTableRestaurant className="mr-2 text-[#ffc300] text-2xl sm:text-3xl" />
+              <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center tracking-tight text-[#04B851]">
+                <MdTableRestaurant className="mr-2 text-[#04B851] text-2xl sm:text-3xl" />
                 <span className="hidden sm:inline">Tables Management</span>
                 <span className="sm:hidden">Tables</span>
               </h1>
-              <p className="text-gray-500 mt-1 text-sm sm:text-base hidden sm:block">
+              <p className="text-[#4D4D4D] mt-1 text-sm sm:text-base hidden sm:block">
                 Manage your café tables, QR codes, and table status
               </p>
             </div>
@@ -507,9 +507,9 @@ export default function TablesPage() {
                     placeholder="Search tables..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="p-2 pl-8 rounded-xl border border-gray-200 bg-white text-sm focus:ring-2 ring-[#ffc300] w-full sm:w-auto shadow-sm"
+                    className="p-2 pl-8 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] text-sm focus:ring-2 ring-[#04B851] w-full sm:w-auto shadow-sm"
                   />
-                  <div className="absolute left-2.5 top-2.5 text-gray-400">
+                  <div className="absolute left-2.5 top-2.5 text-[#04B851]">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -533,7 +533,7 @@ export default function TablesPage() {
                     { value: 'maintenance', label: 'Maintenance' },
                   ]}
                   size="large"
-                  className="rounded-xl shadow-sm !h-10 w-full sm:w-auto"
+                  className="rounded-xl shadow-sm !h-10 w-full sm:w-auto border-[#E0E0E0] bg-[#FFFFFF] text-[#1A1A1A]"
                 />
               </div>
               <button
@@ -550,7 +550,7 @@ export default function TablesPage() {
         <div className="flex flex-col gap-6 w-full">
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl font-medium shadow-sm">
+            <div className="bg-[#e6f9f0] border border-[#EB5757] text-[#EB5757] p-3 rounded-xl font-medium shadow-sm">
               {error}
             </div>
           )}
@@ -578,7 +578,7 @@ export default function TablesPage() {
           {/* Tables Grid */}
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <TbLoader3 className="animate-spin text-[#ffc300]" size={40} />
+              <TbLoader3 className="animate-spin text-[#04B851]" size={40} />
             </div>
           ) : filteredTables.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
@@ -590,7 +590,7 @@ export default function TablesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="border border-gray-200 bg-white rounded-2xl p-4 sm:p-5 shadow-inner hover:shadow-lg transition-shadow duration-200 relative overflow-hidden flex flex-col gap-2"
+                    className="border border-[#E0E0E0] bg-[#FFFFFF] rounded-2xl p-4 sm:p-5 shadow-inner hover:shadow-lg transition-shadow duration-200 relative overflow-hidden flex flex-col gap-2"
                   >
                     {/* Status Badge */}
                     <div className="absolute top-0 right-0 w-12 sm:w-16 h-12 sm:h-16 overflow-hidden">
@@ -604,9 +604,9 @@ export default function TablesPage() {
                     </div>
 
                     <div className="flex justify-between items-start mb-2 pr-8 sm:pr-12">
-                      <h3 className="font-bold text-base sm:text-lg">
+                      <h3 className="font-bold text-base sm:text-lg text-[#1A1A1A]">
                         {table.name}-
-                        <span className="text-gray-400 ml-1 font-normal text-sm sm:text-base">
+                        <span className="text-[#4D4D4D] ml-1 font-normal text-sm sm:text-base">
                           #{table.number}
                         </span>
                       </h3>
@@ -614,21 +614,21 @@ export default function TablesPage() {
 
                     <div className="space-y-1 mb-2">
                       <div className="flex items-center text-sm">
-                        <span className="text-gray-400 w-20 sm:w-24">
+                        <span className="text-[#4D4D4D] w-20 sm:w-24">
                           Capacity:
                         </span>
                         <span>{table.capacity} people</span>
                       </div>
                       {table.location && (
                         <div className="flex items-center text-sm">
-                          <span className="text-gray-400 w-20 sm:w-24">
+                          <span className="text-[#4D4D4D] w-20 sm:w-24">
                             Location:
                           </span>
                           <span className="truncate">{table.location}</span>
                         </div>
                       )}
                       <div className="flex items-center text-sm">
-                        <span className="text-gray-400 w-20 sm:w-24">
+                        <span className="text-[#4D4D4D] w-20 sm:w-24">
                           QR Code:
                         </span>
                         <span>
@@ -642,21 +642,21 @@ export default function TablesPage() {
                       <div className="flex gap-2 justify-center sm:justify-start">
                         <button
                           onClick={() => openEditModal(table)}
-                          className="p-2 bg-[#f7f7f7] hover:bg-[#fede31] rounded-xl transition-colors duration-200 border border-gray-200"
+                          className="p-2 bg-[#e6f9f0] hover:bg-[#039f45] rounded-xl transition-colors duration-200 border border-[#E0E0E0]"
                           title="Edit Table"
                         >
                           <FaEdit className="text-gray-600" size={16} />
                         </button>
                         <button
                           onClick={() => openQRModal(table)}
-                          className="p-2 bg-[#f7f7f7] hover:bg-[#fede31] rounded-xl transition-colors duration-200 border border-gray-200"
+                          className="p-2 bg-[#e6f9f0] hover:bg-[#039f45] rounded-xl transition-colors duration-200 border border-[#E0E0E0]"
                           title="Show QR Code"
                         >
                           <FaQrcode className="text-gray-600" size={16} />
                         </button>
                         <button
                           onClick={() => openDeleteModal(table._id)}
-                          className="p-2 bg-[#f7f7f7] hover:shadow-white/[0.5]  hover:shadow-inner hover:bg-red-100 rounded-xl transition-colors duration-200 border border-gray-200"
+                          className="p-2 bg-[#e6f9f0] hover:shadow-[#e6f9f0]/[0.5] hover:shadow-inner hover:bg-[#EB5757]/[0.1] rounded-xl transition-colors duration-200 border border-[#E0E0E0]"
                           title="Delete Table"
                         >
                           <FaTrash className="text-red-500" size={16} />
@@ -676,7 +676,7 @@ export default function TablesPage() {
                           { value: 'maintenance', label: 'Maintenance' },
                         ]}
                         size="large"
-                        className="rounded-xl shadow-sm !h-10 w-full sm:w-auto"
+                        className="rounded-xl shadow-sm !h-10 w-full sm:w-auto border-[#E0E0E0] bg-[#FFFFFF] text-[#1A1A1A]"
                       />
                     </div>
                   </motion.div>
@@ -684,11 +684,13 @@ export default function TablesPage() {
               </AnimatePresence>
             </div>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center shadow-inner">
+            <div className="bg-[#FFFFFF] border border-[#E0E0E0] rounded-2xl p-10 text-center shadow-inner">
               <div className="flex flex-col items-center gap-3">
-                <MdTableRestaurant className="text-[#ffc300]" size={48} />
-                <h3 className="text-xl font-semibold">No tables found</h3>
-                <p className="text-gray-400 max-w-md mx-auto">
+                <MdTableRestaurant className="text-[#04B851]" size={48} />
+                <h3 className="text-xl font-semibold text-[#1A1A1A]">
+                  No tables found
+                </h3>
+                <p className="text-[#4D4D4D] max-w-md mx-auto">
                   {filterStatus === 'all'
                     ? "You haven't added any tables yet. Click the 'Add Table' button to create your first table."
                     : `No tables with status '${filterStatus}' found. Try changing the filter or add a new table.`}
@@ -696,7 +698,7 @@ export default function TablesPage() {
                 {filterStatus !== 'all' && (
                   <button
                     onClick={() => setFilterStatus('all')}
-                    className="mt-2 text-[#ffc300] hover:text-yellow-600 font-semibold transition-colors duration-200"
+                    className="mt-2 text-[#04B851] hover:text-[#039f45] font-semibold transition-colors duration-200"
                   >
                     Show all tables
                   </button>
@@ -713,11 +715,11 @@ export default function TablesPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+              className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md"
             >
               <div className="p-5 sm:p-7 space-y-5">
-                <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2">
-                  <MdTableRestaurant className="text-[#ffc300] text-xl sm:text-2xl" />
+                <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2 text-[#04B851]">
+                  <MdTableRestaurant className="text-[#04B851] text-xl sm:text-2xl" />
                   <span className="hidden sm:inline">
                     {editingTable ? 'Edit Table' : 'Add New Table'}
                   </span>
@@ -728,10 +730,7 @@ export default function TablesPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
-                      <label
-                        htmlFor="name"
-                        className="block text-sm font-semibold text-gray-700 mb-1"
-                      >
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-1">
                         Table Name
                       </label>
                       <input
@@ -742,14 +741,11 @@ export default function TablesPage() {
                         onChange={handleChange}
                         placeholder="e.g. Window Table"
                         required
-                        className="w-full p-2 rounded-xl border border-gray-200 bg-white focus:ring-2 ring-[#ffc300] shadow-sm"
+                        className="w-full p-2 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] focus:ring-2 ring-[#04B851] shadow-sm"
                       />
                     </div>
                     <div>
-                      <label
-                        htmlFor="number"
-                        className="block text-sm font-semibold text-gray-700 mb-1"
-                      >
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-1">
                         Table Number
                       </label>
                       <input
@@ -760,14 +756,11 @@ export default function TablesPage() {
                         onChange={handleChange}
                         placeholder="e.g. 1"
                         required
-                        className="w-full p-2 rounded-xl border border-gray-200 bg-white focus:ring-2 ring-[#ffc300] shadow-sm"
+                        className="w-full p-2 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] focus:ring-2 ring-[#04B851] shadow-sm"
                       />
                     </div>
                     <div>
-                      <label
-                        htmlFor="capacity"
-                        className="block text-sm font-semibold text-gray-700 mb-1"
-                      >
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-1">
                         Capacity
                       </label>
                       <input
@@ -778,14 +771,11 @@ export default function TablesPage() {
                         onChange={handleChange}
                         placeholder="e.g. 4"
                         required
-                        className="w-full p-2 rounded-xl border border-gray-200 bg-white focus:ring-2 ring-[#ffc300] shadow-sm"
+                        className="w-full p-2 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] focus:ring-2 ring-[#04B851] shadow-sm"
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label
-                        htmlFor="location"
-                        className="block text-sm font-semibold text-gray-700 mb-1"
-                      >
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-1">
                         Location (Optional)
                       </label>
                       <input
@@ -795,14 +785,11 @@ export default function TablesPage() {
                         value={formData.location}
                         onChange={handleChange}
                         placeholder="e.g. Near Window, First Floor"
-                        className="w-full p-2 rounded-xl border border-gray-200 bg-white focus:ring-2 ring-[#ffc300] shadow-sm"
+                        className="w-full p-2 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] focus:ring-2 ring-[#04B851] shadow-sm"
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label
-                        htmlFor="status"
-                        className="block text-sm font-semibold text-gray-700 mb-1"
-                      >
+                      <label className="block text-sm font-semibold text-[#1A1A1A] mb-1">
                         Status
                       </label>
                       <Select
@@ -829,7 +816,7 @@ export default function TablesPage() {
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
-                      className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
+                      className="py-2 px-4 border border-[#E0E0E0] text-[#1A1A1A] rounded-xl hover:bg-[#e6f9f0] transition-colors duration-200 font-semibold w-full sm:w-auto"
                     >
                       Cancel
                     </button>
@@ -853,27 +840,27 @@ export default function TablesPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+              className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md"
             >
               <div className="p-5 sm:p-7 space-y-5">
-                <h2 className="text-xl sm:text-2xl font-extrabold text-red-500 flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-[#EB5757] flex items-center gap-2">
                   <FaTrash />
                   Delete Table
                 </h2>
-                <p className="text-gray-700 text-sm sm:text-base">
+                <p className="text-[#4D4D4D] text-sm sm:text-base">
                   Are you sure you want to delete this table? This action cannot
                   be undone.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
                   <button
                     onClick={() => setIsDeleteModalOpen(false)}
-                    className="py-2 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
+                    className="py-2 px-4 border border-[#E0E0E0] text-[#1A1A1A] rounded-xl hover:bg-[#e6f9f0] transition-colors duration-200 font-semibold w-full sm:w-auto"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors duration-200 font-semibold w-full sm:w-auto"
+                    className="py-2 px-4 bg-[#EB5757] hover:bg-[#d9534f] text-white rounded-xl transition-colors duration-200 font-semibold w-full sm:w-auto"
                   >
                     Delete
                   </button>
@@ -890,19 +877,19 @@ export default function TablesPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+              className="bg-[#FFFFFF] rounded-2xl shadow-2xl w-full max-w-md"
             >
               <div className="p-5 sm:p-7 space-y-5">
-                <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2">
-                  <FaQrcode className="text-[#ffc300] text-xl sm:text-2xl" />
+                <h2 className="text-xl sm:text-2xl font-extrabold flex items-center gap-2 text-[#04B851]">
+                  <FaQrcode className="text-[#04B851] text-xl sm:text-2xl" />
                   <span className="hidden sm:inline">Table QR Code</span>
                   <span className="sm:hidden">QR Code</span>
                 </h2>
-                <div className="flex flex-col items-center justify-center bg-[#f7f7f7] p-4 sm:p-6 rounded-xl">
+                <div className="flex flex-col items-center justify-center bg-[#e6f9f0] p-4 sm:p-6 rounded-xl">
                   {/* Show fancy QR image if available, else fallback icon */}
                   {qrTable.qrCode ? (
                     <div className="flex flex-col items-center">
-                      <div className="border-4 border-[#ffc300]/20 rounded-2xl shadow-lg overflow-hidden">
+                      <div className="border-4 border-[#04B851]/20 rounded-2xl shadow-lg overflow-hidden">
                         <Image
                           src={qrTable.qrCode}
                           alt={`QR Code for Table ${qrTable.number}`}
@@ -916,8 +903,8 @@ export default function TablesPage() {
                           unoptimized
                         />
                       </div>
-                      <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
-                        <FaQrcode className="text-[#ffc300]" />
+                      <div className="mt-4 flex items-center gap-2 text-sm text-[#4D4D4D]">
+                        <FaQrcode className="text-[#04B851]" />
                         <span>Scan to access the menu</span>
                       </div>
                     </div>
@@ -926,29 +913,29 @@ export default function TablesPage() {
                       <div className="text-center">
                         <FaQrcode
                           size={60}
-                          className="mx-auto mb-3 text-[#ffc300] sm:w-20 sm:h-20"
+                          className="mx-auto mb-3 text-[#04B851] sm:w-20 sm:h-20"
                         />
-                        <p className="text-sm sm:text-base text-gray-500">
+                        <p className="text-sm sm:text-base text-[#4D4D4D]">
                           QR Code not generated yet
                         </p>
-                        <div className="mt-4 text-xs text-gray-400">
+                        <div className="mt-4 text-xs text-[#4D4D4D]">
                           Save to generate QR code
                         </div>
                       </div>
                     </div>
                   )}
-                  <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200 shadow-sm w-full">
-                    <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                      <MdTableRestaurant className="text-[#ffc300]" />
+                  <div className="mt-4 p-3 bg-[#FFFFFF] rounded-xl border border-[#E0E0E0] shadow-sm w-full">
+                    <h3 className="font-bold text-[#1A1A1A] flex items-center gap-2">
+                      <MdTableRestaurant className="text-[#04B851]" />
                       {qrTable.name}
                     </h3>
                     <div className="mt-1 space-y-1 text-sm">
-                      <p className="text-gray-500">Table #{qrTable.number}</p>
-                      <p className="text-gray-500">
+                      <p className="text-[#4D4D4D]">Table #{qrTable.number}</p>
+                      <p className="text-[#4D4D4D]">
                         Capacity: {qrTable.capacity} people
                       </p>
                       {qrTable.location && (
-                        <p className="text-gray-500">
+                        <p className="text-[#4D4D4D]">
                           Location: {qrTable.location}
                         </p>
                       )}
@@ -969,7 +956,7 @@ export default function TablesPage() {
                         alert('QR code not available yet.')
                       }
                     }}
-                    className="py-2 whitespace-nowrap px-4 border border-gray-200 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors duration-200 flex items-center justify-center gap-2 font-semibold w-full sm:w-auto"
+                    className="py-2 whitespace-nowrap px-4 border border-[#E0E0E0] bg-[#e6f9f0] text-[#04B851] rounded-xl hover:bg-[#039f45]/10 transition-colors duration-200 flex items-center justify-center gap-2 font-semibold w-full sm:w-auto"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -987,7 +974,7 @@ export default function TablesPage() {
                   <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => setIsQRModalOpen(false)}
-                      className="py-2 px-4  whitespace-nowrap border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors duration-200 font-semibold w-full sm:w-auto"
+                      className="py-2 px-4 whitespace-nowrap border border-[#E0E0E0] text-[#1A1A1A] rounded-xl hover:bg-[#e6f9f0] transition-colors duration-200 font-semibold w-full sm:w-auto"
                     >
                       Close
                     </button>

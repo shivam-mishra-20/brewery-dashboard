@@ -137,7 +137,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           <div className="mb-4">
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[#4D4D4D] mb-1"
             >
               Item Name
             </label>
@@ -147,7 +147,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+              className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
               placeholder="e.g., Coffee Beans, Milk"
               required
             />
@@ -157,7 +157,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           <div className="mb-4">
             <label
               htmlFor="category"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[#4D4D4D] mb-1"
             >
               Category
             </label>
@@ -173,7 +173,12 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                 .map((category) => ({ value: category, label: category }))}
               className="w-full rounded-xl shadow-sm !h-10 font-inter"
               size="large"
-              style={{ borderRadius: 12 }}
+              style={{
+                borderRadius: 12,
+                background: '#e6f9f0',
+                color: '#1A1A1A',
+                border: '1px solid #E0E0E0',
+              }}
               placeholder="Select or type category"
               showSearch
               allowClear={false}
@@ -217,8 +222,8 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               dropdownRender={(menu) => (
                 <>
                   {menu}
-                  <div className="px-3 py-2 border-t border-gray-100">
-                    <span className="text-xs text-gray-400">
+                  <div className="px-3 py-2 border-t border-[#E0E0E0]">
+                    <span className="text-xs text-[#4D4D4D]">
                       Type and press Enter to add a new category
                     </span>
                   </div>
@@ -226,7 +231,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               )}
               notFoundContent={
                 <div className="px-3 py-2 text-center">
-                  <span className="text-gray-600 text-sm">
+                  <span className="text-[#4D4D4D] text-sm">
                     Type a new category name and press Enter
                   </span>
                 </div>
@@ -238,7 +243,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           <div className="mb-4">
             <label
               htmlFor="supplier"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[#4D4D4D] mb-1"
             >
               Supplier
             </label>
@@ -253,7 +258,12 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               }))}
               className="w-full rounded-xl shadow-sm !h-10 font-inter"
               size="large"
-              style={{ borderRadius: 12 }}
+              style={{
+                borderRadius: 12,
+                background: '#e6f9f0',
+                color: '#1A1A1A',
+                border: '1px solid #E0E0E0',
+              }}
               placeholder="Select supplier (optional)"
               showSearch
               allowClear={true}
@@ -263,7 +273,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                   .includes(input.toLowerCase())
               }
               notFoundContent={
-                <span className="text-gray-400">No suppliers found</span>
+                <span className="text-[#4D4D4D]">No suppliers found</span>
               }
             />
           </div>
@@ -273,7 +283,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             <div>
               <label
                 htmlFor="quantity"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-[#4D4D4D] mb-1"
               >
                 Quantity
               </label>
@@ -285,14 +295,14 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                 onChange={handleChange}
                 min="0"
                 step="0.01"
-                className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+                className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
                 required
               />
             </div>
             <div>
               <label
                 htmlFor="unit"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-[#4D4D4D] mb-1"
               >
                 Unit
               </label>
@@ -317,7 +327,12 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                 ]}
                 className="w-full rounded-xl shadow-sm !h-10 font-inter"
                 size="large"
-                style={{ borderRadius: 12 }}
+                style={{
+                  borderRadius: 12,
+                  background: '#e6f9f0',
+                  color: '#1A1A1A',
+                  border: '1px solid #E0E0E0',
+                }}
                 placeholder="Select unit"
               />
             </div>
@@ -328,7 +343,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             <div>
               <label
                 htmlFor="costPerUnit"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-[#4D4D4D] mb-1"
               >
                 Cost per Unit (₹)
               </label>
@@ -340,14 +355,14 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                 onChange={handleChange}
                 min="0"
                 step="0.01"
-                className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+                className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
                 required
               />
             </div>
             <div>
               <label
                 htmlFor="reorderPoint"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-[#4D4D4D] mb-1"
               >
                 Reorder Point
               </label>
@@ -359,7 +374,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                 onChange={handleChange}
                 min="0"
                 step="0.01"
-                className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+                className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
                 required
               />
             </div>
@@ -374,23 +389,23 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                 name="autoReorderNotify"
                 checked={formData.autoReorderNotify}
                 onChange={handleChange}
-                className="h-4 w-4 text-yellow-500 focus:ring-yellow-400 border-gray-300 rounded"
+                className="h-4 w-4 text-[#04B851] focus:ring-[#e6f9f0] border-[#E0E0E0] rounded"
               />
               <label
                 htmlFor="autoReorderNotify"
-                className="ml-2 text-sm font-medium text-gray-700"
+                className="ml-2 text-sm font-medium text-[#4D4D4D]"
               >
                 Enable Automatic Reorder Notifications
               </label>
             </div>
 
             {showAutoReorder && (
-              <div className="mt-3 pl-6 border-l-2 border-yellow-200">
+              <div className="mt-3 pl-6 border-l-2 border-[#e6f9f0]">
                 <div className="grid grid-cols-2 gap-4 mb-2">
                   <div>
                     <label
                       htmlFor="autoReorderThreshold"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-[#4D4D4D] mb-1"
                     >
                       Threshold Quantity
                     </label>
@@ -402,10 +417,10 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                       onChange={handleChange}
                       min="0"
                       step="0.01"
-                      className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+                      className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
                       required={formData.autoReorderNotify}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-[#4D4D4D] mt-1">
                       Notification will be sent when quantity falls below this
                       value
                     </p>
@@ -413,7 +428,7 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                   <div>
                     <label
                       htmlFor="autoReorderQuantity"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-[#4D4D4D] mb-1"
                     >
                       Suggested Order Qty
                     </label>
@@ -425,12 +440,12 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
                       onChange={handleChange}
                       min="0"
                       step="0.01"
-                      className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+                      className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
                       required={formData.autoReorderNotify}
                     />
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-[#4D4D4D] mt-1">
                   Note: WhatsApp notifications will be integrated in the future.
                 </p>
               </div>
@@ -442,14 +457,14 @@ const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             <button
               type="button"
               onClick={onCancel}
-              className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl font-inter hover:bg-gray-200 transition border border-gray-300 shadow-sm"
+              className="px-5 py-2 bg-[#e6f9f0] text-[#04B851] rounded-xl font-inter hover:bg-[#04B851] hover:text-white transition border border-[#04B851] shadow-sm"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-inter hover:opacity-90 shadow-white/[0.5] shadow-inner transition flex items-center gap-2 border border-primary/[0.1] "
+              className="px-6 py-2 bg-gradient-to-r from-[#04B851] to-[#039f45] text-white rounded-xl hover:opacity-90 shadow-white/[0.5] shadow-inner transition flex items-center gap-2 border border-[#04B851] font-inter-semibold"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

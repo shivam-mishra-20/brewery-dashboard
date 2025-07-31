@@ -804,25 +804,44 @@ function MenuContent() {
 
 function IntroPage() {
   return (
-    <div className="min-h-screen absolute flex flex-col items-center justify-center bg-[#0B3D2E] bg-[url('/bg-image.png')] bg-cover bg-center bg-no-repeat px-4 allow-scroll font-serif">
-      <div className="bg-[#23272F]/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 flex flex-col items-center max-w-lg w-full border border-[#FFC600]/20">
-        <FiCoffee className="text-[#FFC600] text-6xl mb-4 animate-bounce" />
-        <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2 text-center font-serif">
-          Welcome to <br />
-          <span className="bg-clip-text mt-4 text-transparent bg-gradient-to-r from-[#FFC600] via-[#FFD700] to-[#FFC600] font-serif">
-            The Brewery
-          </span>
-        </h1>
-        <p className="text-lg text-[#FFD700] mb-6 mt-3 text-center font-serif">
-          Your favorite spot for coffee, comfort, and creativity.
-        </p>
-        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-[#FFC600] to-[#FFD700] border border-[#FFC600]/20 shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3">
-          <FiTruck className="text-[#23272F] text-6xl" />
-          <span className="font-semibold text-[#23272F] text-lg font-serif">
-            Delivery &amp; Takeaway options are coming soon!
-          </span>
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#0B3D2E] bg-[url('/bg-image.png')] bg-cover bg-center bg-no-repeat px-2 sm:px-4 md:px-8 py-8 font-serif">
+      <div className="w-full max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl flex flex-col items-center justify-center">
+        <div className="bg-[#23272F]/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-10 flex flex-col items-center w-full border border-[#FFC600]/20">
+          <FiCoffee className="text-[#FFC600] text-5xl sm:text-6xl mb-4 animate-bounce" />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2 text-center font-serif leading-tight">
+            Welcome to <br />
+            <span className="bg-clip-text mt-2 text-transparent bg-gradient-to-r from-[#FFC600] via-[#FFD700] to-[#FFC600] font-serif text-3xl sm:text-4xl md:text-5xl">
+              The Brewery
+            </span>
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl text-[#FFD700] mb-6 mt-3 text-center font-serif">
+            Your favorite spot for coffee, comfort, and creativity.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center text-center gap-2 sm:gap-4 bg-gradient-to-tr from-[#FFC600] to-[#FFD700] border border-[#FFC600]/20 shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3 w-full max-w-md">
+            <FiTruck className="text-[#23272F] text-4xl sm:text-5xl md:text-6xl" />
+            <span className="font-semibold text-[#23272F] text-base sm:text-lg md:text-xl font-serif">
+              Delivery &amp; Takeaway options are coming soon!
+            </span>
+          </div>
         </div>
       </div>
+      <style jsx>{`
+        @media (max-width: 640px) {
+          .responsive-intro {
+            padding: 1.5rem 0.5rem;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .responsive-intro {
+            padding: 2.5rem 1.5rem;
+          }
+        }
+        @media (min-width: 1025px) {
+          .responsive-intro {
+            padding: 3.5rem 2.5rem;
+          }
+        }
+      `}</style>
     </div>
   )
 }

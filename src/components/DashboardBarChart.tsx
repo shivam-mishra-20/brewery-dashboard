@@ -21,13 +21,13 @@ import {
 // ]
 
 const barFills = [
-  '#fff9c4', // light yellow
-  '#ffe082', // pale yellow
-  '#ffd54f', // soft yellow
-  '#ffeb3b', // bright yellow
-  '#ffc300', // golden yellow
-  '#ffb300', // deep yellow
-  '#ffa000', // darker yellow
+  '#e6f9f0', // primary light
+  '#b2f2d7', // lighter green
+  '#04B851', // brand green
+  '#039f45', // primary hover
+  '#2ECC71', // success
+  '#A7E9C3', // soft green
+  '#4D4D4D', // text light
 ]
 
 interface DashboardBarChartProps {
@@ -42,7 +42,7 @@ const DashboardBarChart: React.FC<DashboardBarChartProps> = ({ data }) => (
     onMouseDown={(e) => e.preventDefault()}
   >
     <div className="flex flex-col justify-start w-full h-full">
-      <h1 className="text-lg font-inter-semibold text-black">
+      <h1 className="text-lg font-inter-semibold text-[#04B851]">
         Weekly Sales Analytics
       </h1>
       <div className="w-full h-full flex items-center justify-center">
@@ -55,13 +55,13 @@ const DashboardBarChart: React.FC<DashboardBarChartProps> = ({ data }) => (
                 width="6"
                 height="6"
               >
-                <rect x="0" y="0" width="6" height="6" fill="#ffc300" />
+                <rect x="0" y="0" width="6" height="6" fill="#e6f9f0" />
                 <line
                   x1="0"
                   y1="6"
                   x2="6"
                   y2="0"
-                  stroke="#fffde7"
+                  stroke="#04B851"
                   strokeWidth="1.5"
                 />
               </pattern>
@@ -70,21 +70,26 @@ const DashboardBarChart: React.FC<DashboardBarChartProps> = ({ data }) => (
               dataKey="day"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#6b7280', fontSize: 14, fontFamily: 'inherit' }} // Tailwind's text-gray-500
+              tick={{
+                fill: '#04B851',
+                fontSize: 14,
+                fontFamily: 'inherit',
+                fontWeight: 600,
+              }}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(0,0,0,0.04)' }}
+              cursor={{ fill: 'rgba(4,184,81,0.08)' }}
               contentStyle={{
                 borderRadius: 12,
-                background: '#fff',
-                border: '1px solid #eee',
-                color: '#333',
+                background: '#e6f9f0',
+                border: '1px solid #04B851',
+                color: '#1A1A1A',
                 fontFamily: 'inherit',
                 fontSize: 14,
-                boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 8px 0 rgba(4,184,81,0.08)',
               }}
               labelStyle={{
-                color: '#ffc300',
+                color: '#04B851',
                 fontWeight: 600,
                 fontFamily: 'inherit',
               }}

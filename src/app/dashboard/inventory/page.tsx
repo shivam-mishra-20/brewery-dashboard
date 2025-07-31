@@ -259,13 +259,13 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#f7f7f7] rounded-2xl shadow-inner custom-scrollbar">
+    <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#F9FAFB] rounded-2xl shadow-inner custom-scrollbar">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-inter-semibold text-black drop-shadow-sm">
+          <h1 className="text-2xl md:text-3xl font-inter-semibold text-[#04B851] drop-shadow-sm">
             Inventory
           </h1>
-          <p className="text-black text-xs md:text-sm mt-1">
+          <p className="text-[#4D4D4D] text-xs md:text-sm mt-1">
             Manage your inventory items, track stock levels, and link items to
             your menu.
           </p>
@@ -274,12 +274,12 @@ export default function InventoryPage() {
           <div className="flex items-center gap-2 w-full md:w-64">
             <div className="relative w-full">
               <input
-                className="w-full py-2 pl-10 pr-4 rounded-xl border border-yellow-300 bg-white text-black text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
+                className="w-full py-2 pl-10 pr-4 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] text-[#1A1A1A] text-sm focus:ring-2 focus:ring-[#04B851] outline-none transition"
                 placeholder="Search inventory..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#04B851]">
                 <BsSearch className="text-xl" />
               </span>
             </div>
@@ -287,12 +287,12 @@ export default function InventoryPage() {
           <div className="flex flex-wrap gap-2 items-center w-full">
             <a
               href="/dashboard/inventory/suppliers"
-              className="flex items-center gap-1 px-4 py-2 rounded-xl whitespace-nowrap border border-primary text-primary hover:bg-primary hover:text-white text-sm transition"
+              className="flex items-center gap-1 px-4 py-2 rounded-xl whitespace-nowrap border border-[#04B851] text-[#04B851] hover:bg-[#04B851] hover:text-white text-sm transition font-inter-semibold"
             >
               Manage Suppliers
             </a>
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-[#04B851] to-[#039f45] text-white font-medium shadow-inner shadow-[#e6f9f0]/[0.5] border border-[#04B851] text-sm hover:scale-105 transition font-inter-semibold"
               onClick={() => {
                 setEditingItem(null)
                 setIsFormOpen(true)
@@ -302,7 +302,7 @@ export default function InventoryPage() {
             </button>
             {/* Show Manage Categories inline on desktop, below on mobile */}
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-yellow-400 to-yellow-500 text-white font-medium shadow-inner border border-yellow-900/[0.1] text-sm hover:scale-105 transition w-full md:w-auto md:ml-2"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#04B851] text-white font-medium shadow-inner border border-[#04B851] text-sm hover:scale-105 transition w-full md:w-auto md:ml-2 font-inter-semibold"
               onClick={() => setIsCategoryManagerOpen(true)}
               type="button"
             >
@@ -319,10 +319,10 @@ export default function InventoryPage() {
           {categories.map((cat) => (
             <button
               key={cat}
-              className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition shadow-sm backdrop-blur-md ${
+              className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition shadow-sm backdrop-blur-md font-inter-semibold ${
                 selectedCategory === cat
-                  ? 'bg-yellow-400 shadow-inner text-white border-yellow-400 shadow-white/[.4]'
-                  : 'bg-white text-black border-yellow-200 hover:bg-yellow-50'
+                  ? 'bg-[#04B851] shadow-inner text-white border-[#04B851] shadow-[#e6f9f0]/[.4]'
+                  : 'bg-[#FFFFFF] text-[#1A1A1A] border-[#E0E0E0] hover:bg-[#e6f9f0] hover:text-[#04B851] hover:border-[#04B851]'
               }`}
               onClick={() => setSelectedCategory(cat)}
             >
@@ -333,10 +333,10 @@ export default function InventoryPage() {
 
         {/* Low stock filter toggle */}
         <button
-          className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition shadow-sm backdrop-blur-md flex items-center gap-2 ${
+          className={`px-4 py-1.5 rounded-full border text-sm font-semibold transition shadow-sm backdrop-blur-md flex items-center gap-2 font-inter-semibold ${
             showLowStockOnly
-              ? 'bg-red-500 text-white border-red-500'
-              : 'bg-white text-black border-red-200 hover:bg-red-50'
+              ? 'bg-[#EB5757] text-white border-[#EB5757]'
+              : 'bg-[#FFFFFF] text-[#1A1A1A] border-[#E0E0E0] hover:bg-[#e6f9f0] hover:text-[#04B851] hover:border-[#04B851]'
           }`}
           onClick={() => setShowLowStockOnly(!showLowStockOnly)}
         >
@@ -347,10 +347,10 @@ export default function InventoryPage() {
       {/* Loading state */}
       {loading ? (
         <div className="flex justify-center items-center py-20">
-          <TbLoader3 className="animate-spin text-yellow-400" size={40} />
+          <TbLoader3 className="animate-spin text-[#04B851]" size={40} />
         </div>
       ) : error ? (
-        <div className="col-span-full bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl">
+        <div className="col-span-full bg-[#e6f9f0] border border-[#EB5757] text-[#EB5757] p-4 rounded-xl">
           <p className="font-semibold">Error loading inventory items</p>
           <p className="text-sm mt-1">Please try refreshing the page.</p>
         </div>
@@ -365,10 +365,10 @@ export default function InventoryPage() {
                 width={80}
                 height={80}
               />
-              <p className="text-black text-lg font-inter-semibold">
+              <p className="text-[#1A1A1A] text-lg font-inter-semibold">
                 No inventory items found.
               </p>
-              <p className="text-gray-500 text-sm mt-2">
+              <p className="text-[#4D4D4D] text-sm mt-2">
                 {selectedCategory !== 'All'
                   ? `Try selecting a different category or add new items to ${selectedCategory}.`
                   : search

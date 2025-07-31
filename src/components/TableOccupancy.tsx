@@ -32,18 +32,18 @@ const CustomTooltip = (props: TooltipProps<ValueType, NameType>) => {
   return (
     <div
       style={{
-        background: '#fff',
-
+        background: '#FFFFFF',
         borderRadius: 12,
-        boxShadow: '0 2px 12px 0 rgba(255, 215, 64, 0.10)',
+        boxShadow: '0 2px 12px 0 rgba(4, 184, 81, 0.10)',
         padding: '16px 20px',
         minWidth: 140,
-        color: '#1e293b',
+        color: '#1A1A1A',
         fontFamily: 'inherit',
         transition: 'box-shadow 0.2s',
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
+        border: '1px solid #E0E0E0',
       }}
     >
       <div
@@ -52,6 +52,7 @@ const CustomTooltip = (props: TooltipProps<ValueType, NameType>) => {
           fontSize: 16,
           marginBottom: 2,
           letterSpacing: 0.2,
+          color: '#04B851',
         }}
       >
         {label}
@@ -66,12 +67,21 @@ const CustomTooltip = (props: TooltipProps<ValueType, NameType>) => {
                 borderRadius: 3,
                 background: barFills[0],
                 display: 'inline-block',
-                border: '1.5px solid #ffe082',
+                border: '1.5px solid #04B851',
                 marginRight: 2,
               }}
             />
-            <span style={{ fontWeight: 500, fontSize: 14 }}>Occupied</span>
-            <span style={{ fontWeight: 700, fontSize: 15, marginLeft: 'auto' }}>
+            <span style={{ fontWeight: 500, fontSize: 14, color: '#04B851' }}>
+              Occupied
+            </span>
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: 15,
+                marginLeft: 'auto',
+                color: '#1A1A1A',
+              }}
+            >
               {occupied.value}
             </span>
           </span>
@@ -85,12 +95,21 @@ const CustomTooltip = (props: TooltipProps<ValueType, NameType>) => {
                 borderRadius: 3,
                 background: barFills[2],
                 display: 'inline-block',
-                border: '1.5px solid #ffd54f',
+                border: '1.5px solid #039f45',
                 marginRight: 2,
               }}
             />
-            <span style={{ fontWeight: 500, fontSize: 14 }}>Available</span>
-            <span style={{ fontWeight: 700, fontSize: 15, marginLeft: 'auto' }}>
+            <span style={{ fontWeight: 500, fontSize: 14, color: '#039f45' }}>
+              Available
+            </span>
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: 15,
+                marginLeft: 'auto',
+                color: '#1A1A1A',
+              }}
+            >
               {available.value}
             </span>
           </span>
@@ -104,12 +123,21 @@ const CustomTooltip = (props: TooltipProps<ValueType, NameType>) => {
                 borderRadius: 3,
                 background: barFills[4],
                 display: 'inline-block',
-                border: '1.5px solid #ffc300',
+                border: '1.5px solid #F2C94C',
                 marginRight: 2,
               }}
             />
-            <span style={{ fontWeight: 500, fontSize: 14 }}>Reserved</span>
-            <span style={{ fontWeight: 700, fontSize: 15, marginLeft: 'auto' }}>
+            <span style={{ fontWeight: 500, fontSize: 14, color: '#F2C94C' }}>
+              Reserved
+            </span>
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: 15,
+                marginLeft: 'auto',
+                color: '#1A1A1A',
+              }}
+            >
               {reserved.value}
             </span>
           </span>
@@ -119,15 +147,15 @@ const CustomTooltip = (props: TooltipProps<ValueType, NameType>) => {
   )
 }
 
-// Dashboard yellow palette
+// Green palette for chart bars
 const barFills = [
-  '#fff9c4', // light yellow
-  '#ffe082', // pale yellow
-  '#ffd54f', // soft yellow
-  '#ffeb3b', // bright yellow
-  '#ffc300', // golden yellow
-  '#ffb300', // deep yellow
-  '#ffa000', // darker yellow
+  '#04B851', // brand green
+  '#039f45', // green hover
+  '#e6f9f0', // primary light
+  '#2ECC71', // success
+  '#F2C94C', // warning
+  '#EB5757', // error
+  '#4D4D4D', // text light
 ]
 
 interface TableOccupancyProps {
@@ -174,8 +202,8 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
       .finally(() => setLoading(false))
   }, [timeRange])
   return (
-    <div className="w-full h-full min-h-[300px] rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h3 className="text-lg font-bold mb-4">
+    <div className="w-full h-full min-h-[300px] rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] p-4 shadow-sm">
+      <h3 className="text-lg font-bold mb-4 text-[#04B851]">
         Table Occupancy{' '}
         {timeRange === 'daily'
           ? 'Today'
@@ -186,7 +214,7 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
 
       {loading ? (
         <div className="flex justify-center items-center h-[250px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#04B851]"></div>
         </div>
       ) : (
         <div style={{ position: 'relative', width: '100%', height: 250 }}>
@@ -204,7 +232,7 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
               alignItems: 'center',
               paddingLeft: 24,
               zIndex: 2,
-              background: 'white',
+              background: '#FFFFFF',
               height: 32,
             }}
           >
@@ -216,10 +244,10 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
                   borderRadius: 3,
                   background: barFills[0],
                   display: 'inline-block',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid #04B851',
                 }}
               />
-              <span style={{ fontWeight: 500, color: '#1e293b' }}>
+              <span style={{ fontWeight: 500, color: '#04B851' }}>
                 Occupied
               </span>
             </span>
@@ -231,10 +259,10 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
                   borderRadius: 3,
                   background: barFills[2],
                   display: 'inline-block',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid #039f45',
                 }}
               />
-              <span style={{ fontWeight: 500, color: '#1e293b' }}>
+              <span style={{ fontWeight: 500, color: '#039f45' }}>
                 Available
               </span>
             </span>
@@ -246,10 +274,10 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
                   borderRadius: 3,
                   background: barFills[4],
                   display: 'inline-block',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid #F2C94C',
                 }}
               />
-              <span style={{ fontWeight: 500, color: '#1e293b' }}>
+              <span style={{ fontWeight: 500, color: '#F2C94C' }}>
                 Reserved
               </span>
             </span>
@@ -281,14 +309,12 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
                   tickLine={false}
                   tick={(props) => {
                     const { x, y, payload } = props
-                    // const idx = data.findIndex((d) => d.name === payload.value)
-                    // const fill = barFills[idx % barFills.length]
                     return (
                       <text
                         x={x}
                         y={y + 10}
                         textAnchor="middle"
-                        fill="#64748b"
+                        fill="#4D4D4D"
                         fontWeight={500}
                         fontSize={15}
                         fontFamily="inherit"
@@ -303,35 +329,26 @@ const TableOccupancy: React.FC<TableOccupancyProps> = ({ timeRange }) => {
                     // Remove any dash, period, or unwanted character
                     return String(value).replace(/[-.]/g, '')
                   }}
-                  tick={{ fill: '#64748b' }}
+                  tick={{ fill: '#4D4D4D' }}
                   axisLine={false}
                 />
                 <Tooltip
                   content={<CustomTooltip />}
-                  cursor={{ fill: '#fffde7', opacity: 0.7 }}
+                  cursor={{ fill: '#e6f9f0', opacity: 0.7 }}
                 />
                 <Bar radius={[5, 5, 0, 0]} dataKey="occupied" name="Occupied">
                   {data.map((entry, idx) => (
-                    <Cell
-                      key={`occupied-${idx}`}
-                      fill={barFills[idx % barFills.length]}
-                    />
+                    <Cell key={`occupied-${idx}`} fill={barFills[0]} />
                   ))}
                 </Bar>
                 <Bar radius={[5, 5, 0, 0]} dataKey="available" name="Available">
                   {data.map((entry, idx) => (
-                    <Cell
-                      key={`available-${idx}`}
-                      fill={barFills[(idx + 2) % barFills.length]}
-                    />
+                    <Cell key={`available-${idx}`} fill={barFills[2]} />
                   ))}
                 </Bar>
                 <Bar radius={[5, 5, 0, 0]} dataKey="reserved" name="Reserved">
                   {data.map((entry, idx) => (
-                    <Cell
-                      key={`reserved-${idx}`}
-                      fill={barFills[(idx + 4) % barFills.length]}
-                    />
+                    <Cell key={`reserved-${idx}`} fill={barFills[4]} />
                   ))}
                 </Bar>
               </BarChart>

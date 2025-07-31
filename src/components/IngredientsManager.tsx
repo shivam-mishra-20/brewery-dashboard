@@ -73,23 +73,27 @@ const IngredientsManager: React.FC<IngredientsManagerProps> = ({
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 mb-4">
-      <h3 className="text-lg font-medium mb-3">Ingredients</h3>
+    <div className="border border-[#E0E0E0] rounded-2xl p-4 mb-4 bg-[#FFFFFF]">
+      <h3 className="text-lg font-inter-semibold text-[#1A1A1A] mb-3">
+        Ingredients
+      </h3>
 
       {/* Current ingredients list */}
       <div className="mb-4">
         {ingredients.length === 0 ? (
-          <p className="text-gray-500 text-sm">No ingredients added yet</p>
+          <p className="text-[#4D4D4D] text-sm">No ingredients added yet</p>
         ) : (
           <div className="space-y-2">
             {ingredients.map((ing) => (
               <div
                 key={ing.inventoryItemId}
-                className="flex items-center justify-between bg-gray-50 p-2 rounded"
+                className="flex items-center justify-between bg-[#e6f9f0] p-2 rounded-xl"
               >
                 <div>
-                  <span className="font-medium">{ing.inventoryItemName}</span>
-                  <span className="text-gray-600 text-sm ml-2">
+                  <span className="font-medium text-[#1A1A1A]">
+                    {ing.inventoryItemName}
+                  </span>
+                  <span className="text-[#4D4D4D] text-sm ml-2">
                     {ing.quantity} {ing.unit}
                   </span>
                 </div>
@@ -98,7 +102,7 @@ const IngredientsManager: React.FC<IngredientsManagerProps> = ({
                   danger
                   icon={<BsTrash />}
                   onClick={() => handleRemoveIngredient(ing.inventoryItemId)}
-                  style={{ padding: 0 }}
+                  style={{ padding: 0, color: '#EB5757' }}
                 />
               </div>
             ))}
@@ -109,7 +113,7 @@ const IngredientsManager: React.FC<IngredientsManagerProps> = ({
       {/* Add new ingredient form */}
       <div className="grid grid-cols-12 gap-2 items-end">
         <div className="col-span-6">
-          <label className="block text-sm text-gray-600 mb-1">
+          <label className="block text-sm text-[#4D4D4D] mb-1">
             Select Ingredient
           </label>
           <Select
@@ -119,7 +123,12 @@ const IngredientsManager: React.FC<IngredientsManagerProps> = ({
             placeholder="Select an item"
             className="w-full rounded-xl !h-10"
             size="large"
-            style={{ borderRadius: 12 }}
+            style={{
+              borderRadius: 12,
+              background: '#e6f9f0',
+              color: '#1A1A1A',
+              border: '1px solid #E0E0E0',
+            }}
             optionFilterProp="children"
             filterOption={(input, option) =>
               typeof option?.children === 'string' &&
@@ -137,7 +146,7 @@ const IngredientsManager: React.FC<IngredientsManagerProps> = ({
         </div>
 
         <div className="col-span-4">
-          <label className="block text-sm text-gray-600 mb-1">Quantity</label>
+          <label className="block text-sm text-[#4D4D4D] mb-1">Quantity</label>
           <Input
             type="number"
             value={quantity}
@@ -147,7 +156,12 @@ const IngredientsManager: React.FC<IngredientsManagerProps> = ({
             placeholder="Quantity"
             className="w-full rounded-xl !h-10"
             size="large"
-            style={{ borderRadius: 12 }}
+            style={{
+              borderRadius: 12,
+              background: '#e6f9f0',
+              color: '#1A1A1A',
+              border: '1px solid #E0E0E0',
+            }}
           />
         </div>
 
@@ -156,16 +170,21 @@ const IngredientsManager: React.FC<IngredientsManagerProps> = ({
             type="primary"
             icon={<BsPlusCircle />}
             onClick={handleAddIngredient}
-            className="w-full rounded-xl !h-10 flex items-center justify-center"
+            className="w-full rounded-xl !h-10 flex items-center justify-center font-inter-semibold"
             size="large"
-            style={{ background: '#FFD600', color: '#222', borderRadius: 12 }}
+            style={{
+              background: '#04B851',
+              color: '#fff',
+              borderRadius: 12,
+              border: '1px solid #04B851',
+            }}
           >
             Add
           </Button>
         </div>
       </div>
 
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && <p className="text-[#EB5757] text-sm mt-2">{error}</p>}
     </div>
   )
 }

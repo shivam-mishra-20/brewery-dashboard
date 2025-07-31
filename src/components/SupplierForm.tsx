@@ -93,7 +93,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
           <div className="mb-4">
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[#4D4D4D] mb-1"
             >
               Supplier Name
             </label>
@@ -103,7 +103,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+              className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
               placeholder="e.g., Bean Suppliers Inc."
               required
             />
@@ -113,7 +113,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
           <div className="mb-4">
             <label
               htmlFor="contactPerson"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[#4D4D4D] mb-1"
             >
               Contact Person
             </label>
@@ -123,7 +123,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
               name="contactPerson"
               value={formData.contactPerson}
               onChange={handleChange}
-              className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+              className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
               placeholder="e.g., John Smith"
               required
             />
@@ -134,7 +134,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-[#4D4D4D] mb-1"
               >
                 Email
               </label>
@@ -144,7 +144,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+                className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
                 placeholder="email@example.com"
                 required
               />
@@ -152,7 +152,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
             <div>
               <label
                 htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-[#4D4D4D] mb-1"
               >
                 Phone
               </label>
@@ -162,7 +162,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+                className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
                 placeholder="+1 (555) 123-4567"
                 required
               />
@@ -173,7 +173,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
           <div className="mb-4">
             <label
               htmlFor="address"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[#4D4D4D] mb-1"
             >
               Address
             </label>
@@ -183,7 +183,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="w-full h-10 px-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+              className="w-full h-10 px-3 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
               placeholder="123 Main St, City, State, ZIP"
               required
             />
@@ -193,7 +193,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
           <div className="mb-6">
             <label
               htmlFor="notes"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-[#4D4D4D] mb-1"
             >
               Notes (Optional)
             </label>
@@ -202,7 +202,7 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
               name="notes"
               value={formData.notes}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+              className="w-full px-3 py-2 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none font-inter text-[#1A1A1A] bg-[#F9FAFB]"
               placeholder="Additional information about the supplier..."
               rows={3}
             />
@@ -218,16 +218,16 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
                   name="isActive"
                   checked={formData.isActive}
                   onChange={handleChange}
-                  className="h-4 w-4 text-yellow-500 focus:ring-yellow-400 border-gray-300 rounded"
+                  className="h-4 w-4 text-[#04B851] focus:ring-[#e6f9f0] border-[#E0E0E0] rounded"
                 />
                 <label
                   htmlFor="isActive"
-                  className="ml-2 text-sm font-medium text-gray-700"
+                  className="ml-2 text-sm font-medium text-[#4D4D4D]"
                 >
                   Active Supplier
                 </label>
               </div>{' '}
-              <p className="text-xs text-gray-500 mt-1 ml-6">
+              <p className="text-xs text-[#4D4D4D] mt-1 ml-6">
                 Inactive suppliers won&apos;t appear in dropdown selections
               </p>
             </div>
@@ -238,14 +238,14 @@ const SupplierForm: React.FC<SupplierFormProps> = ({
             <button
               type="button"
               onClick={onCancel}
-              className="px-5 py-2 bg-gray-100 text-gray-700 rounded-xl font-inter hover:bg-gray-200 transition border border-gray-300 shadow-sm"
+              className="px-5 py-2 bg-[#e6f9f0] text-[#04B851] rounded-xl hover:bg-[#04B851] hover:text-white transition border border-[#04B851] shadow-sm font-inter-semibold"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-inter shadow-white/[0.5] shadow-inner hover:opacity-90 transition flex items-center gap-2  border border-primary/[0.1]"
+              className="px-6 py-2 bg-gradient-to-r from-[#04B851] to-[#039f45] text-white rounded-xl shadow-white/[0.5] shadow-inner hover:opacity-90 transition flex items-center gap-2 border border-[#04B851] font-inter-semibold"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

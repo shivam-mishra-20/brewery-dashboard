@@ -142,14 +142,14 @@ export default function MenuPage() {
   })
 
   return (
-    <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#f7f7f7] rounded-2xl shadow-inner custom-scrollbar">
+    <div className="w-full min-h-[85vh] flex flex-col gap-6 px-2 sm:px-4 md:px-8 py-4 md:py-8 bg-[#F9FAFB] rounded-2xl shadow-inner custom-scrollbar">
       {/* Header and filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-inter-semibold text-black drop-shadow-sm">
+          <h1 className="text-2xl md:text-3xl font-inter-semibold text-[#04B851] drop-shadow-sm">
             Menu
           </h1>
-          <p className="text-black text-xs md:text-sm mt-1">
+          <p className="text-[#4D4D4D] text-xs md:text-sm mt-1">
             Manage your restaurant menu items
           </p>
         </div>
@@ -157,12 +157,12 @@ export default function MenuPage() {
           <div className="flex items-center gap-2 w-full md:w-64">
             <div className="relative w-full">
               <input
-                className="w-full py-2 pl-10 pr-4 rounded-xl border border-yellow-300 bg-white text-black text-sm focus:ring-2 focus:ring-yellow-400 outline-none transition"
+                className="w-full py-2 pl-10 pr-4 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] text-[#1A1A1A] text-sm focus:ring-2 focus:ring-[#04B851] outline-none transition"
                 placeholder="Search menu..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-yellow-500">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#04B851]">
                 <BsSearch className="text-xl" />
               </span>
             </div>
@@ -171,13 +171,13 @@ export default function MenuPage() {
             <Link href="/dashboard/menu/add" passHref>
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-yellow-900/[0.1] text-sm hover:scale-105 transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-[#04B851] to-[#039f45] text-white font-medium shadow-inner shadow-[#e6f9f0]/[0.5] border border-[#04B851] text-sm hover:scale-105 transition font-inter-semibold"
               >
                 <BsPlusCircle className="text-lg" /> Add Item
               </motion.button>
             </Link>
             <button
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-tr from-yellow-400 to-yellow-500 text-white font-medium shadow-inner border border-yellow-900/[0.1] text-sm hover:scale-105 transition w-full md:w-auto md:ml-2"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#04B851] text-white font-medium shadow-inner border border-[#04B851] text-sm hover:scale-105 transition w-full md:w-auto md:ml-2 font-inter-semibold"
               onClick={() => setIsCategoryManagerOpen(true)}
               type="button"
             >
@@ -193,10 +193,10 @@ export default function MenuPage() {
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition font-inter-semibold ${
               selectedCategory === category
-                ? 'bg-yellow-400 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+                ? 'bg-[#04B851] text-white'
+                : 'bg-[#FFFFFF] text-[#1A1A1A] hover:bg-[#e6f9f0] hover:text-[#04B851] hover:border-[#04B851] border border-[#E0E0E0]'
             }`}
           >
             {category}
@@ -207,16 +207,16 @@ export default function MenuPage() {
       {/* Content */}
       {loading ? (
         <div className="w-full flex-1 flex items-center justify-center">
-          <TbLoader3 className="animate-spin text-yellow-400 mr-3" size={36} />
-          <p className="text-lg text-gray-600">Loading menu items...</p>
+          <TbLoader3 className="animate-spin text-[#04B851] mr-3" size={36} />
+          <p className="text-lg text-[#4D4D4D]">Loading menu items...</p>
         </div>
       ) : error ? (
         <div className="w-full flex-1 flex items-center justify-center">
-          <div className="text-center p-8 bg-red-50 rounded-xl max-w-md">
-            <h2 className="text-lg font-semibold text-red-600 mb-2">Error</h2>
-            <p className="text-gray-600">{error}</p>
+          <div className="text-center p-8 bg-[#e6f9f0] rounded-xl max-w-md border border-[#EB5757]">
+            <h2 className="text-lg font-semibold text-[#EB5757] mb-2">Error</h2>
+            <p className="text-[#4D4D4D]">{error}</p>
             <button
-              className="mt-4 px-4 py-2 bg-yellow-400 text-yellow-900 rounded-xl"
+              className="mt-4 px-4 py-2 bg-gradient-to-r from-[#04B851] to-[#039f45] text-white rounded-xl font-inter-semibold border border-[#04B851] hover:bg-[#039f45]"
               onClick={() => loadMenuItemsByCategory(selectedCategory)}
             >
               Try Again
@@ -250,7 +250,7 @@ export default function MenuPage() {
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="text-black text-lg font-inter-semibold"
+                className="text-[#1A1A1A] text-lg font-inter-semibold"
               >
                 No menu items found.
               </motion.p>
@@ -258,7 +258,7 @@ export default function MenuPage() {
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-gray-500 text-sm mt-2 text-center max-w-md"
+                className="text-[#4D4D4D] text-sm mt-2 text-center max-w-md"
               >
                 {selectedCategory !== 'All'
                   ? `Try selecting a different category or add new items to ${selectedCategory}.`

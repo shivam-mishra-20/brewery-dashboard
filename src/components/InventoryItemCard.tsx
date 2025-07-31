@@ -54,15 +54,15 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-100"
+      className="bg-[#FFFFFF] rounded-2xl overflow-hidden shadow-md border border-[#E0E0E0]"
     >
       <div className="p-5">
         <div className="flex justify-between items-start mb-4">
-          <h3 className="font-inter-semibold text-lg text-black">
+          <h3 className="font-inter-semibold text-lg text-[#1A1A1A]">
             {item.name}
           </h3>
           {isLowStock && (
-            <span className="px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded-full">
+            <span className="px-2 py-1 text-xs font-semibold bg-[#e6f9f0] text-[#04B851] rounded-full border border-[#04B851]">
               Low Stock
             </span>
           )}
@@ -70,39 +70,39 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
 
         <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
           <div>
-            <p className="text-gray-500">Quantity</p>
+            <p className="text-[#4D4D4D]">Quantity</p>
             <p
-              className={`font-medium ${isLowStock ? 'text-red-600' : 'text-black'}`}
+              className={`font-medium ${isLowStock ? 'text-[#EB5757]' : 'text-[#1A1A1A]'}`}
             >
               {item.quantity} {item.unit}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Cost Per Unit</p>
-            <p className="font-medium text-black">
+            <p className="text-[#4D4D4D]">Cost Per Unit</p>
+            <p className="font-medium text-[#1A1A1A]">
               ₹{item.costPerUnit.toFixed(2)}/{item.unit}
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Category</p>
-            <p className="font-medium text-black">{item.category}</p>
+            <p className="text-[#4D4D4D]">Category</p>
+            <p className="font-medium text-[#1A1A1A]">{item.category}</p>
           </div>
           <div>
-            <p className="text-gray-500">Reorder Point</p>
-            <p className="font-medium text-black">
+            <p className="text-[#4D4D4D]">Reorder Point</p>
+            <p className="font-medium text-[#1A1A1A]">
               {item.reorderPoint} {item.unit}
             </p>
           </div>
         </div>
 
-        <div className="text-xs text-gray-500 mb-4">
+        <div className="text-xs text-[#4D4D4D] mb-4">
           Last Restocked: {formatDate(item.lastRestocked)}
         </div>
 
-        <div className="flex justify-between items-center border-t border-gray-100 pt-4">
+        <div className="flex justify-between items-center border-t border-[#E0E0E0] pt-4">
           <button
             onClick={() => setIsRestockModalOpen(true)}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-[#e6f9f0] text-[#04B851] rounded-lg hover:bg-[#04B851] hover:text-white transition border border-[#04B851]"
           >
             <TbRefresh className="text-base" /> Restock
           </button>
@@ -110,13 +110,13 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
           <div className="flex gap-2">
             <button
               onClick={() => onEdit(item)}
-              className="p-1.5 text-gray-600 hover:text-yellow-500 transition"
+              className="p-1.5 text-[#04B851] hover:text-[#039f45] transition"
             >
               <BsPencilSquare />
             </button>
             <button
               onClick={() => onDelete(item.id)}
-              className="p-1.5 text-gray-600 hover:text-red-500 transition"
+              className="p-1.5 text-[#EB5757] hover:text-[#B71C1C] transition"
             >
               <BsTrash />
             </button>
@@ -125,8 +125,8 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
                 onClick={() => onAutoReorder(item)}
                 className={`p-1.5 transition ${
                   item.autoReorderNotify
-                    ? 'text-yellow-500 hover:text-yellow-600'
-                    : 'text-gray-600 hover:text-yellow-500'
+                    ? 'text-[#F2C94C] hover:text-[#F2C94C]'
+                    : 'text-[#04B851] hover:text-[#039f45]'
                 }`}
                 title={
                   item.autoReorderNotify
@@ -154,15 +154,15 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="bg-white rounded-xl p-5 max-w-md w-full mx-4"
+              className="bg-[#FFFFFF] rounded-2xl p-5 max-w-md w-full mx-4 border border-[#E0E0E0]"
             >
-              <h3 className="text-xl font-inter-semibold mb-4">
+              <h3 className="text-xl font-inter-semibold mb-4 text-[#1A1A1A]">
                 Restock {item.name}
               </h3>
 
               <form onSubmit={handleRestockSubmit}>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
+                  <label className="block text-[#4D4D4D] text-sm font-medium mb-2">
                     Add Quantity ({item.unit})
                   </label>
                   <input
@@ -171,7 +171,7 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
                     step="0.01"
                     value={restockAmount}
                     onChange={(e) => setRestockAmount(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none"
+                    className="w-full p-2 border border-[#E0E0E0] rounded-xl focus:ring-2 focus:ring-[#e6f9f0] focus:border-transparent outline-none text-[#1A1A1A] bg-[#F9FAFB]"
                     required
                   />
                 </div>
@@ -180,13 +180,13 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsRestockModalOpen(false)}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
+                    className="px-4 py-2 text-[#4D4D4D] hover:text-[#1A1A1A] transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                    className="px-4 py-2 bg-[#04B851] text-white rounded-lg hover:bg-[#039f45] transition flex items-center gap-2 font-inter-semibold"
                   >
                     <BsArrowUpCircleFill /> Restock
                   </button>

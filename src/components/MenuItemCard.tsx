@@ -121,7 +121,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     },
     hover: {
       y: -8,
-      boxShadow: '0 20px 30px rgba(255, 207, 51, 0.2)',
+      boxShadow: '0 20px 30px rgba(4, 184, 81, 0.15)',
       transition: { duration: 0.3 },
     },
   }
@@ -145,7 +145,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
   return (
     <motion.div
-      className={`menu-card border ${item.available ? 'border-yellow-200' : 'border-gray-200'}`}
+      className={`menu-card border ${item.available ? 'border-[#04B851]' : 'border-[#E0E0E0]'}`}
       initial="hidden"
       animate="visible"
       whileHover="hover"
@@ -156,7 +156,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
     >
       {/* Status badge */}
       <div
-        className={`status-badge ${item.available ? 'status-available' : 'status-unavailable'}`}
+        className={`status-badge px-2 py-1 text-xs font-inter-semibold rounded-full border ${item.available ? 'bg-[#e6f9f0] text-[#04B851] border-[#04B851]' : 'bg-[#F9FAFB] text-[#EB5757] border-[#EB5757]'}`}
       >
         {item.available ? 'Available' : 'Unavailable'}
       </div>
@@ -247,7 +247,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             {/* Video button */}
             {hasVideo && !isShowingVideo && (
               <motion.button
-                className="absolute bottom-2 left-2 bg-yellow-500 text-white p-2 rounded-full shadow-md z-10"
+                className="absolute bottom-2 left-2 bg-[#04B851] text-white p-2 rounded-full shadow-md z-10"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={toggleVideo}
@@ -278,7 +278,9 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
       {/* Content */}
       <div className="menu-card-content">
         <div className="menu-card-header">
-          <h3 className="menu-card-title">{item.name}</h3>
+          <h3 className="menu-card-title text-[#1A1A1A] font-inter-semibold">
+            {item.name}
+          </h3>
           <div className="flex gap-1">
             <motion.button
               className="btn btn-icon btn-secondary"
@@ -299,12 +301,14 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           </div>
         </div>
 
-        <p className="menu-card-description">
+        <p className="menu-card-description text-[#4D4D4D]">
           {item.description || 'No description available'}
         </p>
 
         <div className="flex items-center justify-between">
-          <p className=" text-secondary ">₹{Number(item.price).toFixed(2)}</p>
+          <p className="text-[#04B851] font-inter-semibold">
+            ₹{Number(item.price).toFixed(2)}
+          </p>
 
           <motion.button
             whileTap={{ scale: 0.95 }}
@@ -312,23 +316,23 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             className="text-lg"
           >
             {item.available ? (
-              <BsToggleOn className="text-green-500" size={24} />
+              <BsToggleOn className="text-[#04B851]" size={24} />
             ) : (
-              <BsToggleOff className="text-gray-400" size={24} />
+              <BsToggleOff className="text-[#E0E0E0]" size={24} />
             )}
           </motion.button>
         </div>
 
         {/* Tags section */}
-        <div className="tag-container">
+        <div className="tag-container flex gap-2 mt-2">
           {hasIngredients && (
-            <span className="menu-tag tag-ingredient">
+            <span className="menu-tag tag-ingredient bg-[#e6f9f0] text-[#04B851] px-2 py-0.5 rounded font-inter-semibold">
               {item.ingredients!.length} ingredients
             </span>
           )}
 
           {hasAddOns && (
-            <span className="menu-tag tag-addon">
+            <span className="menu-tag tag-addon bg-[#e6f9f0] text-[#039f45] px-2 py-0.5 rounded font-inter-semibold">
               {item.addOns!.length} add-ons
             </span>
           )}
@@ -338,7 +342,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowDetails(!showDetails)}
-              className="ml-auto text-xs flex items-center gap-1 text-primary"
+              className="ml-auto text-xs flex items-center gap-1 text-[#04B851] font-inter-semibold"
             >
               <BsInfoCircle size={12} />
               {showDetails ? 'Less info' : 'More info'}
@@ -362,15 +366,15 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
               >
                 {/* Ingredients section */}
                 {hasIngredients && (
-                  <div className="p-2 bg-blue-50 rounded-md">
-                    <h4 className="text-xs font-semibold mb-1 text-blue-800">
+                  <div className="p-2 bg-[#e6f9f0] rounded-md">
+                    <h4 className="text-xs font-inter-semibold mb-1 text-[#04B851]">
                       Ingredients:
                     </h4>
                     <div className="flex flex-wrap gap-1">
                       {item.ingredients!.map((ing, idx) => (
                         <div
                           key={idx}
-                          className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded"
+                          className="text-xs bg-[#e6f9f0] text-[#039f45] px-2 py-0.5 rounded font-inter-semibold border border-[#04B851]"
                         >
                           {ing.inventoryItemName}: {ing.quantity} {ing.unit}
                         </div>
@@ -381,15 +385,15 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
                 {/* Add-ons section */}
                 {hasAddOns && (
-                  <div className="p-2 bg-green-50 rounded-md">
-                    <h4 className="text-xs font-semibold mb-1 text-green-800">
+                  <div className="p-2 bg-[#e6f9f0] rounded-md">
+                    <h4 className="text-xs font-inter-semibold mb-1 text-[#039f45]">
                       Add-ons:
                     </h4>
                     <div className="flex flex-wrap gap-1">
                       {item.addOns!.map((addon, idx) => (
                         <div
                           key={idx}
-                          className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded"
+                          className="text-xs bg-[#e6f9f0] text-[#04B851] px-2 py-0.5 rounded font-inter-semibold border border-[#039f45]"
                         >
                           {addon.name}: ₹{addon.price.toFixed(2)}
                         </div>

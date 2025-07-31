@@ -502,7 +502,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
                 onChange={handleChange}
                 required
                 placeholder="0.00"
-                className="w-full p-2 rounded-xl border border-gray-200 bg-white text-black focus:ring-2 focus:ring-yellow-400 outline-none"
+                className="w-full p-2 rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] text-[#1A1A1A] focus:ring-2 focus:ring-[#e6f9f0] outline-none"
               />
             </div>
 

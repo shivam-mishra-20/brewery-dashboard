@@ -39,20 +39,20 @@ const TableFloorPlan: React.FC<TableFloorPlanProps> = ({
     return a.localeCompare(b)
   })
 
-  // Dashboard yellow palette for status
-  // available: light yellow, occupied: golden yellow, reserved: deep yellow, maintenance: gray
+  // Green palette for status
+  // available: brand green, occupied: green hover, reserved: warning, maintenance: error
   const getStatusColor = (status: string): string => {
     switch (status) {
       case 'available':
-        return 'bg-[#fff9c4] text-slate-800 border border-[#ffe082]'
+        return 'bg-[#e6f9f0] text-[#04B851] border border-[#04B851]'
       case 'occupied':
-        return 'bg-[#ffc300] text-slate-900 border border-[#ffd54f]'
+        return 'bg-[#04B851] text-white border border-[#039f45]'
       case 'reserved':
-        return 'bg-[#ffb300] text-slate-900 border border-[#ffeb3b]'
+        return 'bg-[#F2C94C] text-[#1A1A1A] border border-[#E0E0E0]'
       case 'maintenance':
-        return 'bg-gray-200 text-slate-400 border border-gray-300'
+        return 'bg-[#EB5757] text-white border border-[#E0E0E0]'
       default:
-        return 'bg-gray-100 text-slate-400 border border-gray-200'
+        return 'bg-[#F9FAFB] text-[#4D4D4D] border border-[#E0E0E0]'
     }
   }
 
@@ -82,10 +82,10 @@ const TableFloorPlan: React.FC<TableFloorPlanProps> = ({
 
   return (
     <div
-      className="w-full rounded-xl border border-slate-200 bg-white overflow-auto p-4 shadow-sm min-h-[300px]"
+      className="w-full rounded-xl border border-[#E0E0E0] bg-[#FFFFFF] overflow-auto p-4 shadow-sm min-h-[300px]"
       style={{ height: 350 }}
     >
-      <h3 className="text-lg font-bold mb-4">Floor Plan</h3>
+      <h3 className="text-lg font-bold mb-4 text-[#04B851]">Floor Plan</h3>
 
       <div
         className="flex flex-row gap-8 overflow-x-auto pb-2"
@@ -96,10 +96,10 @@ const TableFloorPlan: React.FC<TableFloorPlanProps> = ({
             key={location}
             className="min-w-[320px] max-w-[400px] flex-shrink-0 mb-2"
           >
-            <h4 className="text-md font-semibold mb-2 text-slate-700 text-center">
+            <h4 className="text-md font-semibold mb-2 text-[#4D4D4D] text-center">
               {location}
             </h4>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+            <div className="p-4 rounded-lg bg-[#F9FAFB] border border-[#E0E0E0]">
               <div className="flex flex-row w-full gap-6 p-4 justify-center">
                 {tablesByLocation[location].map((table) => (
                   <motion.div
@@ -109,15 +109,19 @@ const TableFloorPlan: React.FC<TableFloorPlanProps> = ({
                     onClick={() => onTableClick(table)}
                     className={`${getTableSize(table.capacity)} ${getTableShape(table.capacity)} ${getStatusColor(table.status)} flex items-center justify-center cursor-pointer shadow-md hover:shadow-lg transition-shadow`}
                   >
-                    <div className="text-center text-gray-800">
-                      <div className="font-bold">{table.number}</div>
-                      <div className="text-xs">{table.capacity}p</div>
+                    <div className="text-center">
+                      <div className="font-bold text-[#1A1A1A]">
+                        {table.number}
+                      </div>
+                      <div className="text-xs text-[#4D4D4D]">
+                        {table.capacity}p
+                      </div>
                     </div>
                   </motion.div>
                 ))}
 
                 {tablesByLocation[location].length === 0 && (
-                  <p className="text-slate-500 italic">
+                  <p className="text-[#4D4D4D] italic">
                     No tables in this area
                   </p>
                 )}
@@ -129,39 +133,43 @@ const TableFloorPlan: React.FC<TableFloorPlanProps> = ({
 
       {locations.length === 0 && (
         <div className="flex justify-center items-center h-40">
-          <p className="text-slate-500">No tables to display</p>
+          <p className="text-[#4D4D4D]">No tables to display</p>
         </div>
       )}
 
-      {/* Legend - using dashboard yellow palette */}
+      {/* Legend - using green palette */}
       <div className="mt-4 flex flex-wrap gap-4">
         <div className="flex items-center">
           <div
             className="w-4 h-4 rounded-full mr-2 border"
-            style={{ background: '#fff9c4', borderColor: '#ffe082' }}
+            style={{ background: '#e6f9f0', borderColor: '#04B851' }}
           ></div>
-          <span className="text-xs text-slate-800">Available</span>
+          <span className="text-xs text-[#04B851]">Available</span>
         </div>
         <div className="flex items-center">
           <div
             className="w-4 h-4 rounded-full mr-2 border"
-            style={{ background: '#ffc300', borderColor: '#ffd54f' }}
+            style={{ background: '#04B851', borderColor: '#039f45' }}
           ></div>
-          <span className="text-xs text-slate-900">Occupied</span>
+          <span className="text-xs text-white bg-[#04B851] px-2 py-0.5 rounded">
+            Occupied
+          </span>
         </div>
         <div className="flex items-center">
           <div
             className="w-4 h-4 rounded-full mr-2 border"
-            style={{ background: '#ffb300', borderColor: '#ffeb3b' }}
+            style={{ background: '#F2C94C', borderColor: '#E0E0E0' }}
           ></div>
-          <span className="text-xs text-slate-900">Reserved</span>
+          <span className="text-xs text-[#1A1A1A]">Reserved</span>
         </div>
         <div className="flex items-center">
           <div
             className="w-4 h-4 rounded-full mr-2 border"
-            style={{ background: '#e5e7eb', borderColor: '#cbd5e1' }}
+            style={{ background: '#EB5757', borderColor: '#E0E0E0' }}
           ></div>
-          <span className="text-xs text-slate-400">Maintenance</span>
+          <span className="text-xs text-white bg-[#EB5757] px-2 py-0.5 rounded">
+            Maintenance
+          </span>
         </div>
       </div>
     </div>

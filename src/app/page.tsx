@@ -43,7 +43,7 @@ export default function Home() {
         <div className="bg-[#23272F]/80 backdrop-blur-xl border border-[#FFC600]/20 rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 flex flex-col items-center max-w-xs sm:max-w-md md:max-w-lg w-full mx-auto">
           {/* Icon and main heading */}
           <div className="relative mb-2 md:mb-6 overflow-hidden">
-            <div className="absolute inset-0 bg-[#FFC600]/20 rounded-full blur-2xl animate-pulse"></div>
+            <div className="absolute inset-0 rounded-full blur-2xl animate-pulse"></div>
             <FiCoffee className="relative text-[#FFC600] text-4xl sm:text-5xl md:text-6xl animate-bounce" />
           </div>
 

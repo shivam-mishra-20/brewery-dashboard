@@ -86,28 +86,30 @@ const MenuItemDetailView: React.FC<MenuItemDetailViewProps> = ({
 
           {/* Basic details */}
           <div className="mb-6">
-            <h3 className="text-2xl font-inter-semibold mb-2">{item.name}</h3>
+            <h3 className="text-2xl font-inter-semibold mb-2 text-[#1A1A1A]">
+              {item.name}
+            </h3>
             <div className="flex justify-between items-center mb-3">
-              <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+              <span className="bg-[#e6f9f0] text-[#04B851] px-3 py-1 rounded-full text-sm font-inter-semibold border border-[#04B851]">
                 {item.category}
               </span>
-              <span className="font-inter-bold text-lg">
-                ${formatPrice(item.price)}
+              <span className="font-inter-semibold text-lg text-[#04B851]">
+                ₹{formatPrice(item.price)}
               </span>
             </div>
-            <p className="text-gray-600">{item.description}</p>
+            <p className="text-[#4D4D4D]">{item.description}</p>
           </div>
 
           {/* Availability */}
           <div className="mb-6">
             <div className="flex items-center">
-              <span className="mr-2 font-medium">Status:</span>
+              <span className="mr-2 font-medium text-[#4D4D4D]">Status:</span>
               {item.available ? (
-                <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm">
+                <span className="bg-[#e6f9f0] text-[#04B851] px-2 py-0.5 rounded-full text-sm font-inter-semibold border border-[#04B851]">
                   Available
                 </span>
               ) : (
-                <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-sm">
+                <span className="bg-[#F9FAFB] text-[#EB5757] px-2 py-0.5 rounded-full text-sm font-inter-semibold border border-[#EB5757]">
                   Unavailable
                 </span>
               )}
@@ -117,22 +119,24 @@ const MenuItemDetailView: React.FC<MenuItemDetailViewProps> = ({
           {/* Ingredients section */}
           <div className="mb-5">
             <div className="flex justify-between items-center mb-3">
-              <h4 className="text-lg font-medium">Ingredients</h4>
+              <h4 className="text-lg font-inter-semibold text-[#1A1A1A]">
+                Ingredients
+              </h4>
 
               {hasLowStockIngredients && (
-                <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs">
+                <span className="bg-[#F9FAFB] text-[#EB5757] px-2 py-0.5 rounded-full text-xs font-inter-semibold border border-[#EB5757]">
                   Low Stock Ingredients
                 </span>
               )}
             </div>
 
             {!item.ingredients || item.ingredients.length === 0 ? (
-              <p className="text-gray-500 text-sm italic">
+              <p className="text-[#4D4D4D] text-sm italic">
                 No ingredients data
               </p>
             ) : (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <ul className="divide-y divide-gray-200">
+              <div className="bg-[#e6f9f0] p-3 rounded-xl border border-[#E0E0E0]">
+                <ul className="divide-y divide-[#E0E0E0]">
                   {item.ingredients.map((ing) => {
                     const inventoryItem = getIngredientDetails(
                       ing.inventoryItemId,
@@ -147,10 +151,10 @@ const MenuItemDetailView: React.FC<MenuItemDetailViewProps> = ({
                         className="py-2 flex justify-between items-center"
                       >
                         <div>
-                          <span className="font-medium">
+                          <span className="font-inter-semibold text-[#1A1A1A]">
                             {ing.inventoryItemName}
                           </span>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-[#4D4D4D]">
                             {ing.quantity} {ing.unit} per serving
                           </p>
                         </div>
@@ -158,13 +162,13 @@ const MenuItemDetailView: React.FC<MenuItemDetailViewProps> = ({
                         {inventoryItem && (
                           <div className="text-right">
                             <div
-                              className={`text-sm ${isLowStock ? 'text-red-600 font-medium' : 'text-gray-600'}`}
+                              className={`text-sm font-inter-semibold ${isLowStock ? 'text-[#EB5757]' : 'text-[#04B851]'}`}
                             >
                               Stock: {inventoryItem.quantity}{' '}
                               {inventoryItem.unit}
                             </div>
                             {isLowStock && (
-                              <div className="text-xs text-red-600">
+                              <div className="text-xs text-[#EB5757] font-inter-semibold">
                                 Below reorder point (
                                 {inventoryItem.reorderPoint})
                               </div>
@@ -180,7 +184,7 @@ const MenuItemDetailView: React.FC<MenuItemDetailViewProps> = ({
           </div>
 
           {/* Additional info */}
-          <div className="text-sm text-gray-500 pt-4 border-t border-gray-100">
+          <div className="text-sm text-[#4D4D4D] pt-4 border-t border-[#E0E0E0]">
             <p>Added: {formatDate(item.createdAt)}</p>
             <p>Last Updated: {formatDate(item.updatedAt)}</p>
           </div>

@@ -83,24 +83,24 @@ export default function EditMenuItemPage() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[85vh] flex flex-col items-center justify-center bg-[#f7f7f7] rounded-2xl shadow-inner">
-        <TbLoader3 className="animate-spin text-yellow-400 mb-4" size={48} />
-        <p className="text-lg text-gray-600">Loading menu item...</p>
+      <div className="w-full min-h-[85vh] flex flex-col items-center justify-center bg-[#F9FAFB] rounded-2xl shadow-inner">
+        <TbLoader3 className="animate-spin text-[#04B851] mb-4" size={48} />
+        <p className="text-lg text-[#4D4D4D]">Loading menu item...</p>
       </div>
     )
   }
 
   if (error || !selectedMenuItem) {
     return (
-      <div className="w-full min-h-[85vh] flex flex-col items-center justify-center bg-[#f7f7f7] rounded-2xl shadow-inner p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-lg w-full">
-          <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
-          <p className="text-gray-700 mb-6">
+      <div className="w-full min-h-[85vh] flex flex-col items-center justify-center bg-[#F9FAFB] rounded-2xl shadow-inner p-4">
+        <div className="bg-[#FFFFFF] rounded-2xl shadow-lg p-8 max-w-lg w-full border border-[#E0E0E0]">
+          <h2 className="text-2xl font-bold text-[#EB5757] mb-4">Error</h2>
+          <p className="text-[#4D4D4D] mb-6">
             {error || `Menu item with ID ${itemId} not found`}
           </p>
           <button
             onClick={() => router.push('/dashboard/menu')}
-            className="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-xl font-medium flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-r from-[#04B851] to-[#039f45] text-white rounded-xl font-medium flex items-center gap-2 border border-[#04B851] hover:bg-[#039f45]"
           >
             <BsArrowLeft /> Back to Menu
           </button>
@@ -110,22 +110,22 @@ export default function EditMenuItemPage() {
   }
 
   return (
-    <div className="w-full min-h-[85vh] bg-[#f7f7f7] rounded-2xl shadow-inner p-4 md:p-8 custom-scrollbar">
+    <div className="w-full min-h-[85vh] bg-[#F9FAFB] rounded-2xl shadow-inner p-4 md:p-8 custom-scrollbar">
       <div className="max-w-6xl mx-auto">
         {/* Header section */}
         <div className="flex items-center mb-6">
           <button
             onClick={() => router.push('/dashboard/menu')}
-            className="mr-4 p-2 rounded-full bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition"
+            className="mr-4 p-2 rounded-full bg-[#FFFFFF] text-[#04B851] border border-[#E0E0E0] hover:bg-[#e6f9f0] transition"
             aria-label="Back to menu"
           >
             <BsArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-inter-semibold text-black drop-shadow-sm">
+            <h1 className="text-2xl md:text-3xl font-inter-semibold text-[#04B851] drop-shadow-sm">
               Edit Menu Item
             </h1>
-            <p className="text-black text-xs md:text-sm mt-1">
+            <p className="text-[#4D4D4D] text-xs md:text-sm mt-1">
               Update the details for &quot;{selectedMenuItem.name}&quot;
             </p>
           </div>
@@ -136,7 +136,7 @@ export default function EditMenuItemPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white rounded-2xl shadow-lg overflow-hidden"
+          className="bg-[#FFFFFF] rounded-2xl shadow-lg overflow-hidden border border-[#E0E0E0]"
         >
           <AnimatePresence>
             <MenuItemForm

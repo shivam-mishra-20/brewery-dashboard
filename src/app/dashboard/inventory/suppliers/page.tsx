@@ -123,14 +123,14 @@ export default function SuppliersPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-[#F9FAFB] min-h-[85vh]">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-inter-semibold text-gray-800">
+        <h1 className="text-2xl font-inter-semibold text-[#04B851]">
           Suppliers
         </h1>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-xl flex items-center gap-2"
+          className="bg-gradient-to-r from-[#04B851] to-[#039f45] text-white px-4 py-2 rounded-xl flex items-center gap-2 font-inter-semibold border border-[#04B851] hover:bg-[#039f45]"
         >
           <AiOutlinePlus /> Add Supplier
         </button>
@@ -143,16 +143,16 @@ export default function SuppliersPage() {
             placeholder="Search suppliers..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-10 px-10 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none font-inter"
+            className="w-full h-10 px-10 border border-[#E0E0E0] rounded-xl shadow-sm focus:ring-2 focus:ring-[#04B851] focus:border-transparent outline-none font-inter bg-[#FFFFFF] text-[#1A1A1A]"
           />
           <BiSearch
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#04B851]"
             size={20}
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#04B851] hover:text-[#039f45]"
             >
               <GrPowerReset size={16} />
             </button>
@@ -165,9 +165,9 @@ export default function SuppliersPage() {
             id="showInactive"
             checked={showInactive}
             onChange={(e) => setShowInactive(e.target.checked)}
-            className="h-4 w-4 text-yellow-500 focus:ring-yellow-400 border-gray-300 rounded mr-2"
+            className="h-4 w-4 text-[#04B851] focus:ring-[#04B851] border-[#E0E0E0] rounded mr-2 accent-[#04B851]"
           />
-          <label htmlFor="showInactive" className="text-sm text-gray-700">
+          <label htmlFor="showInactive" className="text-sm text-[#4D4D4D]">
             Show inactive suppliers
           </label>
         </div>
@@ -175,14 +175,14 @@ export default function SuppliersPage() {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#04B851]"></div>
         </div>
       ) : filteredSuppliers.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <p className="text-gray-600 mb-4">No suppliers found</p>
+        <div className="bg-[#FFFFFF] rounded-xl shadow-sm p-8 text-center border border-[#E0E0E0]">
+          <p className="text-[#4D4D4D] mb-4">No suppliers found</p>
           <button
             onClick={() => setShowAddForm(true)}
-            className="text-primary hover:text-primary-dark underline"
+            className="text-[#04B851] hover:text-[#039f45] underline font-inter-semibold"
           >
             Add your first supplier
           </button>

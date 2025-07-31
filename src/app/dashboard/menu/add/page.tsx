@@ -25,22 +25,22 @@ export default function AddMenuItemPage() {
   }
 
   return (
-    <div className="w-full min-h-[85vh] bg-[#f7f7f7] rounded-2xl shadow-inner p-4 md:p-8 custom-scrollbar">
+    <div className="w-full min-h-[85vh] bg-[#F9FAFB] rounded-2xl shadow-inner p-4 md:p-8 custom-scrollbar">
       <div className="max-w-6xl mx-auto">
         {/* Header section */}
         <div className="flex items-center mb-6">
           <button
             onClick={() => router.push('/dashboard/menu')}
-            className="mr-4 p-2 rounded-full bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition"
+            className="mr-4 p-2 rounded-full bg-[#FFFFFF] text-[#04B851] border border-[#E0E0E0] hover:bg-[#e6f9f0] transition"
             aria-label="Back to menu"
           >
             <BsArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-inter-semibold text-black drop-shadow-sm">
+            <h1 className="text-2xl md:text-3xl font-inter-semibold text-[#04B851] drop-shadow-sm">
               Add New Menu Item
             </h1>
-            <p className="text-black text-xs md:text-sm mt-1">
+            <p className="text-[#4D4D4D] text-xs md:text-sm mt-1">
               Create a delicious new addition to your menu
             </p>
           </div>
@@ -51,7 +51,7 @@ export default function AddMenuItemPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl"
+            className="mb-6 bg-[#e6f9f0] border border-[#EB5757] text-[#EB5757] p-4 rounded-xl"
           >
             <p>{error}</p>
           </motion.div>
@@ -62,7 +62,7 @@ export default function AddMenuItemPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white rounded-2xl shadow-lg overflow-hidden"
+          className="bg-[#FFFFFF] rounded-2xl shadow-lg overflow-hidden border border-[#E0E0E0]"
         >
           <AnimatePresence>
             <MenuItemForm

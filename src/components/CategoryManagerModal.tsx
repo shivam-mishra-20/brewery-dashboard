@@ -66,10 +66,16 @@ export default function CategoryManagerModal({
   return (
     <Modal
       open={open}
-      title="Manage Categories"
+      title={
+        <span style={{ color: '#04B851', fontWeight: 600 }}>
+          Manage Categories
+        </span>
+      }
       onCancel={onClose}
       footer={null}
       destroyOnClose
+      bodyStyle={{ background: '#F9FAFB', borderRadius: 16 }}
+      style={{ borderRadius: 18 }}
     >
       <div className="mb-4 flex gap-2">
         <Input
@@ -78,8 +84,24 @@ export default function CategoryManagerModal({
           onChange={(e) => setNewCategory(e.target.value)}
           onPressEnter={handleAdd}
           disabled={loading}
+          style={{
+            borderColor: '#E0E0E0',
+            background: '#FFFFFF',
+            color: '#1A1A1A',
+            borderRadius: 12,
+          }}
         />
-        <Button type="primary" onClick={handleAdd} loading={loading}>
+        <Button
+          type="primary"
+          onClick={handleAdd}
+          loading={loading}
+          style={{
+            background: '#04B851',
+            borderColor: '#04B851',
+            color: '#fff',
+            borderRadius: 12,
+          }}
+        >
           Add
         </Button>
       </div>
@@ -87,7 +109,10 @@ export default function CategoryManagerModal({
         {categories
           .filter((cat) => cat !== 'All')
           .map((cat) => (
-            <div key={cat} className="flex items-center gap-2 mb-2">
+            <div
+              key={cat}
+              className="flex items-center gap-2 mb-2 bg-[#FFFFFF] border border-[#E0E0E0] rounded-xl px-3 py-2"
+            >
               {editing === cat ? (
                 <>
                   <Input
@@ -95,12 +120,24 @@ export default function CategoryManagerModal({
                     onChange={(e) => setEditValue(e.target.value)}
                     onPressEnter={() => handleEdit(cat)}
                     disabled={loading}
+                    style={{
+                      borderColor: '#E0E0E0',
+                      background: '#e6f9f0',
+                      color: '#1A1A1A',
+                      borderRadius: 10,
+                    }}
                   />
                   <Button
                     type="primary"
                     size="small"
                     onClick={() => handleEdit(cat)}
                     loading={loading}
+                    style={{
+                      background: '#04B851',
+                      borderColor: '#04B851',
+                      color: '#fff',
+                      borderRadius: 10,
+                    }}
                   >
                     Save
                   </Button>
@@ -108,18 +145,30 @@ export default function CategoryManagerModal({
                     size="small"
                     onClick={() => setEditing(null)}
                     disabled={loading}
+                    style={{
+                      borderRadius: 10,
+                      color: '#4D4D4D',
+                      borderColor: '#E0E0E0',
+                      background: '#e6f9f0',
+                    }}
                   >
                     Cancel
                   </Button>
                 </>
               ) : (
                 <>
-                  <span className="flex-1">{cat}</span>
+                  <span className="flex-1 text-[#1A1A1A]">{cat}</span>
                   <Button
                     size="small"
                     onClick={() => {
                       setEditing(cat)
                       setEditValue(cat)
+                    }}
+                    style={{
+                      borderRadius: 10,
+                      color: '#04B851',
+                      borderColor: '#04B851',
+                      background: '#e6f9f0',
                     }}
                   >
                     Edit
@@ -129,6 +178,12 @@ export default function CategoryManagerModal({
                     danger
                     onClick={() => handleDelete(cat)}
                     loading={loading}
+                    style={{
+                      borderRadius: 10,
+                      color: '#EB5757',
+                      borderColor: '#EB5757',
+                      background: '#fff',
+                    }}
                   >
                     Delete
                   </Button>

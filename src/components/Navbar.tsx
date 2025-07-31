@@ -80,11 +80,11 @@ const Navbar: React.FC = () => {
   }, [isSearchFocused])
 
   return (
-    <header className="w-full   mt-5 px-4 sm:px-6 py-4 mb-3 border border-gray-200 dark:border-gray-300/[0.1] rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between bg-[#f7f7f7] dark:bg-[#f7f7f7] gap-4 flex-shrink-0">
+    <header className="w-full mt-5 px-4 sm:px-6 py-4 mb-3 border border-[#E0E0E0] rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between bg-[#F9FAFB] gap-4 flex-shrink-0">
       {/* Hamburger for sidebar (mobile only, left side) */}
       <div className="flex w-full items-center justify-between sm:hidden mb-2">
         <button
-          className="flex items-center justify-center bg-white rounded-full text-black border border-gray-200"
+          className="flex items-center justify-center bg-white rounded-full text-[#1A1A1A] border border-[#E0E0E0]"
           style={{ width: 48, height: 48 }}
           aria-label="Open sidebar"
           onClick={() => window.dispatchEvent(new Event('openSidebar'))}
@@ -102,11 +102,11 @@ const Navbar: React.FC = () => {
         </button>
         <div className="flex gap-3 items-center">
           <HiOutlineEnvelope
-            className="font-bold bg-white p-3 rounded-full text-black"
+            className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
             style={{ fontSize: 40 }}
           />
           <HiOutlineBell
-            className="font-bold bg-white p-3 rounded-full text-black"
+            className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
             style={{ fontSize: 40 }}
           />
           <Image
@@ -114,7 +114,7 @@ const Navbar: React.FC = () => {
             alt="User Avatar"
             width={48}
             height={48}
-            className="w-12 h-12 rounded-full"
+            className="w-12 h-12 rounded-full border border-[#E0E0E0]"
           />
         </div>
       </div>
@@ -122,18 +122,18 @@ const Navbar: React.FC = () => {
         onSubmit={handleSearch}
         className="flex w-full sm:max-w-[300px] relative items-center order-2 sm:order-1"
       >
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none transition-all duration-200">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4D4D4D] pointer-events-none transition-all duration-200">
           <CiSearch
-            className={`font-bold ${isSearchFocused ? 'text-primary' : 'text-black'}`}
+            className={`font-bold ${isSearchFocused ? 'text-[#04B851]' : 'text-[#1A1A1A]'}`}
             style={{ fontSize: 24 }}
           />
         </span>
         <input
           ref={searchInputRef}
-          className={`bg-white border-none text-gray-800 py-3 ring-2 ${isSearchFocused ? 'ring-[#ffc400d5]' : 'ring-transparent'} outline-none active:outline-none pl-12 pr-12 rounded-full w-full text-sm sm:text-base transition-all duration-200 shadow-sm hover:shadow-md focus:shadow-md`}
+          className={`bg-white border-none text-[#1A1A1A] py-3 ring-2 ${isSearchFocused ? 'ring-[#04B851]' : 'ring-transparent'} outline-none active:outline-none pl-12 pr-12 rounded-full w-full text-sm sm:text-base transition-all duration-200 shadow-sm hover:shadow-md focus:shadow-md`}
           style={{
-            boxShadow: isSearchFocused ? '0 0 0 2px #ffc300' : undefined,
-            borderColor: '#ffc300',
+            boxShadow: isSearchFocused ? '0 0 0 2px #04B851' : undefined,
+            borderColor: '#04B851',
           }}
           placeholder="Search pages..."
           value={searchQuery}
@@ -147,13 +147,13 @@ const Navbar: React.FC = () => {
         />
         {/* Dropdown for dashboard page search */}
         {showDropdown && (
-          <div className="absolute left-0 top-12 w-full bg-white border border-[#ffc300] rounded-xl shadow-lg z-50">
+          <div className="absolute left-0 top-12 w-full bg-white border border-[#04B851] rounded-xl shadow-lg z-50">
             {filteredPages.map((page) => (
               <button
                 key={page.path}
-                className="w-full text-left px-4 py-2 hover:bg-[#ffc300]/10 focus:bg-[#ffc300]/20 focus:outline-none text-base"
+                className="w-full text-left px-4 py-2 hover:bg-[#e6f9f0] focus:bg-[#e6f9f0] focus:outline-none text-base text-[#1A1A1A]"
                 tabIndex={0}
-                style={{ color: '#222' }}
+                style={{ color: '#1A1A1A' }}
                 onMouseDown={() => {
                   router.push(page.path)
                   setShowDropdown(false)
@@ -164,7 +164,7 @@ const Navbar: React.FC = () => {
               </button>
             ))}
             {filteredPages.length === 0 && (
-              <div className="px-4 py-2 text-gray-400">No pages found</div>
+              <div className="px-4 py-2 text-[#4D4D4D]">No pages found</div>
             )}
           </div>
         )}
@@ -172,7 +172,7 @@ const Navbar: React.FC = () => {
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-12 top-1/2 -translate-y-1/2 text-[#4D4D4D] hover:text-[#04B851] transition-colors"
             aria-label="Clear search"
           >
             <IoMdClose style={{ fontSize: 20 }} />
@@ -182,12 +182,12 @@ const Navbar: React.FC = () => {
           type="submit"
           className={`absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full ${
             searchQuery.trim()
-              ? 'bg-[#ffc300] hover:bg-[#e6b800]'
-              : 'bg-gray-300'
+              ? 'bg-[#04B851] hover:bg-[#039f45]'
+              : 'bg-[#E0E0E0]'
           } transition-colors`}
           style={
             searchQuery.trim()
-              ? { background: '#ffc300', borderColor: '#ffc300' }
+              ? { background: '#04B851', borderColor: '#04B851' }
               : {}
           }
           disabled={!searchQuery.trim()}
@@ -198,11 +198,11 @@ const Navbar: React.FC = () => {
       </form>
       <div className="hidden sm:flex gap-5 flex-row w-auto items-center justify-end order-1 sm:order-2">
         <HiOutlineEnvelope
-          className="font-bold bg-white p-3 rounded-full text-black"
+          className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
           style={{ fontSize: 48 }}
         />
         <HiOutlineBell
-          className="font-bold bg-white p-3 rounded-full text-black"
+          className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
           style={{ fontSize: 48 }}
         />
         <div className="flex items-center">
@@ -211,7 +211,7 @@ const Navbar: React.FC = () => {
             alt="User Avatar"
             width={48}
             height={48}
-            className="w-12 h-12 rounded-full"
+            className="w-12 h-12 rounded-full border border-[#E0E0E0]"
           />
           <div className="hidden sm:flex flex-col ml-3">
             {loading ? (
@@ -221,16 +221,16 @@ const Navbar: React.FC = () => {
               </div>
             ) : user ? (
               <>
-                <h1 className="text-sm sm:text-base font-medium">
+                <h1 className="text-sm sm:text-base font-medium text-[#1A1A1A]">
                   {user.name}
                 </h1>
-                <div className="flex items-center  space-x-3 text-xs sm:text-sm">
-                  <p className="font-inter-regular text-gray-500">
+                <div className="flex items-center space-x-3 text-xs sm:text-sm">
+                  <p className="font-inter-regular text-[#4D4D4D]">
                     {user.email}
                   </p>
                   <button
                     onClick={logout}
-                    className="text-blue-500 hover:underline"
+                    className="text-[#04B851] hover:underline"
                   >
                     <IoLogInOutline className="text-2xl" />
                   </button>
@@ -238,9 +238,14 @@ const Navbar: React.FC = () => {
               </>
             ) : (
               <>
-                <h1 className="text-sm sm:text-base">Not logged in</h1>
+                <h1 className="text-sm sm:text-base text-[#1A1A1A]">
+                  Not logged in
+                </h1>
                 <p className="text-xs sm:text-sm font-inter-regular">
-                  <Link href="/login" className="text-blue-500 hover:underline">
+                  <Link
+                    href="/login"
+                    className="text-[#04B851] hover:underline"
+                  >
                     Sign in
                   </Link>
                 </p>
