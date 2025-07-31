@@ -35,13 +35,12 @@ function LoginPage() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center relative">
+      <div className="min-h-screen flex items-center justify-center font-serif">
         {/* Blurred background image */}
         <div
-          className="absolute inset-0 bg-blend-multiply backdrop-blur-md  bg-[#000000a5] w-full h-full z-0 bg-center bg-cover"
+          className="absolute inset-0 bg-blend-multiply backdrop-blur-xl bg-[#0B3D2E] w-full h-full z-0 bg-center bg-cover bg-no-repeat"
           style={{
-            backgroundImage:
-              "url('https://plus.unsplash.com/premium_photo-1750590746718-1fcce88540a3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+            backgroundImage: "url('/bg-image.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -49,19 +48,23 @@ function LoginPage() {
         />
         {/* Foreground content */}
         <div className="relative z-10 flex items-center justify-center w-full min-h-screen">
-          <div className="bg-white/90 dark:bg-zinc-900/90 rounded-3xl shadow-2xl p-8 sm:p-12 w-full max-w-md relative overflow-hidden">
+          <div className="bg-[#23272F]/90 rounded-3xl shadow-2xl p-8 sm:p-12 w-full max-w-md relative overflow-hidden border border-[#FFC600]/20 font-serif">
             {/* Animated yellow circle */}
-            <div className="absolute -top-20 -right-20 w-56 h-56 bg-primary opacity-30 rounded-full blur-2xl animate-pulse z-0" />
+            <div className="absolute -top-20 -right-20 w-56 h-56 bg-[#FFC600] opacity-30 rounded-full blur-2xl animate-pulse z-0" />
             {/* Animated secondary circle */}
-            <div className="absolute -bottom-24 -left-24 w-44 h-44 bg-secondary opacity-20 rounded-full blur-2xl animate-bounce z-0" />
+            <div className="absolute -bottom-24 -left-24 w-44 h-44 bg-[#FFD700] opacity-20 rounded-full blur-2xl animate-bounce z-0" />
             <form
               onSubmit={handleSubmit}
-              className="relative z-10 flex flex-col gap-6 animate-fade-in"
+              className="relative z-10 flex flex-col gap-6 animate-fade-in font-serif"
             >
-              <h1 className="text-3xl font-bold text-center text-zinc-900 dark:text-white mb-2 tracking-tight">
-                Welcome Back
+              <h1 className="text-3xl font-bold text-center text-white mb-2 tracking-tight font-serif">
+                Welcome Back to
+                <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FFC600] via-[#FFD700] to-[#FFC600] font-serif">
+                  The Brewery
+                </span>
               </h1>
-              <p className="text-center text-zinc-500 dark:text-zinc-300 mb-4">
+              <p className="text-center text-[#FFD700] mb-4 font-serif">
                 Sign in to your dashboard
               </p>
               <input
@@ -70,7 +73,7 @@ function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="px-4 py-3 rounded-xl text-white border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-primary transition"
+                className="px-4 py-3 rounded-xl text-white border border-[#FFC600]/30 bg-[#18382D] focus:outline-none focus:ring-2 focus:ring-[#FFC600] transition font-serif"
               />
               <div className="relative">
                 <input
@@ -79,14 +82,14 @@ function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="px-4 py-3 rounded-xl text-white border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-secondary transition w-full pr-12"
+                  className="px-4 py-3 rounded-xl text-white border border-[#FFC600]/30 bg-[#18382D] focus:outline-none focus:ring-2 focus:ring-[#FFD700] transition w-full pr-12 font-serif"
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#FFC600] hover:text-[#FFD700] focus:outline-none"
                 >
                   {showPassword ? (
                     <svg
@@ -137,26 +140,17 @@ function LoginPage() {
                 </button>
               </div>
               {error && (
-                <div className="text-red-500 text-center text-sm animate-shake">
+                <div className="text-red-500 text-center text-sm animate-shake font-serif">
                   {error}
                 </div>
               )}
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-2 py-3 rounded-xl bg-gradient-to-br shadow-white/[.5] shadow-inner from-primary to-secondary text-zinc-900 font-semibold border-primary/[0.1] border  hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                className="mt-2 py-3 rounded-xl bg-gradient-to-br shadow-white/[.5] shadow-inner from-[#FFC600] to-[#FFD700] text-[#23272F] font-semibold border-[#FFC600]/20 border hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#FFC600] focus:ring-offset-2 font-serif"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
-              {/* <div className="text-center text-zinc-500 dark:text-zinc-300 text-sm mt-2">
-                Don&apos;t have an account?{' '}
-                <a
-                  href="/signup"
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Sign up
-                </a>
-              </div> */}
             </form>
           </div>
         </div>

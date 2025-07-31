@@ -15,6 +15,7 @@ export interface CartItem {
   quantity: number
   addOns?: Array<{ name: string; price: number }>
   image?: string
+  instructions?: string
 }
 
 interface CartContextType {
@@ -28,6 +29,11 @@ interface CartContextType {
   updateQuantity: (
     id: string,
     quantity: number,
+    addOns?: Array<{ name: string; price: number }>,
+  ) => void
+  updateInstructions: (
+    id: string,
+    instructions: string,
     addOns?: Array<{ name: string; price: number }>,
   ) => void
 }
@@ -180,9 +186,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     })
   }
 
+  const updateInstructions = (
+    id: string,
+    instructions: string,
+    addOns?: Array<{ name: string; price: number }>,
+  ) => {
+    setCart((prev) => {
+      const updateKey = `${id}|${normalizeAddOns(addOns)}`
+      return prev.map((ci) => {
+        const ciKey = `${ci.id}|${normalizeAddOns(ci.addOns)}`
+        return ciKey === updateKey ? { ...ci, instructions } : ci
+      })
+    })
+  }
+
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity }}
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        updateQuantity,
+        updateInstructions,
+      }}
     >
       {children}
     </CartContext.Provider>

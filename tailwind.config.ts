@@ -13,7 +13,7 @@ module.exports = {
         'inter-regular': ['Inter-Regular'],
       },
       colors: {
-        primary: '#fede31',
+        primary: '#F59E0B',
         secondary: '#ffb700',
       },
     },

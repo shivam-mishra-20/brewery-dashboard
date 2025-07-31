@@ -280,38 +280,43 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-amber-50">
-        <div className="flex flex-col items-center bg-white/80 backdrop-blur-lg p-8 rounded-2xl shadow-2xl">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#181c22] to-[#23272F]">
+        <div className="flex flex-col items-center bg-[#23272F]/90 backdrop-blur-lg p-10 rounded-2xl shadow-2xl border border-yellow-400/20 animate-fadein-card">
+          <div className="relative mb-4">
+            <div className="w-20 h-20 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <FiCoffee className="text-amber-500 h-8 w-8" />
+              <FiCoffee className="text-yellow-400 h-8 w-8 animate-bounce-slow" />
             </div>
           </div>
-          <h1 className="text-xl font-bold text-amber-700 mt-4">
+          <h1 className="text-2xl font-bold text-yellow-400 mt-2 font-serif drop-shadow-lg">
             Preparing your order...
           </h1>
-          <p className="text-amber-600/80 mt-2">Loading menu item details</p>
+          <p className="text-yellow-200/80 mt-2 font-serif text-lg">
+            Loading menu item details
+          </p>
         </div>
       </div>
     )
   }
 
-  if (error || !item) {
+  if (!loading && error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-yellow-50">
-        <div className="bg-white p-6 rounded-xl shadow-lg max-w-md text-center">
-          <FiCoffee className="text-red-400 text-4xl mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-red-500 mb-2">
-            {error || 'Item not found'}
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#181c22] to-[#23272F]">
+        <div className="bg-[#23272F]/90 border border-yellow-400/20 p-8 rounded-2xl shadow-2xl max-w-md text-center flex flex-col items-center animate-fadein-card">
+          <FiCoffee className="text-yellow-400 text-5xl mb-4 animate-bounce-slow" />
+          <h1 className="text-2xl font-bold text-yellow-400 mb-2 font-serif drop-shadow-lg">
+            {error}
           </h1>
+          <p className="text-yellow-200/80 mb-4 font-serif text-lg">
+            Sorry, we couldn't find this menu item.
+          </p>
           <button
             onClick={() =>
               router.push(`/menu?tabledata=${encodeURIComponent(tabledata)}`)
             }
-            className="mt-4 px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+            className="mt-2 px-8 py-3 bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-300 text-[#23272F] rounded-xl font-bold font-serif shadow-lg hover:from-yellow-600 hover:via-yellow-500 hover:to-yellow-400 transition-all"
           >
-            Back to menu
+            Back to Menu
           </button>
         </div>
       </div>
@@ -319,33 +324,35 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 relative pb-24">
+    <div className="min-h-screen flex flex-col bg-[#151a22] relative pb-24 font-inter">
       {/* Modern app-like header with back button */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#181C22]/95 backdrop-blur-xl shadow-lg border-b border-[#23272F]/40">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <button
-            className="p-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-colors flex items-center justify-center"
+            className="p-2 rounded-full bg-gradient-to-br from-[#23272F] to-[#18382D] hover:from-[#23272F]/80 hover:to-[#18382D]/80 transition-colors flex items-center justify-center shadow-lg border border-[#23272F]/30"
             onClick={() =>
               router.push(`/menu?tabledata=${encodeURIComponent(tabledata)}`)
             }
+            aria-label="Back"
           >
-            <FiArrowLeft className="h-5 w-5 text-gray-800" />
+            <FiArrowLeft className="h-5 w-5 text-yellow-400" />
           </button>
 
-          <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary drop-shadow-sm">
-            {item.name}
+          <h1 className="text-xl font-serif font-bold text-white drop-shadow-lg tracking-tight">
+            {item?.name}
           </h1>
 
           <div className="relative">
             <button
-              className="p-2 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 transition-colors flex items-center justify-center"
+              className="p-2 rounded-full bg-gradient-to-br from-[#23272F] to-[#18382D] hover:from-[#23272F]/80 hover:to-[#18382D]/80 transition-colors flex items-center justify-center shadow-lg border border-[#23272F]/30"
               onClick={() =>
                 router.push(`/cart?tabledata=${encodeURIComponent(tabledata)}`)
               }
+              aria-label="Cart"
             >
-              <FiShoppingBag className="h-5 w-5 text-gray-800" />
+              <FiShoppingBag className="h-5 w-5 text-yellow-400" />
               {cart && cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse shadow-lg border border-yellow-200">
                   {cart.reduce((total, item) => total + item.quantity, 0)}
                 </span>
               )}
@@ -363,7 +370,7 @@ export default function ProductDetailPage() {
         onTouchEnd={handleTouchEnd}
       >
         <div className="relative flex flex-col items-center justify-center w-full max-w-2xl mx-auto px-4">
-          <div className="relative bg-white rounded-3xl shadow-xl p-3 flex items-center justify-center border border-primary/10 w-full aspect-square max-w-md mx-auto overflow-hidden">
+          <div className="relative bg-[#23272F] rounded-3xl shadow-2xl p-3 flex items-center justify-center border border-[#23272F]/40 w-full aspect-square max-w-md mx-auto overflow-hidden">
             <AnimatePresence initial={false}>
               {imageItems.length > 0 && (
                 <motion.div
@@ -372,7 +379,7 @@ export default function ProductDetailPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4, ease: 'easeInOut' }}
-                  className="absolute   inset-0 flex items-center justify-center"
+                  className="absolute inset-0 flex items-center justify-center"
                 >
                   <div
                     className="w-full h-full relative cursor-zoom-in flex items-center justify-center"
@@ -380,19 +387,19 @@ export default function ProductDetailPage() {
                   >
                     <Image
                       src={imageItems[currentImageIndex]}
-                      alt={`${item.name} - image ${currentImageIndex + 1}`}
+                      alt={`${item?.name} - image ${currentImageIndex + 1}`}
                       fill
-                      className={`object-cover rounded-2xl transition-transform duration-300 ${isZoomed ? 'scale-110' : 'scale-100'}`}
+                      className={`object-cover rounded-2xl transition-transform duration-300 ${isZoomed ? 'scale-110' : 'scale-100'} shadow-lg`}
                       priority={currentImageIndex === 0}
                     />
 
                     {/* Image number indicator */}
                     {imageItems.length > 1 && (
-                      <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-medium">
+                      <div className="absolute bottom-3 right-3 bg-[#181C22]/80 backdrop-blur-md px-3 py-1.5 rounded-full text-yellow-400 text-xs font-medium border border-yellow-400/30">
                         {currentImageIndex + 1}/{imageItems.length}
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 rounded-2xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 rounded-2xl"></div>
                   </div>
                 </motion.div>
               )}
@@ -403,14 +410,14 @@ export default function ProductDetailPage() {
               <>
                 <button
                   onClick={handlePrevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-primary/80 text-gray-800 hover:text-white p-2 rounded-full shadow-md backdrop-blur-sm border border-white/30 z-10 transition-all"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#23272F]/80 hover:bg-yellow-500 text-yellow-400 hover:text-white p-2 rounded-full shadow-md backdrop-blur-sm border border-yellow-400/30 z-10 transition-all"
                   aria-label="Previous image"
                 >
                   <FiChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={handleNextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-primary/80 text-gray-800 hover:text-white p-2 rounded-full shadow-md backdrop-blur-sm border border-white/30 z-10 transition-all"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#23272F]/80 hover:bg-yellow-500 text-yellow-400 hover:text-white p-2 rounded-full shadow-md backdrop-blur-sm border border-yellow-400/30 z-10 transition-all"
                   aria-label="Next image"
                 >
                   <FiChevronRight className="w-6 h-6" />
@@ -429,8 +436,8 @@ export default function ProductDetailPage() {
                     onClick={() => setCurrentImageIndex(idx)}
                     className={`h-2 rounded-full transition-all ${
                       currentImageIndex === idx
-                        ? 'bg-primary w-6'
-                        : 'bg-gray-300 w-2'
+                        ? 'bg-yellow-400 w-6'
+                        : 'bg-[#23272F] w-2'
                     }`}
                     aria-label={`Go to image ${idx + 1}`}
                   />
@@ -510,7 +517,7 @@ export default function ProductDetailPage() {
               muted={videoMuted}
               playsInline
               className="w-full h-full object-cover"
-              poster={item.videoThumbnailUrl || item.imageURL}
+              poster={item?.videoThumbnailUrl || item?.imageURL}
               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
             >
               <source src={videoUrl || undefined} type="video/mp4" />
@@ -522,7 +529,7 @@ export default function ProductDetailPage() {
               {videoExpanded && (
                 <div className="flex justify-end">
                   <div className="text-xs text-amber-100 bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                    {item.name} - Video Preview
+                    {item?.name} - Video Preview
                   </div>
                 </div>
               )}
@@ -531,14 +538,12 @@ export default function ProductDetailPage() {
         </div>
       ) : null}
       {/* Enhanced Image thumbnails with glossy effect */}
-      <div className="w-full  flex justify-center items-center mt-12 mb-2">
+      <div className="w-full flex justify-center items-center mt-12 mb-2">
         <div className="flex gap-4 overflow-x-auto pb-3 px-6 snap-x snap-mandatory scrollbar-hide">
           {imageItems.map((image, idx) => (
             <motion.div
               key={idx}
-              className={`relative snap-center ${
-                currentImageIndex === idx ? '' : ''
-              } bg-white rounded-xl border border-amber-100 shadow-md p-2 flex items-center justify-center transition-all duration-300`}
+              className={`relative snap-center bg-[#23272F] rounded-xl border border-yellow-400/20 shadow-lg p-2 flex items-center justify-center transition-all duration-300`}
               whileTap={{ scale: 0.97 }}
               style={{
                 minWidth: '80px',
@@ -549,11 +554,11 @@ export default function ProductDetailPage() {
             >
               <Image
                 src={image}
-                alt={`${item.name} - thumbnail ${idx + 1}`}
+                alt={`${item?.name} - thumbnail ${idx + 1}`}
                 width={72}
                 height={72}
                 onClick={() => setCurrentImageIndex(idx)}
-                className="rounded-lg object-cover border border-gray-200 transition-all hover:opacity-100 cursor-pointer"
+                className="rounded-lg object-cover border border-yellow-400/30 transition-all hover:opacity-100 cursor-pointer"
                 style={{
                   width: '72px',
                   height: '72px',
@@ -570,249 +575,154 @@ export default function ProductDetailPage() {
       </div>
       {/* Premium content card with luxury café design */}
       <div
-        className="relative z-20 w-full max-w-2xl mb-10 rounded-2xl p-6 product-detail-card mx-auto flex flex-col items-center"
+        className="relative z-20 w-full max-w-md mb-10 rounded-2xl p-6 product-detail-card mx-auto flex flex-col items-center bg-gradient-to-br from-[#181c22] to-[#23272F] shadow-2xl border border-[#23272F]/40"
         style={{ marginTop: '1rem' }}
       >
-        {/* Product name and price - responsive alignment */}
-        <div className="mb-6 product-title-price w-full flex flex-col items-center">
-          <h1 className="text-2xl font-bold text-amber-900 mb-2 product-title w-full text-center">
-            {item.name}
-          </h1>
-          <div className="flex items-center gap-2 justify-center">
-            <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-4 py-2 rounded-lg border border-amber-300 shadow-sm">
-              ₹{item.price.toFixed(2)}
+        {/* Tag badges */}
+        <div className="flex gap-2 mb-4">
+          {/* Availability indicator */}
+          {item?.available ? (
+            <span className="bg-green-50 text-green-700 border border-green-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+              Available
             </span>
-          </div>
+          ) : (
+            <span className="bg-red-50 text-red-600 border border-red-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
+              <span className="w-2 h-2 bg-red-500 rounded-full mr-1.5 animate-pulse"></span>
+              Unavailable
+            </span>
+          )}
+
+          {/* Category badge */}
+          <span className="bg-gradient-to-r from-primary to-secondary shadow-white/[0.5] shadow-inner text-white text-sm px-4 py-1.5 rounded-full font-medium border-primary/10 border flex items-center gap-1">
+            <FiCoffee className="mr-1" />
+            {item?.category}
+          </span>
         </div>
 
-        {/* Item title and price */}
-        <div className="w-full max-w-xl mx-auto px-4 mt-4">
-          <h2 className="text-2xl font-bold text-gray-800">{item.name}</h2>
+        {/* Product name and price */}
+        <h1 className="text-2xl font-normal font-serif text-white mb-2 text-center drop-shadow-lg">
+          {item?.name}
+        </h1>
+        <div className="text-lg font-bold text-yellow-400 mb-4">
+          ₹{item?.price.toFixed(0)}
+        </div>
 
-          <div className="flex items-center justify-between mt-2 mb-4">
-            <div className="flex items-center gap-2">
-              {/* Category badge */}
-              <span className="bg-gradient-to-r from-primary to-secondary shadow-white/[0.5] shadow-inner text-white text-sm px-4 py-1.5 rounded-full font-medium border-primary/10 border flex items-center gap-1">
-                <FiCoffee className="mr-1" />
-                {item.category}
+        {/* Chef's Special Recommendation */}
+        <div className="mb-2 text-left font-serif w-full">
+          <span className="text-yellow-400 font-semibold">
+            Chef's Special Recommendation
+          </span>
+          <p className="text-gray-300 text-sm mt-1">{item?.description}</p>
+        </div>
+
+        {/* Customize Your Dish */}
+        <div className="w-full mt-6">
+          <details className="mb-4">
+            <summary className="font-semibold font-serif text-white cursor-pointer py-2">
+              Customize Your Dish
+            </summary>
+            {/* Spice Level */}
+            <div className="mt-3 mb-2">
+              <span className="text-sm text-gray-200 mb-2 font-serif block">
+                Spice Level
               </span>
-
-              {/* Availability indicator */}
-              {item.available ? (
-                <span className="bg-green-50 text-green-700 border border-green-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
-                  Available
-                </span>
-              ) : (
-                <span className="bg-red-50 text-red-600 border border-red-200 text-sm px-3 py-1 rounded-full font-medium shadow-sm flex items-center">
-                  <span className="w-2 h-2 bg-red-500 rounded-full mr-1.5 animate-pulse"></span>
-                  Unavailable
-                </span>
-              )}
-            </div>
-
-            {/* Price tag */}
-            <div className="font-bold text-white px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-secondary shadow-white/[0.5] shadow-inner border border-primary/[0.1] text-lg">
-              ₹{(item.price / 100).toFixed(2)}
-            </div>
-          </div>
-
-          {/* Description */}
-          <p className="text-gray-600 leading-relaxed mb-6">
-            {item.description}
-          </p>
-        </div>
-
-        {/* Modern quantity selector and add to cart */}
-        <div className="mt-4 relative w-full flex flex-col items-center justify-center product-add-order-section">
-          {/* Decorative elements */}
-          <div className="absolute -left-4 -bottom-4 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-secondary/10 rounded-full blur-xl"></div>
-
-          <div className="w-full max-w-xl mx-auto px-4 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-semibold text-gray-800">Quantity</span>
-              <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-lg border border-gray-200">
-                <button
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-700 hover:bg-gray-200 transition-colors"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
-                >
-                  <FiMinus size={18} />
-                </button>
-                <span className="font-bold text-lg px-3 text-gray-900">
-                  {quantity}
-                </span>
-                <button
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-700 hover:bg-gray-200 transition-colors"
-                  onClick={() => setQuantity((q) => q + 1)}
-                >
-                  <FiPlus size={18} />
-                </button>
+              <div className="flex gap-2">
+                {['Mild', 'Medium', 'Spicy'].map((level) => (
+                  <button
+                    key={level}
+                    className={`px-4 py-1 rounded-full text-xs font-semibold border font-serif transition-all ${
+                      selectedAddOns.includes(level)
+                        ? 'bg-yellow-400 text-[#23272F] border-yellow-400'
+                        : 'bg-[#23272F] text-yellow-400 border-yellow-400/30'
+                    }`}
+                    onClick={() => handleAddOnToggle(level)}
+                    type="button"
+                  >
+                    {level}
+                  </button>
+                ))}
               </div>
             </div>
+            {/* Add Extra */}
+            {item?.addOns && item?.addOns.length > 0 && (
+              <div className="mt-3">
+                <span className="text-sm text-gray-200 mb-2 block">
+                  Add Extra
+                </span>
+                <div className="flex flex-col gap-2">
+                  {item?.addOns.map((addon, idx) => (
+                    <label
+                      key={idx}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedAddOns.includes(addon.name)}
+                        onChange={() => handleAddOnToggle(addon.name)}
+                        disabled={!addon.available}
+                        className="accent-yellow-400 w-4 h-4"
+                      />
+                      <span
+                        className={`text-sm ${
+                          addon.available ? 'text-white' : 'text-gray-500'
+                        }`}
+                      >
+                        {addon.name}{' '}
+                        <span className="text-yellow-400 font-semibold">
+                          (+₹{addon.price.toFixed(0)})
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </details>
+        </div>
+
+        {/* Quantity Selector */}
+        <div className="w-full flex items-center font-serif justify-between mt-4 mb-6">
+          <span className="font-semibold text-gray-200">Quantity</span>
+          <div className="flex items-center gap-1 bg-[#181C22] p-1 rounded-lg border border-[#23272F]/40">
+            <button
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-yellow-400 hover:bg-[#23272F]/80 transition-colors"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+            >
+              <FiMinus size={18} />
+            </button>
+            <span className="font-bold text-lg px-3 text-yellow-400">
+              {quantity}
+            </span>
+            <button
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-yellow-400 hover:bg-[#23272F]/80 transition-colors"
+              onClick={() => setQuantity((q) => q + 1)}
+            >
+              <FiPlus size={18} />
+            </button>
           </div>
         </div>
-        {/* We'll remove this duplicate description since it's already shown above */}
 
-        {/* Ingredients with enhanced visual styling */}
-        {item.ingredients && item.ingredients.length > 0 && (
-          <div className="mb-8 w-full product-ingredients-row flex flex-col items-center">
-            <div className="flex items-center justify-center w-full my-4">
-              <h3 className="mx-4 text-xl font-bold text-gray-800 flex justify-center items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-secondary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-                Ingredients
-              </h3>
-              <div className="h-px flex-grow bg-gradient-to-r from-primary/30 to-secondary/30"></div>
-            </div>
-            <div className="grid w-full items-start grid-cols-1 sm:grid-cols-2 gap-3">
-              {item.ingredients.map((ingredient, idx) => (
-                <div
-                  key={idx}
-                  className={`flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 border border-gray-200 shadow-sm hover:shadow transition-all duration-300 animate-fadein-card`}
-                >
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-2 bg-secondary"></div>
-                    <span className="font-medium text-gray-800 text-sm md:text-base">
-                      {ingredient.inventoryItemName}
-                    </span>
-                  </div>
-                  <span className="ml-2 text-sm text-gray-600 font-semibold bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                    {ingredient.quantity} {ingredient.unit}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        {/* Enhanced Add-ons section with cart logic */}
-        {item.addOns && item.addOns.length > 0 && (
-          <div className="mb-8 w-full product-addons-row flex flex-col items-center">
-            <div className="flex items-center justify-center w-full my-4">
-              <h3 className="mx-4 text-xl font-bold text-gray-800 flex justify-center items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-secondary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                Customizations
-              </h3>
-              <div className="h-px flex-grow bg-gradient-to-r from-primary/30 to-secondary/30"></div>
-            </div>
-
-            <div className="grid grid-cols-1 w-full sm:grid-cols-2 gap-3">
-              {item.addOns.map((addon, idx) => (
-                <div
-                  key={idx}
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                  className={`flex items-center justify-between p-3 rounded-xl ${
-                    addon.available
-                      ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200'
-                      : 'bg-gray-100 border border-gray-200 opacity-60'
-                  } shadow-md hover:shadow-lg transition-all duration-300 animate-fadein-card`}
-                >
-                  <div className="flex items-center">
-                    <div
-                      className={`w-3 h-3 rounded-full mr-2 ${addon.available ? 'bg-amber-400' : 'bg-gray-300'}`}
-                    ></div>
-                    <span className="font-medium text-gray-800 text-sm md:text-base">
-                      {addon.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`${addon.available ? 'text-amber-700' : 'text-gray-500'} font-bold text-xs md:text-base px-2 py-1 rounded-md ${addon.available ? 'bg-amber-100' : 'bg-gray-100'}`}
-                    >
-                      + ₹{addon.price.toFixed(2)}
-                    </span>
-                    <button
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm transform transition-transform duration-200 hover:scale-110 ${
-                        addon.available
-                          ? selectedAddOns.includes(addon.name)
-                            ? 'bg-amber-600 text-white border-amber-700 border-2'
-                            : 'bg-gradient-to-r from-primary to-secondary shdow-inner shadow-white/[0.4] border border-primary/[0.1] hover:from-amber-600 hover:to-amber-500 text-white'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                      disabled={!addon.available}
-                      onClick={() => handleAddOnToggle(addon.name)}
-                      aria-label={
-                        selectedAddOns.includes(addon.name)
-                          ? 'Remove add-on'
-                          : 'Add add-on'
-                      }
-                    >
-                      {selectedAddOns.includes(addon.name) ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                          />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Cart modal removed as per user request. All related logic and state removed for error-free code. */}
+        {/* Add to Cart Button */}
+        <button
+          className="w-full py-4 rounded-xl font-bold font-serif text-lg bg-yellow-400 text-[#23272F] flex items-center justify-center gap-2 shadow-lg hover:bg-yellow-500 transition-all"
+          disabled={!item?.available || isAdding}
+          onClick={handleAddToCart}
+        >
+          <FiShoppingBag className="h-5 w-5" />
+          Add to Cart
+        </button>
       </div>
       <div
         className="flex w-full pb-5 flex-row justify-center items-center product-add-to-order-row"
         style={{ zIndex: 30, position: 'relative' }}
       >
         <button
-          className={`w-[95%] max-w-md py-4 shadow-inner shadow-white/[0.5] rounded-2xl font-extrabold text-lg tracking-wide font-inter relative overflow-hidden transition-all duration-300 product-add-to-order-btn ${
-            item.available && !isAdding
-              ? 'bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 hover:from-amber-700 hover:via-amber-600 hover:to-yellow-600 text-white hover:scale-[1.02]'
-              : 'bg-gray-300 cursor-not-allowed text-gray-500'
+          className={`w-[95%] max-w-md py-4 shadow-inner shadow-yellow-400/[0.5] rounded-2xl font-extrabold font-serif text-lg tracking-wide relative overflow-hidden transition-all duration-300 product-add-to-order-btn ${
+            item?.available && !isAdding
+              ? 'bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-300 hover:from-yellow-600 hover:via-yellow-500 hover:to-yellow-400 text-[#23272F] hover:scale-[1.02]'
+              : 'bg-[#23272F]/40 cursor-not-allowed text-gray-500'
           }`}
           style={{
             display: 'flex',
@@ -820,22 +730,22 @@ export default function ProductDetailPage() {
             alignItems: 'center',
             margin: '0 auto',
           }}
-          disabled={!item.available || isAdding}
+          disabled={!item?.available || isAdding}
           onClick={handleAddToCart}
         >
           {/* Add shine effect for available items */}
-          {item.available && !isAdding && (
+          {item?.available && !isAdding && (
             <span className="absolute inset-0 overflow-hidden">
               <span className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 animate-shine"></span>
             </span>
           )}
 
           <div className="flex items-center justify-center">
-            {item.available ? (
+            {item?.available ? (
               isAdding ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#23272F]"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -901,18 +811,22 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Enhanced decorative elements */}
-      <div className="absolute top-8 right-8 z-30 animate-float">
-        <FiCoffee className="text-amber-300 text-5xl md:text-6xl opacity-40" />
-      </div>
+      {/* <div className="absolute top-8 right-8 z-30 animate-float">
+        <FiCoffee className="text-yellow-400 text-5xl md:text-6xl opacity-40" />
+      </div> */}
       <div className="absolute bottom-8 left-8 z-30 animate-float-delay pointer-events-none">
-        <FiCoffee className="text-amber-400 text-4xl md:text-5xl opacity-30" />
+        <FiCoffee className="text-yellow-500 text-4xl md:text-5xl opacity-30" />
       </div>
       {/* Additional decorative elements */}
-      <div className="absolute top-1/4 left-12 z-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+      <div className="absolute top-1/4 left-12 z-0 w-32 h-32 bg-yellow-400/10 rounded-full blur-3xl animate-pulse-slow"></div>
       <div className="absolute bottom-1/4 right-12 z-0 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl animate-pulse-slow-delay"></div>
       {/* Enhanced responsive and animation styles */}
       <style jsx global>{`
-        /* Responsive alignment for product detail page */
+        body {
+          background: #181c22 !important;
+          color: #fff;
+          font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        }
         .product-detail-card,
         .product-title-price,
         .product-title,
@@ -950,7 +864,6 @@ export default function ProductDetailPage() {
             justify-content: flex-start !important;
           }
         }
-        /* Always center the Add to Order button */
         .product-add-to-order-row,
         .product-add-to-order-btn,
         .product-cart-place-order-btn {

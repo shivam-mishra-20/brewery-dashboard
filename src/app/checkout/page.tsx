@@ -134,21 +134,21 @@ export default function CheckoutPage() {
   // If payment is successful, show success screen
   if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 pt-8 pb-32 px-2 sm:px-0 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-6 text-center">
+      <div className="min-h-screen bg-[#0B3D2E] bg-[url('/bg-image.png')] bg-cover bg-center bg-no-repeat bg-fixed pt-8 pb-32 px-2 sm:px-0 flex items-center justify-center">
+        <div className="max-w-md w-full bg-[#23272F]/90 rounded-2xl shadow-2xl p-8 text-center border border-[#FFC600]/30">
           <div className="mb-6 flex justify-center">
-            <div className="flex items-center justify-center w-32 h-32">
-              <FiCheckCircle className="w-20 h-20 text-green-500" />
+            <div className="flex items-center justify-center w-28 h-28 rounded-full bg-[#FFC600]/20">
+              <FiCheckCircle className="w-16 h-16 text-[#10B981]" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4 font-serif">
             Order Successful!
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-[#FFC600] mb-6 font-medium">
             Your order #{orderId.slice(-6)} has been placed successfully and is
             being processed.
           </p>
-          <p className="text-sm text-gray-500 mb-8">
+          <p className="text-sm text-gray-300 mb-8 font-serif">
             {paymentMethod === 'online'
               ? 'Your payment has been processed successfully.'
               : 'Please pay at the counter when your order is ready.'}
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
           <div className="flex flex-col gap-4">
             <Link
               href="/menu"
-              className="px-6 py-3 bg-primary/90 text-gray-900 rounded-xl font-bold shadow hover:bg-primary transition-colors border border-primary/30 text-center"
+              className="px-6 py-3 bg-gradient-to-r from-[#FFC600] to-[#FFD700] text-[#23272F] rounded-xl font-bold shadow hover:from-[#FFD700] hover:to-[#FFC600] transition-colors border border-[#FFC600]/30 text-center"
             >
               Continue Shopping
             </Link>
@@ -167,30 +167,40 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 pt-8 pb-32 px-2 sm:px-0">
+    <div
+      className="container mx-auto px-4 py-6 pb-28 absolute z-10 bg-[#0B3D2E]/80"
+      style={{
+        backgroundImage: 'url("/bg-image.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        opacity: 1,
+      }}
+    >
       <div className="max-w-xl mx-auto">
         <div className="flex items-center mb-6">
           <Link
             href="/cart"
-            className="mr-4 p-2 hover:bg-amber-100 rounded-full transition-colors"
+            className="mr-4 p-2 hover:bg-[#FFC600]/20 rounded-full transition-colors"
           >
-            <FiArrowLeft className="text-amber-900" />
+            <FiArrowLeft className="text-[#FFC600]" />
           </Link>
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary tracking-tight">
+          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#FFC600] to-[#FFD700] tracking-tight font-serif">
             Checkout
           </h1>
         </div>
 
         {/* Customer Information */}
-        <div className="bg-white rounded-xl shadow-md p-5 mb-4 border border-amber-100">
-          <h2 className="text-lg font-semibold text-amber-900 mb-4">
+        <div className="bg-[#23272F]/90 rounded-xl shadow-lg p-6 mb-4 border border-[#FFC600]/20">
+          <h2 className="text-lg font-semibold text-[#FFC600] mb-4 font-serif">
             Customer Information
           </h2>
           <div className="space-y-4">
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-amber-800 mb-1"
+                className="block text-sm font-medium text-[#FFD700] mb-1 font-serif"
               >
                 Name *
               </label>
@@ -199,7 +209,7 @@ export default function CheckoutPage() {
                 id="name"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-amber-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-4 py-2 rounded-lg border border-[#FFC600]/30 bg-[#121212] text-white focus:outline-none focus:ring-2 focus:ring-[#FFC600]/50 font-serif"
                 placeholder="Your name"
                 required
               />
@@ -207,7 +217,7 @@ export default function CheckoutPage() {
             <div>
               <label
                 htmlFor="phone"
-                className="block text-sm font-medium text-amber-800 mb-1"
+                className="block text-sm font-medium text-[#FFD700] mb-1 font-serif"
               >
                 Phone Number (Optional)
               </label>
@@ -216,7 +226,7 @@ export default function CheckoutPage() {
                 id="phone"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-amber-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-4 py-2 rounded-lg border border-[#FFC600]/30 bg-[#121212] text-white focus:outline-none focus:ring-2 focus:ring-[#FFC600]/50 font-serif"
                 placeholder="Your phone number"
               />
             </div>
@@ -224,18 +234,18 @@ export default function CheckoutPage() {
         </div>
 
         {/* Order Summary */}
-        <div className="bg-white rounded-xl shadow-md p-5 mb-4 border border-amber-100">
-          <h2 className="text-lg font-semibold text-amber-900 mb-4">
+        <div className="bg-[#23272F]/90 rounded-xl shadow-lg p-6 mb-4 border border-[#FFC600]/20">
+          <h2 className="text-lg font-semibold text-[#FFC600] mb-4 font-serif">
             Order Summary
           </h2>
           <div className="space-y-3 max-h-64 overflow-y-auto">
             {cart.map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between pb-3 border-b border-amber-100 last:border-b-0"
+                className="flex items-center justify-between pb-3 border-b border-[#FFC600]/20 last:border-b-0"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 relative rounded overflow-hidden bg-amber-50">
+                  <div className="w-10 h-10 relative rounded overflow-hidden bg-[#FFC600]/10">
                     {item.image && (
                       <Image
                         src={item.image}
@@ -247,18 +257,20 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-amber-900">{item.name}</p>
-                    <p className="text-xs text-amber-700">
+                    <p className="font-medium text-white font-serif">
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-[#FFC600] font-serif">
                       Qty: {item.quantity} × ₹{item.price.toFixed(2)}
                     </p>
                     {item.addOns && item.addOns.length > 0 && (
-                      <p className="text-xs text-amber-600 italic">
+                      <p className="text-xs text-[#FFD700] italic font-serif">
                         With: {item.addOns.map((a) => a.name).join(', ')}
                       </p>
                     )}
                   </div>
                 </div>
-                <p className="font-semibold text-amber-800">
+                <p className="font-semibold text-[#FFC600] font-serif">
                   ₹
                   {(
                     item.price * item.quantity +
@@ -269,8 +281,8 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
-          <div className="mt-4 pt-3 border-t border-amber-200">
-            <div className="flex items-center justify-between font-bold text-amber-900">
+          <div className="mt-4 pt-3 border-t border-[#FFC600]/20">
+            <div className="flex items-center justify-between font-bold text-[#FFD700] font-serif">
               <span>Total Amount:</span>
               <span>₹{total.toFixed(2)}</span>
             </div>
@@ -278,41 +290,41 @@ export default function CheckoutPage() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-white rounded-xl shadow-md p-5 mb-6 border border-amber-100">
-          <h2 className="text-lg font-semibold text-amber-900 mb-4">
+        <div className="bg-[#23272F]/90 rounded-xl shadow-lg p-6 mb-6 border border-[#FFC600]/20">
+          <h2 className="text-lg font-semibold text-[#FFC600] mb-4 font-serif">
             Payment Method
           </h2>
           <div className="space-y-3">
-            <label className="flex items-center p-3 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-50 transition-colors">
+            <label className="flex items-center p-3 border border-[#FFC600]/20 rounded-lg cursor-pointer hover:bg-[#FFC600]/10 transition-colors font-serif">
               <input
                 type="radio"
                 name="payment"
                 value="online"
                 checked={paymentMethod === 'online'}
                 onChange={() => setPaymentMethod('online')}
-                className="mr-3"
+                className="mr-3 accent-[#FFC600]"
               />
-              <FiCreditCard className="mr-2 text-amber-700" />
-              <span>Pay Online (Razorpay)</span>
+              <FiCreditCard className="mr-2 text-[#FFC600]" />
+              <span className="text-white">Pay Online (Razorpay)</span>
             </label>
-            <label className="flex items-center p-3 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-50 transition-colors">
+            <label className="flex items-center p-3 border border-[#FFC600]/20 rounded-lg cursor-pointer hover:bg-[#FFC600]/10 transition-colors font-serif">
               <input
                 type="radio"
                 name="payment"
                 value="cash"
                 checked={paymentMethod === 'cash'}
                 onChange={() => setPaymentMethod('cash')}
-                className="mr-3"
+                className="mr-3 accent-[#FFC600]"
               />
-              <FiDollarSign className="mr-2 text-amber-700" />
-              <span>Pay at Counter (Cash)</span>
+              <FiDollarSign className="mr-2 text-[#FFC600]" />
+              <span className="text-white">Pay at Counter (Cash)</span>
             </label>
           </div>
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg font-serif">
             {error}
           </div>
         )}
@@ -321,7 +333,7 @@ export default function CheckoutPage() {
         <button
           onClick={handlePayment}
           disabled={loading}
-          className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-secondary to-primary text-white font-bold shadow hover:from-primary hover:to-secondary transition-colors border border-secondary/30 flex items-center justify-center gap-2"
+          className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-[#FFC600] to-[#FFD700] text-[#23272F] font-bold shadow hover:from-[#FFD700] hover:to-[#FFC600] transition-colors border border-[#FFC600]/30 flex items-center justify-center gap-2 font-serif text-lg"
         >
           {loading ? (
             <>Processing...</>

@@ -74,6 +74,7 @@ function OrdersContent() {
     message: string
     type: 'success' | 'info' | 'error'
   } | null>(null)
+  const [activeTab, setActiveTab] = useState<'ongoing' | 'history'>('ongoing')
 
   // Use refs to avoid dependency cycles and excessive re-renders
   const prevOrdersRef = useRef<Order[]>([])
@@ -781,7 +782,17 @@ function OrdersContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50/30 to-yellow-50/50 px-4 py-8 pb-24 allow-scroll">
+    <div
+      className="container mx-auto px-4 py-6 pb-28 absolute z-10 bg-[#0B3D2E]/80"
+      style={{
+        backgroundImage: 'url("/bg-image.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        opacity: 1,
+      }}
+    >
       {/* Notification toast */}
       {notification && (
         <div
@@ -824,69 +835,81 @@ function OrdersContent() {
 
       <div className="max-w-2xl mx-auto">
         {/* Header with title and back button */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary">
-            Your Orders
-          </h1>
-          <Link
-            href={`/menu${tableDataParam ? `?tabledata=${encodeURIComponent(tableDataParam)}` : ''}`}
-            className="flex items-center text-amber-700 hover:text-amber-900 transition-colors"
-          >
-            <FiArrowLeft className="mr-1" /> Back to Menu
-          </Link>
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <Link
+              href={`/menu${tableDataParam ? `?tabledata=${encodeURIComponent(tableDataParam)}` : ''}`}
+              className="flex items-center text-white hover:text-amber-900 transition-colors"
+              aria-label="Back to Menu"
+            >
+              <FiArrowLeft size={24} />
+            </Link>
+            <h1 className="flex-1 text-center text-2xl font-serif font-normal text-white">
+              Your Orders
+            </h1>
+            <div className="w-8" /> {/* Spacer for symmetry */}
+          </div>
+          <hr className="border-t border-white/20 mt-4" />
         </div>
 
         {/* Auto refresh status */}
         <div
-          className={`flex items-center justify-between mb-4 rounded-lg shadow-sm p-3 border transition-all duration-300 ${loading ? 'bg-amber-50 border-amber-200' : 'bg-white border-amber-100'}`}
+          className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 rounded-xl shadow-sm p-4 border transition-all duration-300 ${
+            loading
+              ? 'bg-black/40 border-amber-200'
+              : 'bg-black/40 border-amber-100'
+          } backdrop-blur-md`}
         >
-          <div className="flex items-center">
+          <div className="flex flex-row items-center gap-3 flex-1 min-w-0">
             <FiRefreshCw
-              className={`mr-2 ${autoRefresh && !loading ? 'text-amber-700' : loading ? 'animate-spin text-amber-500' : 'text-gray-400'}`}
+              className={`flex-shrink-0 ${autoRefresh && !loading ? 'text-amber-700' : loading ? 'animate-spin text-amber-500' : 'text-gray-400'}`}
+              size={22}
             />
-            <div>
-              <p className="text-sm font-medium text-gray-700 flex items-center">
+            <div className="min-w-0">
+              <p className="text-md font-serif text-white flex flex-wrap items-center gap-2">
                 {loading ? (
                   <>
-                    <span className="inline-block w-3 h-3 bg-amber-500 rounded-full animate-pulse mr-2"></span>
+                    <span className="inline-block w-3 h-3 bg-amber-500 rounded-full animate-pulse"></span>
                     Refreshing<span className="dots-animation ml-1">...</span>
                   </>
                 ) : autoRefresh ? (
                   <>
-                    Auto-refreshing in{' '}
-                    <span className="font-bold ml-1 text-amber-700">
-                      {Math.floor(refreshCountdown / 60)}m{' '}
+                    <span>Auto-refresh in</span>
+                    <span className="font-bold text-amber-700 text-lg tabular-nums">
+                      {Math.floor(refreshCountdown / 60)}m
+                    </span>
+                    <span className="font-bold text-amber-700 text-lg tabular-nums">
                       {refreshCountdown % 60}s
                     </span>
                   </>
                 ) : (
-                  'Auto-refresh is off'
+                  <span>Auto-refresh is off</span>
                 )}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs font-serif text-gray-400 truncate">
                 Last updated: {lastRefreshTime.toLocaleTimeString()}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end -mt-8">
             <button
               onClick={handleManualRefresh}
-              className={`p-2 rounded-full transition-colors ${loading ? 'bg-amber-100 cursor-not-allowed' : 'hover:bg-amber-100'}`}
+              className={`p-2 rounded-full transition-colors border ${loading ? 'bg-amber-100 cursor-not-allowed border-amber-100' : 'hover:bg-amber-200 bg-white/60 border-amber-200'}`}
               disabled={loading}
               aria-label="Refresh orders"
               title="Refresh now"
             >
               <FiRefreshCw
                 className={`${loading ? 'animate-spin' : ''} text-amber-700`}
-                size={18}
+                size={14}
               />
             </button>
             <button
               onClick={toggleAutoRefresh}
-              className={`flex items-center px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              className={`flex items-center px-2 py-2 rounded-full text-xs font-semibold font-serif transition-all border focus:outline-none focus:ring-2 focus:ring-amber-300 ${
                 autoRefresh
-                  ? 'bg-amber-500 text-white shadow-sm'
-                  : 'bg-gray-200 text-gray-700'
+                  ? 'bg-amber-500/80 text-white border-amber-500 shadow-sm'
+                  : 'bg-gray-100/80 text-gray-700 border-gray-300'
               }`}
               title={
                 autoRefresh
@@ -894,7 +917,15 @@ function OrdersContent() {
                   : 'Turn on auto-refresh (updates every 3 minutes)'
               }
             >
-              {autoRefresh ? 'AUTO' : 'OFF'}
+              {autoRefresh ? (
+                <>
+                  <FiRefreshCw className="mr-1" /> AUTO
+                </>
+              ) : (
+                <>
+                  <FiX className="mr-1" /> OFF
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -937,30 +968,31 @@ function OrdersContent() {
         `}</style>
 
         {/* Search bar */}
-        <div className="relative mb-6">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500">
-            <FiSearch size={24} />
+        <div className="relative mb-8">
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-white">
+            <FiSearch size={22} />
           </span>
           <input
             type="text"
             placeholder="Search orders by name, table, items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white border border-amber-200 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-300 outline-none transition-all"
+            className="w-full pl-12 pr-10 py-3 bg-black/60 border border-amber-200 rounded-xl shadow-sm outline-none transition-all text-white placeholder:text-gray-400 backdrop-blur-md"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-amber-500 transition"
+              aria-label="Clear search"
             >
-              <FiX />
+              <FiX size={20} />
             </button>
           )}
         </div>
 
         {/* Main content */}
         {loading && orders.length === 0 ? (
-          <div className="flex flex-col overflow-auto overflow-y-scroll h-full items-center justify-center py-16 bg-white/60 backdrop-blur-sm rounded-xl shadow-sm border border-amber-100 p-6">
+          <div className="flex flex-col overflow-auto overflow-y-scroll h-full items-center justify-center py-16 bg-black/60 backdrop-blur-sm rounded-xl shadow-sm border border-amber-100 p-6">
             <div className="w-24 h-24 mb-4 relative">
               <div className="absolute inset-0 rounded-full border-4 border-amber-100"></div>
               <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-b-4 border-amber-500"></div>
@@ -992,7 +1024,7 @@ function OrdersContent() {
             </button>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="text-center overflow-auto overflow-y-scroll h-full bg-white/80 backdrop-blur-sm border border-amber-100 rounded-xl shadow-sm p-8 mt-4">
+          <div className="text-center overflow-auto overflow-y-scroll h-full bg-black/80 backdrop-blur-sm border border-amber-100 rounded-xl shadow-sm p-8 mt-4">
             <div className="w-40 h-40 mx-auto mb-6">
               <DotLottieReact
                 src="https://lottie.host/8f640ecf-517b-4af2-a0d7-5f64686db407/aEH8wUJWWD.lottie"
@@ -1102,454 +1134,226 @@ function OrdersContent() {
               filteredOrders.map((order) => (
                 <div
                   key={order.id}
-                  className={`bg-white rounded-xl shadow-md p-5 border ${expandedOrderId === order.id ? 'border-amber-300' : 'border-amber-100'}`}
+                  className={`rounded-2xl shadow-lg p-6 border border-[#1B2E24] bg-[#121212]/60 backdrop-blur-sm text-white max-w-md mx-auto relative transition-all duration-300 ${
+                    expandedOrderId === order.id
+                      ? 'border-amber-400'
+                      : 'border-transparent'
+                  }`}
                 >
-                  {/* Order header with ID and status badges */}
-                  <div className="flex flex-wrap justify-between items-center mb-3">
-                    <div className="flex items-center">
-                      <span className="font-bold text-amber-800 mr-3">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <span className="font-semibold text-lg tracking-wide">
                         Order #{order.id.substring(0, 8)}...
                       </span>
-                      <button
-                        onClick={() => toggleOrderExpansion(order.id)}
-                        className="text-xs text-amber-600 hover:text-amber-800 underline"
-                      >
-                        {expandedOrderId === order.id
-                          ? 'Hide details'
-                          : 'View details'}
-                      </button>
+                      <div className="text-xs text-gray-300 mt-1">
+                        {formatDate(order.createdAt)}
+                      </div>
                     </div>
-                    <div className="flex gap-2 mt-1 sm:mt-0">
-                      {/* Order status badge */}
-                      <div
-                        className={`flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusStyles(order.status).bg} ${getStatusStyles(order.status).text}`}
+                    <div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold shadow border border-amber-700 bg-amber-700/80 text-white`}
                       >
-                        {getStatusStyles(order.status).icon}
+                        {order.status === 'preparing'
+                          ? 'Being Prepared'
+                          : order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Timeline */}
+                  <div className="flex items-center justify-between mt-4 mb-2">
+                    <div className="flex items-center gap-2">
+                      <FiClock className="text-amber-400" />
+                      <span className="text-sm text-amber-200 font-medium">
+                        Estimated Time
+                      </span>
+                    </div>
+                    <span className="text-sm text-amber-100 font-semibold">
+                      ~18 minutes
+                    </span>
+                  </div>
+                  <div className="w-full flex items-center mb-4">
+                    {/* Timeline steps */}
+                    <div className="flex-1 flex items-center">
+                      <div className="flex flex-col items-center flex-1">
+                        <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center text-black font-bold border-2 border-amber-600">
+                          <span>✓</span>
+                        </div>
+                        <span className="text-xs mt-1 text-amber-100">
+                          Ordered
+                        </span>
+                      </div>
+                      <div className="h-1 bg-amber-700 flex-1 mx-1"></div>
+                      <div className="flex flex-col items-center flex-1">
+                        <div
+                          className={`w-6 h-6 rounded-full ${order.status === 'preparing' ? 'bg-amber-400' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border-2 border-amber-600`}
+                        >
+                          <span>{order.status === 'preparing' ? '✓' : ''}</span>
+                        </div>
+                        <span className="text-xs mt-1 text-amber-100">
+                          Preparing
+                        </span>
+                      </div>
+                      <div className="h-1 bg-amber-700 flex-1 mx-1"></div>
+                      <div className="flex flex-col items-center flex-1">
+                        <div
+                          className={`w-6 h-6 rounded-full ${order.status === 'ready' || order.status === 'completed' ? 'bg-amber-400' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border-2 border-amber-600`}
+                        >
+                          <span>
+                            {order.status === 'ready' ||
+                            order.status === 'completed'
+                              ? '✓'
+                              : ''}
+                          </span>
+                        </div>
+                        <span className="text-xs mt-1 text-amber-100">
+                          Ready
+                        </span>
+                      </div>
+                      <div className="h-1 bg-amber-700 flex-1 mx-1"></div>
+                      <div className="flex flex-col items-center flex-1">
+                        <div
+                          className={`w-6 h-6 rounded-full ${order.status === 'completed' ? 'bg-amber-400' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border-2 border-amber-600`}
+                        >
+                          <span>{order.status === 'completed' ? '✓' : ''}</span>
+                        </div>
+                        <span className="text-xs mt-1 text-amber-100">
+                          Delivered
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Items */}
+                  <div className="mt-4">
+                    <div className="font-semibold text-amber-200 mb-2">
+                      Order Items
+                    </div>
+                    <ul className="space-y-2">
+                      {order.items.map((item: any) => (
+                        <li
+                          key={item.menuItemId}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-3 h-3 rounded-full ${item.name.toLowerCase().includes('salmon') ? 'bg-red-500' : 'bg-green-500'}`}
+                            ></span>
+                            <span className="font-medium">{item.name}</span>
+                          </div>
+                          <span className="font-semibold text-amber-100">
+                            ₹{(item.price * item.quantity).toFixed(0)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={() => toggleOrderExpansion(order.id)}
+                      className="mt-3 text-amber-400 font-semibold text-sm underline hover:text-amber-300 transition"
+                    >
+                      {expandedOrderId === order.id
+                        ? 'Hide Full Order'
+                        : 'View Full Order →'}
+                    </button>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-6">
+                    <div className="flex items-center gap-2 text-amber-200">
+                      <span className="bg-amber-900/40 rounded px-2 py-1 text-xs flex items-center gap-1">
+                        <svg
+                          width="16"
+                          height="16"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <rect
+                            x="3"
+                            y="7"
+                            width="18"
+                            height="10"
+                            rx="2"
+                            fill="#FFD580"
+                          />
+                        </svg>
+                        Table #{order.tableNumber || '-'}
+                      </span>
+                    </div>
+                    {/* Contact Staff button removed */}
+                  </div>
+
+                  {/* Expanded Full Order Details */}
+                  {expandedOrderId === order.id && (
+                    <div className="mt-6 p-4 rounded-xl bg-[#183828]/90 border border-amber-900 text-amber-100 shadow-inner">
+                      <div className="mb-2">
+                        <span className="font-bold text-lg">Order Details</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-semibold">Customer:</span>{' '}
+                        {order.customerName}
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-semibold">Table:</span>{' '}
+                        {order.tableNumber}
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-semibold">Order ID:</span>{' '}
+                        {order.id}
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-semibold">Created:</span>{' '}
+                        {formatDate(order.createdAt)}
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-semibold">Status:</span>{' '}
                         {order.status}
                       </div>
-
-                      {/* Payment status badge (improved) */}
-                      {(() => {
-                        const { label, bg, text, icon, extra } =
-                          getPaymentStatusDisplay(order)
-                        return (
-                          <div
-                            className={`flex items-center px-3 py-1 rounded-full text-xs font-bold ${bg} ${text}`}
-                          >
-                            {icon}
-                            {label}
-                            {extra && (
-                              <span className="ml-2 text-xs font-normal text-amber-700">
-                                {extra}
-                              </span>
-                            )}
-                          </div>
-                        )
-                      })()}
-                    </div>
-                  </div>
-
-                  {/* Payment action banner for unpaid orders */}
-                  {(order.paymentStatus === 'unpaid' ||
-                    order.paymentStatus === 'pending') && (
-                    <div className="mb-3 p-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-100 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <div className="p-2 bg-amber-100 rounded-full mr-2">
-                            <FiAlertCircle className="text-amber-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-amber-800 text-sm">
-                              Payment Required
-                            </h4>
-                            <p className="text-xs text-amber-700">
-                              This order requires payment of ₹
-                              {order.totalAmount.toFixed(2)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Show payment method only if order is not expanded */}
-                        {expandedOrderId !== order.id && (
-                          <button
-                            onClick={() => toggleOrderExpansion(order.id)}
-                            className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium rounded-md transition-colors shadow-sm"
-                          >
-                            Choose Payment Method
-                          </button>
-                        )}
+                      <div className="mb-2">
+                        <span className="font-semibold">Payment Status:</span>{' '}
+                        {order.paymentStatus}
                       </div>
-
-                      {/* Payment options - shown only when order is expanded */}
-                      {expandedOrderId === order.id && (
-                        <div className="mt-2 pt-2 border-t border-amber-100">
-                          <p className="text-xs text-amber-800 mb-2">
-                            Select a payment method:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {/* Cash payment option */}
-                            <button
-                              onClick={() => markForCashPayment(order)}
-                              className="flex-1 px-3 py-2 bg-white border border-amber-200 hover:bg-amber-50 text-amber-700 rounded-md shadow-sm transition-colors flex items-center justify-center"
-                              disabled={loading}
-                            >
-                              <FiDollarSign className="mr-1" />
-                              <span className="font-medium text-sm">
-                                Pay Cash
-                              </span>
-                            </button>
-
-                            {/* Online payment option with Razorpay */}
-                            <button
-                              onClick={() => initiateOnlinePayment(order)}
-                              className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition-colors flex items-center justify-center"
-                              disabled={loading}
-                            >
-                              <FiCreditCard className="mr-1" />
-                              <span className="font-medium text-sm">
-                                Pay Online
-                              </span>
-                            </button>
-                          </div>
+                      <div className="mb-2">
+                        <span className="font-semibold">Payment Method:</span>{' '}
+                        {order.paymentMethod || 'N/A'}
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-semibold">Total Amount:</span> ₹
+                        {order.totalAmount.toFixed(2)}
+                      </div>
+                      {order.notes && (
+                        <div className="mb-2">
+                          <span className="font-semibold">Notes:</span>{' '}
+                          {order.notes}
                         </div>
                       )}
-                    </div>
-                  )}
-
-                  {/* Order summary info */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
-                    <div className="text-sm text-gray-600">
-                      <span className="text-xs text-gray-500">Table:</span>{' '}
-                      {order.tableNumber || '-'}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <span className="text-xs text-gray-500">Customer:</span>{' '}
-                      {order.customerName}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      <span className="text-xs text-gray-500">Total:</span> ₹
-                      {order.totalAmount.toFixed(2)}
-                    </div>
-                    <div className="text-sm text-gray-600 col-span-2 sm:col-span-3">
-                      <span className="text-xs text-gray-500">Placed:</span>{' '}
-                      {formatDate(order.createdAt)}
-                    </div>
-
-                    {/* Payment method if available */}
-                    {order.paymentMethod && (
-                      <div className="text-sm text-gray-600 col-span-2 sm:col-span-3">
-                        <span className="text-xs text-gray-500">
-                          Payment Method:
-                        </span>{' '}
-                        {order.paymentMethod === 'online'
-                          ? 'Online (Razorpay)'
-                          : 'Cash'}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Order items */}
-                  <div
-                    className={`mt-4 transition-all duration-300 ${expandedOrderId === order.id ? 'opacity-100' : 'hidden'}`}
-                  >
-                    <div className="font-semibold text-amber-700 mb-2 pb-1 border-b border-amber-100">
-                      Items ({hasOrderItems(order) ? order.items.length : 0})
-                    </div>
-
-                    {!hasOrderItems(order) ? (
-                      <p className="text-gray-500 text-sm italic">
-                        No items found in this order.
-                      </p>
-                    ) : (
-                      <ul className="space-y-2 pl-1">
-                        {order.items.map((item: any) => (
-                          <li
-                            key={item.menuItemId}
-                            className="bg-amber-50/50 p-2 rounded"
-                          >
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <span className="font-medium text-gray-800">
-                                  {item.name || item.menuItemId}
-                                </span>
-                                <span className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded-full">
-                                  x{item.quantity}
-                                </span>
-                              </div>
-                              <span className="font-medium text-amber-800">
-                                ₹{(item.price * item.quantity).toFixed(2)}
-                              </span>
-                            </div>
-
-                            {/* Add-ons if available */}
-                            {item.selectedAddOns &&
-                              item.selectedAddOns.length > 0 && (
-                                <div className="mt-1.5 ml-4 text-xs text-gray-600">
-                                  <span className="text-amber-700">
-                                    Add-ons:
-                                  </span>{' '}
-                                  {item.selectedAddOns.map((addon: any) => (
-                                    <span
-                                      key={addon.name}
-                                      className="ml-1 px-1.5 py-0.5 bg-white rounded text-xs"
-                                    >
-                                      {addon.name} (₹{addon.price.toFixed(2)})
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-
-                            {/* Ingredients if available */}
-                            {item.ingredients &&
-                              item.ingredients.length > 0 && (
-                                <div className="mt-1 ml-4 text-xs text-gray-500">
-                                  <span className="text-amber-600">
-                                    Ingredients:
-                                  </span>{' '}
-                                  {item.ingredients
-                                    .map(
-                                      (ing: any) =>
-                                        `${ing.inventoryItemName} (${ing.quantity}${ing.unit})`,
-                                    )
-                                    .join(', ')}
-                                </div>
-                              )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {/* Notes if available */}
-                    {order.notes && (
-                      <div className="mt-3 text-sm border-t border-amber-100 pt-2">
-                        <span className="font-medium text-amber-700">
-                          Notes:
-                        </span>
-                        <p className="mt-1 text-gray-600 bg-yellow-50 p-2 rounded italic">
-                          &ldquo;{order.notes}&rdquo;
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Order timeline - shows in expanded view */}
-                  {expandedOrderId === order.id && (
-                    <div className="mt-4 pt-3 border-t border-amber-100">
-                      <div className="flex items-center justify-between text-sm mb-3">
-                        <div className="flex items-center text-amber-700">
-                          <FiClock className="mr-1.5" />
-                          <span>Order Progress</span>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Last updated:{' '}
-                          {formatDate(order.updatedAt || order.createdAt)}
-                        </div>
-                      </div>
-
-                      {/* Order progress bar */}
-                      <div className="mb-4 relative">
-                        <div className="overflow-hidden h-2.5 text-xs flex rounded-full bg-amber-100">
-                          <div
-                            style={{
-                              width:
-                                order.status === 'pending'
-                                  ? '20%'
-                                  : order.status === 'preparing'
-                                    ? '40%'
-                                    : order.status === 'ready'
-                                      ? '70%'
-                                      : order.status === 'completed'
-                                        ? '100%'
-                                        : '0%',
-                            }}
-                            className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${
-                              order.status === 'cancelled'
-                                ? 'bg-red-500'
-                                : 'bg-gradient-to-r from-amber-500 to-amber-400'
-                            } transition-all duration-1000 ease-in-out`}
-                          ></div>
-                        </div>
-
-                        {/* Progress steps */}
-                        <div className="flex justify-between mt-1 px-1">
-                          <div
-                            className={`text-xs font-medium ${order.status === 'pending' || order.status === 'preparing' || order.status === 'ready' || order.status === 'completed' ? 'text-amber-700' : 'text-gray-400'}`}
-                          >
-                            Pending
-                          </div>
-                          <div
-                            className={`text-xs font-medium ${order.status === 'preparing' || order.status === 'ready' || order.status === 'completed' ? 'text-amber-700' : 'text-gray-400'}`}
-                          >
-                            Preparing
-                          </div>
-                          <div
-                            className={`text-xs font-medium ${order.status === 'ready' || order.status === 'completed' ? 'text-amber-700' : 'text-gray-400'}`}
-                          >
-                            Ready
-                          </div>
-                          <div
-                            className={`text-xs font-medium ${order.status === 'completed' ? 'text-amber-700' : 'text-gray-400'}`}
-                          >
-                            Completed
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Payment information - DETAILED */}
-                      <div className="bg-gray-50 rounded-lg p-3 mb-2">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">
-                          Payment Information
-                        </h4>
-                        <div className="flex flex-wrap gap-x-6 gap-y-2">
-                          <div>
-                            <span className="text-xs text-gray-500 block">
-                              Status:
-                            </span>
-                            {(() => {
-                              const { label, text, icon, extra } =
-                                getPaymentStatusDisplay(order)
-                              return (
-                                <span
-                                  className={`text-sm font-medium flex items-center gap-1 ${text}`}
-                                >
-                                  {icon}
-                                  {label}
-                                  {extra && (
-                                    <span className="ml-1 text-xs font-normal text-amber-700">
-                                      {extra}
-                                    </span>
-                                  )}
-                                </span>
-                              )
-                            })()}
-                          </div>
-                          <div>
-                            <span className="text-xs text-gray-500 block">
-                              Method:
-                            </span>
-                            <span className="text-sm font-medium text-gray-700">
-                              {order.paymentMethod === 'online'
-                                ? 'Online (Razorpay)'
-                                : order.paymentMethod === 'cash'
-                                  ? 'Cash'
-                                  : 'Not specified'}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-xs text-gray-500 block">
-                              Amount:
-                            </span>
-                            <span className="text-sm font-medium text-gray-700">
-                              ₹{order.totalAmount.toFixed(2)}
-                            </span>
-                          </div>
-                          {/* Show all payment details if available */}
-                          {order.razorpayOrderId && (
-                            <div>
-                              <span className="text-xs text-gray-500 block">
-                                Razorpay Order ID:
-                              </span>
-                              <span className="text-xs font-mono text-gray-700">
-                                {order.razorpayOrderId}
-                              </span>
-                            </div>
-                          )}
-                          {order.razorpayPaymentId && (
-                            <div>
-                              <span className="text-xs text-gray-500 block">
-                                Razorpay Payment ID:
-                              </span>
-                              <span className="text-xs font-mono text-gray-700">
-                                {order.razorpayPaymentId}
-                              </span>
-                            </div>
-                          )}
-                          {order.paymentStatus && (
-                            <div>
-                              <span className="text-xs text-gray-500 block">
-                                Payment Status:
-                              </span>
-                              <span className="text-xs font-mono text-gray-700">
-                                {order.paymentStatus}
-                              </span>
-                            </div>
-                          )}
-                          {order.paymentMethod && (
-                            <div>
-                              <span className="text-xs text-gray-500 block">
-                                Payment Method:
-                              </span>
-                              <span className="text-xs font-mono text-gray-700">
-                                {order.paymentMethod}
-                              </span>
-                            </div>
-                          )}
-                          {order.updatedAt && (
-                            <div>
-                              <span className="text-xs text-gray-500 block">
-                                Last Updated:
-                              </span>
-                              <span className="text-xs font-mono text-gray-700">
-                                {formatDate(order.updatedAt)}
-                              </span>
-                            </div>
-                          )}
-                          {order.createdAt && (
-                            <div>
-                              <span className="text-xs text-gray-500 block">
-                                Created At:
-                              </span>
-                              <span className="text-xs font-mono text-gray-700">
-                                {formatDate(order.createdAt)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        {/* Payment options for unpaid orders */}
-                        {(order.paymentStatus === 'unpaid' ||
-                          order.paymentStatus === 'pending') && (
-                          <div className="w-full mt-3 border-t border-gray-200 pt-3">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-gray-800 mb-2">
-                                Process Payment:
-                              </span>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() =>
-                                    handlePaymentProcess(order.id, 'cash')
-                                  }
-                                  className="flex items-center justify-center px-3 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition-colors"
-                                  disabled={loading}
-                                >
-                                  <FiCheck className="mr-1" /> Mark as Cash
-                                  Payment
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handlePaymentProcess(order.id, 'online')
-                                  }
-                                  className="flex items-center justify-center px-3 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors"
-                                  disabled={loading}
-                                >
-                                  <span className="flex items-center">
-                                    <svg
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      className="mr-1"
-                                    >
-                                      <path
-                                        d="M17.32 9.36L19.31 11.35C19.5 11.54 19.5 11.85 19.31 12.04L12.7 18.65C12.51 18.84 12.2 18.84 12.01 18.65L8.99 15.63C8.9 15.54 8.75 15.54 8.66 15.63L5.69 18.6C5.5 18.79 5.19 18.79 5 18.6L3.01 16.61C2.82 16.42 2.82 16.11 3.01 15.92L9.62 9.31C9.81 9.12 10.12 9.12 10.31 9.31L13.33 12.33C13.42 12.42 13.57 12.42 13.66 12.33L16.63 9.36C16.82 9.17 17.13 9.17 17.32 9.36Z"
-                                        fill="white"
-                                      />
-                                    </svg>
-                                    Process Online Payment
-                                  </span>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                      {/* Payment actions (keep as before) */}
+                      <div className="mt-4 flex gap-2">
+                        {order.paymentStatus !== 'paid' && (
+                          <>
+                            <button
+                              className="px-4 py-2 rounded-full bg-amber-500 text-white font-semibold hover:bg-amber-600 transition"
+                              onClick={() =>
+                                handlePaymentProcess(order.id, 'online')
+                              }
+                            >
+                              Pay Online
+                            </button>
+                            <button
+                              className="px-4 py-2 rounded-full bg-gray-200 text-amber-700 font-semibold hover:bg-amber-100 transition"
+                              onClick={() =>
+                                handlePaymentProcess(order.id, 'cash')
+                              }
+                            >
+                              Mark as Cash
+                            </button>
+                          </>
+                        )}
+                        {order.paymentStatus === 'paid' && (
+                          <span className="px-4 py-2 rounded-full bg-green-500 text-white font-semibold">
+                            Paid
+                          </span>
                         )}
                       </div>
                     </div>
