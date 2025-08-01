@@ -74,7 +74,6 @@ function OrdersContent() {
     message: string
     type: 'success' | 'info' | 'error'
   } | null>(null)
-  const [activeTab, setActiveTab] = useState<'ongoing' | 'history'>('ongoing')
 
   // Use refs to avoid dependency cycles and excessive re-renders
   const prevOrdersRef = useRef<Order[]>([])
@@ -783,7 +782,7 @@ function OrdersContent() {
 
   return (
     <div
-      className="container mx-auto px-4 py-6 pb-28 absolute z-10 bg-[#0B3D2E]/80"
+      className="container mx-auto px-4 py-6 pb-28 absolute z-10 bg-[#04362A]/95"
       style={{
         backgroundImage: 'url("/bg-image.png")',
         backgroundSize: 'cover',
@@ -839,7 +838,7 @@ function OrdersContent() {
           <div className="flex items-center justify-between">
             <Link
               href={`/menu${tableDataParam ? `?tabledata=${encodeURIComponent(tableDataParam)}` : ''}`}
-              className="flex items-center text-white hover:text-amber-900 transition-colors"
+              className="flex items-center text-white hover:text-[#04B851] transition-colors"
               aria-label="Back to Menu"
             >
               <FiArrowLeft size={24} />
@@ -847,38 +846,37 @@ function OrdersContent() {
             <h1 className="flex-1 text-center text-2xl font-serif font-normal text-white">
               Your Orders
             </h1>
-            <div className="w-8" /> {/* Spacer for symmetry */}
           </div>
-          <hr className="border-t border-white/20 mt-4" />
+          <hr className="border-t border-white/20 w-full mt-5" />
         </div>
 
         {/* Auto refresh status */}
         <div
           className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 rounded-xl shadow-sm p-4 border transition-all duration-300 ${
             loading
-              ? 'bg-black/40 border-amber-200'
-              : 'bg-black/40 border-amber-100'
+              ? 'bg-[#072923]/80 border-[#04B851]/20'
+              : 'bg-[#072923]/80 border-[#04B851]/20'
           } backdrop-blur-md`}
         >
           <div className="flex flex-row items-center gap-3 flex-1 min-w-0">
             <FiRefreshCw
-              className={`flex-shrink-0 ${autoRefresh && !loading ? 'text-amber-700' : loading ? 'animate-spin text-amber-500' : 'text-gray-400'}`}
+              className={`flex-shrink-0 ${autoRefresh && !loading ? 'text-[#04B851]' : loading ? 'animate-spin text-[#04B851]' : 'text-gray-400'}`}
               size={22}
             />
             <div className="min-w-0">
               <p className="text-md font-serif text-white flex flex-wrap items-center gap-2">
                 {loading ? (
                   <>
-                    <span className="inline-block w-3 h-3 bg-amber-500 rounded-full animate-pulse"></span>
+                    <span className="inline-block w-3 h-3 bg-[#04B851] rounded-full animate-pulse"></span>
                     Refreshing<span className="dots-animation ml-1">...</span>
                   </>
                 ) : autoRefresh ? (
                   <>
                     <span>Auto-refresh in</span>
-                    <span className="font-bold text-amber-700 text-lg tabular-nums">
+                    <span className="font-bold text-[#04B851] text-lg tabular-nums">
                       {Math.floor(refreshCountdown / 60)}m
                     </span>
-                    <span className="font-bold text-amber-700 text-lg tabular-nums">
+                    <span className="font-bold text-[#04B851] text-lg tabular-nums">
                       {refreshCountdown % 60}s
                     </span>
                   </>
@@ -891,25 +889,25 @@ function OrdersContent() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 justify-end -mt-8">
+          <div className="flex items-center gap-2 justify-end sm:mt-0 -mt-8">
             <button
               onClick={handleManualRefresh}
-              className={`p-2 rounded-full transition-colors border ${loading ? 'bg-amber-100 cursor-not-allowed border-amber-100' : 'hover:bg-amber-200 bg-white/60 border-amber-200'}`}
+              className={`p-2 rounded-full transition-colors border ${loading ? 'bg-[#04B851]/10 cursor-not-allowed border-[#04B851]/20' : 'hover:bg-[#04B851]/20 bg-[#04B851]/10 border-[#04B851]/30'}`}
               disabled={loading}
               aria-label="Refresh orders"
               title="Refresh now"
             >
               <FiRefreshCw
-                className={`${loading ? 'animate-spin' : ''} text-amber-700`}
+                className={`${loading ? 'animate-spin' : ''} text-[#04B851]`}
                 size={14}
               />
             </button>
             <button
               onClick={toggleAutoRefresh}
-              className={`flex items-center px-2 py-2 rounded-full text-xs font-semibold font-serif transition-all border focus:outline-none focus:ring-2 focus:ring-amber-300 ${
+              className={`flex items-center px-2 py-2 rounded-full text-xs font-semibold font-serif transition-all border focus:outline-none focus:ring-2 focus:ring-[#04B851]/30 ${
                 autoRefresh
-                  ? 'bg-amber-500/80 text-white border-amber-500 shadow-sm'
-                  : 'bg-gray-100/80 text-gray-700 border-gray-300'
+                  ? 'bg-[#04B851]/80 text-white border-[#04B851] shadow-sm'
+                  : 'bg-gray-800/80 text-gray-300 border-gray-700'
               }`}
               title={
                 autoRefresh
@@ -968,21 +966,21 @@ function OrdersContent() {
         `}</style>
 
         {/* Search bar */}
-        <div className="relative mb-8">
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-white">
-            <FiSearch size={22} />
+        <div className="relative mb-6">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60">
+            <FiSearch size={20} />
           </span>
           <input
             type="text"
             placeholder="Search orders by name, table, items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-10 py-3 bg-black/60 border border-amber-200 rounded-xl shadow-sm outline-none transition-all text-white placeholder:text-gray-400 backdrop-blur-md"
+            className="w-full pl-12 pr-10 py-3 bg-[#072923]/90 border border-[#04B851]/30 rounded-xl shadow-sm outline-none transition-all text-white placeholder:text-gray-400 focus:border-[#04B851]/70 focus:ring-1 focus:ring-[#04B851]/30 backdrop-blur-md"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-amber-500 transition"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-[#04B851] transition"
               aria-label="Clear search"
             >
               <FiX size={20} />
@@ -1134,25 +1132,25 @@ function OrdersContent() {
               filteredOrders.map((order) => (
                 <div
                   key={order.id}
-                  className={`rounded-2xl shadow-lg p-6 border border-[#1B2E24] bg-[#121212]/60 backdrop-blur-sm text-white max-w-md mx-auto relative transition-all duration-300 ${
+                  className={`rounded-2xl shadow-lg p-6 border border-[#1B2E24] bg-[#0A2721] backdrop-blur-sm text-white max-w-md mx-auto relative transition-all duration-300 ${
                     expandedOrderId === order.id
-                      ? 'border-amber-400'
-                      : 'border-transparent'
+                      ? 'border-[#04B851]'
+                      : 'border-[#1B2E24]'
                   }`}
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <span className="font-semibold text-lg tracking-wide">
-                        Order #{order.id.substring(0, 8)}...
+                        Order #{order.id.substring(0, 4)}
                       </span>
-                      <div className="text-xs text-gray-300 mt-1">
+                      <div className="text-xs text-gray-400 mt-1">
                         {formatDate(order.createdAt)}
                       </div>
                     </div>
                     <div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold shadow border border-amber-700 bg-amber-700/80 text-white`}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold shadow border border-[#F2C94C]/60 bg-[#F2C94C]/80 text-black`}
                       >
                         {order.status === 'preparing'
                           ? 'Being Prepared'
@@ -1165,12 +1163,24 @@ function OrdersContent() {
                   {/* Timeline */}
                   <div className="flex items-center justify-between mt-4 mb-2">
                     <div className="flex items-center gap-2">
-                      <FiClock className="text-amber-400" />
-                      <span className="text-sm text-amber-200 font-medium">
+                      <FiClock className="text-[#F2C94C]" />
+                      <span className="text-sm text-gray-300 font-medium">
                         Estimated Time
                       </span>
                     </div>
-                    <span className="text-sm text-amber-100 font-semibold">
+                    <span className="text-sm text-[#F2C94C] font-semibold flex items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-4 h-4 mr-1"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                       ~18 minutes
                     </span>
                   </div>
@@ -1178,28 +1188,28 @@ function OrdersContent() {
                     {/* Timeline steps */}
                     <div className="flex-1 flex items-center">
                       <div className="flex flex-col items-center flex-1">
-                        <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center text-black font-bold border-2 border-amber-600">
+                        <div className="w-6 h-6 rounded-full bg-[#F2C94C] flex items-center justify-center text-black font-bold border border-[#F2C94C]">
                           <span>✓</span>
                         </div>
-                        <span className="text-xs mt-1 text-amber-100">
+                        <span className="text-xs mt-1 text-gray-300">
                           Ordered
                         </span>
                       </div>
-                      <div className="h-1 bg-amber-700 flex-1 mx-1"></div>
+                      <div className="h-1 bg-[#F2C94C] flex-1 mx-1"></div>
                       <div className="flex flex-col items-center flex-1">
                         <div
-                          className={`w-6 h-6 rounded-full ${order.status === 'preparing' ? 'bg-amber-400' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border-2 border-amber-600`}
+                          className={`w-6 h-6 rounded-full ${order.status === 'preparing' ? 'bg-[#F2C94C]' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border ${order.status === 'preparing' ? 'border-[#F2C94C]' : 'border-gray-700'}`}
                         >
                           <span>{order.status === 'preparing' ? '✓' : ''}</span>
                         </div>
-                        <span className="text-xs mt-1 text-amber-100">
+                        <span className="text-xs mt-1 text-gray-300">
                           Preparing
                         </span>
                       </div>
-                      <div className="h-1 bg-amber-700 flex-1 mx-1"></div>
+                      <div className="h-1 bg-gray-700 flex-1 mx-1"></div>
                       <div className="flex flex-col items-center flex-1">
                         <div
-                          className={`w-6 h-6 rounded-full ${order.status === 'ready' || order.status === 'completed' ? 'bg-amber-400' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border-2 border-amber-600`}
+                          className={`w-6 h-6 rounded-full ${order.status === 'ready' || order.status === 'completed' ? 'bg-[#F2C94C]' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border ${order.status === 'ready' || order.status === 'completed' ? 'border-[#F2C94C]' : 'border-gray-700'}`}
                         >
                           <span>
                             {order.status === 'ready' ||
@@ -1208,18 +1218,18 @@ function OrdersContent() {
                               : ''}
                           </span>
                         </div>
-                        <span className="text-xs mt-1 text-amber-100">
+                        <span className="text-xs mt-1 text-gray-300">
                           Ready
                         </span>
                       </div>
-                      <div className="h-1 bg-amber-700 flex-1 mx-1"></div>
+                      <div className="h-1 bg-gray-700 flex-1 mx-1"></div>
                       <div className="flex flex-col items-center flex-1">
                         <div
-                          className={`w-6 h-6 rounded-full ${order.status === 'completed' ? 'bg-amber-400' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border-2 border-amber-600`}
+                          className={`w-6 h-6 rounded-full ${order.status === 'completed' ? 'bg-[#F2C94C]' : 'bg-gray-700'} flex items-center justify-center text-black font-bold border ${order.status === 'completed' ? 'border-[#F2C94C]' : 'border-gray-700'}`}
                         >
                           <span>{order.status === 'completed' ? '✓' : ''}</span>
                         </div>
-                        <span className="text-xs mt-1 text-amber-100">
+                        <span className="text-xs mt-1 text-gray-300">
                           Delivered
                         </span>
                       </div>
@@ -1227,11 +1237,11 @@ function OrdersContent() {
                   </div>
 
                   {/* Items */}
-                  <div className="mt-4">
-                    <div className="font-semibold text-amber-200 mb-2">
+                  <div className="mt-4 border-t border-[#1B2E24] pt-3">
+                    <div className="font-semibold text-white mb-3">
                       Order Items
                     </div>
-                    <ul className="space-y-2">
+                    <ul className="space-y-3">
                       {order.items.map((item: any) => (
                         <li
                           key={item.menuItemId}
@@ -1239,11 +1249,13 @@ function OrdersContent() {
                         >
                           <div className="flex items-center gap-2">
                             <span
-                              className={`w-3 h-3 rounded-full ${item.name.toLowerCase().includes('salmon') ? 'bg-red-500' : 'bg-green-500'}`}
+                              className={`w-3 h-3 rounded-full ${item.name.toLowerCase().includes('salmon') ? 'bg-[#EB5757]' : 'bg-[#04B851]'}`}
                             ></span>
-                            <span className="font-medium">{item.name}</span>
+                            <span className="text-gray-100 text-sm">
+                              {item.name}
+                            </span>
                           </div>
-                          <span className="font-semibold text-amber-100">
+                          <span className="text-sm font-medium text-white">
                             ₹{(item.price * item.quantity).toFixed(0)}
                           </span>
                         </li>
@@ -1251,76 +1263,146 @@ function OrdersContent() {
                     </ul>
                     <button
                       onClick={() => toggleOrderExpansion(order.id)}
-                      className="mt-3 text-amber-400 font-semibold text-sm underline hover:text-amber-300 transition"
+                      className="mt-3 text-[#04B851] font-medium text-sm hover:text-[#F2C94C] transition flex items-center"
                     >
                       {expandedOrderId === order.id
                         ? 'Hide Full Order'
-                        : 'View Full Order →'}
+                        : 'View Full Order'}
+                      {expandedOrderId !== order.id && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-4 h-4 ml-1"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                          />
+                        </svg>
+                      )}
                     </button>
                   </div>
 
                   {/* Footer */}
                   <div className="flex items-center justify-between mt-6">
-                    <div className="flex items-center gap-2 text-amber-200">
-                      <span className="bg-amber-900/40 rounded px-2 py-1 text-xs flex items-center gap-1">
+                    <div className="flex items-center gap-2 text-white">
+                      <span className="bg-[#0D362E] rounded-lg px-2 py-1 text-xs flex items-center gap-1 border border-[#04B851]/20">
                         <svg
-                          width="16"
-                          height="16"
+                          xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-4 h-4 text-[#04B851]"
                         >
-                          <rect
-                            x="3"
-                            y="7"
-                            width="18"
-                            height="10"
-                            rx="2"
-                            fill="#FFD580"
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
                           />
                         </svg>
                         Table #{order.tableNumber || '-'}
                       </span>
                     </div>
-                    {/* Contact Staff button removed */}
+                    {/* <button className="bg-[#04B851] hover:bg-[#039f45] text-white text-xs px-4 py-1.5 rounded-lg transition flex items-center">
+                      Contact Staff
+                    </button> */}
                   </div>
 
                   {/* Expanded Full Order Details */}
                   {expandedOrderId === order.id && (
-                    <div className="mt-6 p-4 rounded-xl bg-[#183828]/90 border border-amber-900 text-amber-100 shadow-inner">
-                      <div className="mb-2">
-                        <span className="font-bold text-lg">Order Details</span>
+                    <div className="mt-6 p-4 rounded-xl bg-[#0D362E] border border-[#04B851]/20 text-white shadow-inner">
+                      <div className="mb-3">
+                        <span className="font-bold text-lg text-[#04B851]">
+                          Order Details
+                        </span>
                       </div>
-                      <div className="mb-2">
-                        <span className="font-semibold">Customer:</span>{' '}
-                        {order.customerName}
+                      <div className="mb-2 flex">
+                        <span className="font-semibold text-sm w-24">
+                          Customer:
+                        </span>
+                        <span className="text-sm text-gray-300">
+                          {order.customerName}
+                        </span>
                       </div>
-                      <div className="mb-2">
-                        <span className="font-semibold">Table:</span>{' '}
-                        {order.tableNumber}
+                      <div className="mb-2 flex">
+                        <span className="font-semibold text-sm w-24">
+                          Table:
+                        </span>
+                        <span className="text-sm text-gray-300">
+                          {order.tableNumber}
+                        </span>
                       </div>
                       <div className="mb-2">
                         <span className="font-semibold">Order ID:</span>{' '}
                         {order.id}
                       </div>
-                      <div className="mb-2">
-                        <span className="font-semibold">Created:</span>{' '}
-                        {formatDate(order.createdAt)}
+                      <div className="mb-2 flex">
+                        <span className="font-semibold text-sm w-24">
+                          Created:
+                        </span>
+                        <span className="text-sm text-gray-300">
+                          {formatDate(order.createdAt)}
+                        </span>
                       </div>
-                      <div className="mb-2">
-                        <span className="font-semibold">Status:</span>{' '}
-                        {order.status}
+                      <div className="mb-2 flex">
+                        <span className="font-semibold text-sm w-24">
+                          Status:
+                        </span>
+                        <span className="text-sm">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs ${
+                              order.status === 'pending'
+                                ? 'bg-[#F2C94C]/20 text-[#F2C94C]'
+                                : order.status === 'preparing'
+                                  ? 'bg-[#04B851]/20 text-[#04B851]'
+                                  : order.status === 'ready'
+                                    ? 'bg-[#2ECC71]/20 text-[#2ECC71]'
+                                    : order.status === 'completed'
+                                      ? 'bg-[#2ECC71]/20 text-[#2ECC71]'
+                                      : 'bg-gray-700/20 text-gray-400'
+                            }`}
+                          >
+                            {order.status.charAt(0).toUpperCase() +
+                              order.status.slice(1)}
+                          </span>
+                        </span>
                       </div>
-                      <div className="mb-2">
-                        <span className="font-semibold">Payment Status:</span>{' '}
-                        {order.paymentStatus}
+                      <div className="mb-2 flex">
+                        <span className="font-semibold text-sm w-24">
+                          Payment:
+                        </span>
+                        <span className="text-sm">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs ${
+                              order.paymentStatus === 'paid'
+                                ? 'bg-[#04B851]/20 text-[#04B851]'
+                                : order.paymentStatus === 'pending'
+                                  ? 'bg-[#F2C94C]/20 text-[#F2C94C]'
+                                  : 'bg-[#EB5757]/20 text-[#EB5757]'
+                            }`}
+                          >
+                            {order.paymentStatus.charAt(0).toUpperCase() +
+                              order.paymentStatus.slice(1)}
+                          </span>
+                          {order.paymentMethod && (
+                            <span className="ml-2 text-gray-400 text-xs">
+                              via {order.paymentMethod}
+                            </span>
+                          )}
+                        </span>
                       </div>
-                      <div className="mb-2">
-                        <span className="font-semibold">Payment Method:</span>{' '}
-                        {order.paymentMethod || 'N/A'}
-                      </div>
-                      <div className="mb-2">
-                        <span className="font-semibold">Total Amount:</span> ₹
-                        {order.totalAmount.toFixed(2)}
+                      <div className="mb-2 flex">
+                        <span className="font-semibold text-sm w-24">
+                          Amount:
+                        </span>
+                        <span className="text-sm text-[#04B851] font-mono">
+                          ₹{order.totalAmount.toFixed(2)}
+                        </span>
                       </div>
                       {order.notes && (
                         <div className="mb-2">

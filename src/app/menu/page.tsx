@@ -368,11 +368,11 @@ function MenuContent() {
             <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin"></div>
             <p className="mt-4 text-white font-medium">Loading menu...</p>
           </div>
-        ) : filteredItems.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Apply search filter */}
-            {filteredItems
-              .filter((item) =>
+        ) : (
+          <>
+            {/* Filtered and searched items */}
+            {(() => {
+              const visibleItems = filteredItems.filter((item) =>
                 searchTerm
                   ? item.name
                       .toLowerCase()
@@ -382,126 +382,124 @@ function MenuContent() {
                       .includes(searchTerm.toLowerCase())
                   : true,
               )
-              .map((item, idx) => {
-                const imageSrc =
-                  item.imageURLs?.[0] ||
-                  item.imageURL ||
-                  item.image ||
-                  '/placeholder-food.jpg'
-
-                const totalItemQuantity = cart
-                  .filter((cartItem) => cartItem.id === item.id)
-                  .reduce((total, cartItem) => total + cartItem.quantity, 0)
-
-                return (
-                  <div
-                    key={item.id}
-                    style={{ animationDelay: `${idx * 50}ms` }}
-                    className="bg-[#18382D]/80 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 cursor-pointer group flex flex-col"
-                    onClick={() => {
-                      router.push(
-                        `/menu/${encodeURIComponent(item.id)}${
-                          tableDataParam
-                            ? `?tabledata=${encodeURIComponent(tableDataParam)}`
-                            : ''
-                        }`,
-                      )
-                    }}
-                  >
-                    {/* Image display */}
-                    <div className="w-full h-60 relative">
-                      <Image
-                        src={imageSrc}
-                        alt={item.name}
-                        fill
-                        className="object-cover rounded-t-3xl"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        priority={idx < 6}
-                      />
-                    </div>
-                    <div className="flex-1 flex flex-col justify-between p-4">
-                      <div>
-                        <h3 className="text-2xl font-serif font-bold text-white mb-2">
-                          {item.name}
-                        </h3>
-                        <p className="text-md font-serif text-gray-200 mb-4">
-                          {item.description}
-                        </p>
+              return (
+                <>
+                  {visibleItems.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <div className="bg-gradient-to-br from-[#FFC600]/80 to-[#FFD700]/60 rounded-full w-16 h-16 flex items-center justify-center border-4 border-[#FFC600] shadow-lg mb-4">
+                        <FiSearch className="text-3xl text-[#FFC600]" />
                       </div>
-                      <div className="flex items-end justify-between mt-2">
-                        <span className="text-xl font-serif font-bold text-[#FFC600]">
-                          ₹ {item.price.toFixed(0)}
+                      <span className="text-[#FFC600] font-serif font-bold text-lg mb-2">
+                        No Results
+                      </span>
+                      <h2 className="text-xl font-serif font-bold text-white mb-2 text-center">
+                        Nothing matches your search
+                      </h2>
+                      <p className="text-md text-[#FFD700] mb-6 text-center font-serif">
+                        <span className="font-semibold text-[#FFC600]">
+                          "{searchTerm}"
+                        </span>{' '}
+                        not found.
+                        <br />
+                        Try a different keyword or explore categories below.
+                      </p>
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="px-5 py-2 bg-gradient-to-r from-[#FFC600] to-[#FFD700] text-[#23272F] rounded-full border border-[#FFC600]/40 font-bold shadow hover:from-[#FFD700] hover:to-[#FFC600] transition-all font-serif"
+                      >
+                        Clear Search
+                      </button>
+                      {/* <div className="mt-8 w-full flex flex-col items-center">
+                        <span className="text-xs text-gray-400 mb-2 font-serif">
+                          Tip: Use short keywords for better results.
                         </span>
                         <button
-                          className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-[#FFC600] hover:bg-[#FFD700] transition-all shadow-lg"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            if (item.available) {
-                              // If you want to keep modal for "+" button, keep this:
-                              openModal(item)
-                            }
-                          }}
-                          disabled={!item.available}
+                          onClick={() => setShowSearch(false)}
+                          className="text-[#FFC600] underline text-sm font-serif hover:text-[#FFD700]"
                         >
-                          <FiPlus size={24} className="text-white" />
+                          Browse All Items
                         </button>
-                      </div>
+                      </div> */}
                     </div>
+                  )}
+                  <div
+                    className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 ${visibleItems.length === 0 ? 'hidden' : ''}`}
+                  >
+                    {visibleItems.map((item, idx) => {
+                      const imageSrc =
+                        item.imageURLs?.[0] ||
+                        item.imageURL ||
+                        item.image ||
+                        '/placeholder-food.jpg'
+
+                      const totalItemQuantity = cart
+                        .filter((cartItem) => cartItem.id === item.id)
+                        .reduce(
+                          (total, cartItem) => total + cartItem.quantity,
+                          0,
+                        )
+
+                      return (
+                        <div
+                          key={item.id}
+                          style={{ animationDelay: `${idx * 50}ms` }}
+                          className="bg-[#18382D]/80 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 cursor-pointer group flex flex-col"
+                          onClick={() => {
+                            router.push(
+                              `/menu/${encodeURIComponent(item.id)}${
+                                tableDataParam
+                                  ? `?tabledata=${encodeURIComponent(tableDataParam)}`
+                                  : ''
+                              }`,
+                            )
+                          }}
+                        >
+                          {/* Image display */}
+                          <div className="w-full h-60 relative">
+                            <Image
+                              src={imageSrc}
+                              alt={item.name}
+                              fill
+                              className="object-cover rounded-t-3xl"
+                              sizes="(max-width: 768px) 100vw, 33vw"
+                              priority={idx < 6}
+                            />
+                          </div>
+                          <div className="flex-1 flex flex-col justify-between p-4">
+                            <div>
+                              <h3 className="text-2xl font-serif font-bold text-white mb-2">
+                                {item.name}
+                              </h3>
+                              <p className="text-md font-serif text-gray-200 mb-4">
+                                {item.description}
+                              </p>
+                            </div>
+                            <div className="flex items-end justify-between mt-2">
+                              <span className="text-xl font-serif font-bold text-[#FFC600]">
+                                ₹ {item.price.toFixed(0)}
+                              </span>
+                              <button
+                                className="ml-2 w-10 h-10 flex items-center justify-center rounded-full bg-[#FFC600] hover:bg-[#FFD700] transition-all shadow-lg"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (item.available) {
+                                    openModal(item)
+                                  }
+                                }}
+                                disabled={!item.available}
+                              >
+                                <FiPlus size={24} className="text-white" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                )
-              })}
-          </div>
-        ) : (
-          <div
-            className="flex items-center justify-center min-h-[100vh] w-full"
-            style={{
-              backgroundImage: 'url("/bg-image.png")',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              backgroundAttachment: 'fixed',
-              opacity: 1,
-            }}
-          >
-            <div className="bg-[#23272F]/90 rounded-2xl shadow-2xl border border-[#FFC600]/30 px-6 py-12 flex flex-col items-center max-w-sm w-full animate-fadein justify-center">
-              <div className="mb-6 flex flex-col items-center">
-                <div className="bg-gradient-to-br from-[#FFC600]/80 to-[#FFD700]/60 rounded-full w-16 h-16 flex items-center justify-center border-4 border-[#FFC600] shadow-lg">
-                  <FiSearch className="text-3xl text-[#FFC600]" />
-                </div>
-                <span className="mt-2 text-[#FFC600] font-serif font-bold text-lg">
-                  No Results
-                </span>
-              </div>
-              <h2 className="text-xl font-serif font-bold text-white mb-2 text-center">
-                Nothing matches your search
-              </h2>
-              <p className="text-md text-[#FFD700] mb-6 text-center font-serif">
-                <span className="font-semibold text-[#FFC600]">
-                  "{searchTerm}"
-                </span>{' '}
-                not found.
-                <br />
-                Try a different keyword or explore categories below.
-              </p>
-              <button
-                onClick={() => setSearchTerm('')}
-                className="px-5 py-2 bg-gradient-to-r from-[#FFC600] to-[#FFD700] text-[#23272F] rounded-full border border-[#FFC600]/40 font-bold shadow hover:from-[#FFD700] hover:to-[#FFC600] transition-all font-serif"
-              >
-                Clear Search
-              </button>
-              <div className="mt-8 w-full flex flex-col items-center">
-                <span className="text-xs text-gray-400 mb-2 font-serif">
-                  Tip: Use short keywords for better results.
-                </span>
-                <button
-                  onClick={() => setShowSearch(false)}
-                  className="text-[#FFC600] underline text-sm font-serif hover:text-[#FFD700]"
-                >
-                  Browse All Items
-                </button>
-              </div>
-            </div>
-          </div>
+                </>
+              )
+            })()}
+          </>
         )}
         {/* Enhanced Modal for quantity/add-ons selection */}
         {showModal && modalItem && (
@@ -713,26 +711,26 @@ function MenuContent() {
       {/* Floating Cart Icon */}
       <Link
         href={`/cart?tabledata=${tableDataParam ? encodeURIComponent(tableDataParam) : ''}`}
-        className="fixed bottom-24 right-2 z-50"
+        className="fixed bottom-24 right-3 z-50"
         style={{ textDecoration: 'none' }}
       >
         <div
-          className="flex items-center justify-center px-5 py-2 rounded-full shadow-lg border border-[#FFD700]/40"
+          className="flex items-center justify-center px-3 py-1.5 rounded-full shadow-lg border border-[#FFD700]/40"
           style={{
             background: '#C9A227',
             boxShadow: '0 2px 12px 0 rgba(200,160,25,0.18)',
-            minWidth: '90px',
-            minHeight: '44px',
+            minWidth: '60px',
+            minHeight: '36px',
             fontFamily: 'serif',
           }}
         >
-          <FiShoppingBag size={22} className="text-white mr-2" />
-          <span className="text-white text-[1.25rem] font-serif font-normal mr-2">
+          <FiShoppingBag size={18} className="text-white mr-1" />
+          <span className="text-white text-[1rem] font-serif font-normal mr-1">
             {cart.reduce((total, item) => total + item.quantity, 0)}
           </span>
           <span
-            className="text-white text-[1.25rem] font-serif font-normal"
-            style={{ borderLeft: '1.5px solid #e5c76b', paddingLeft: '12px' }}
+            className="text-white text-[1rem] font-serif font-normal"
+            style={{ borderLeft: '1px solid #e5c76b', paddingLeft: '8px' }}
           >
             ₹
             {cart.reduce(

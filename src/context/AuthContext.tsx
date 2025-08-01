@@ -127,6 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     localStorage.removeItem('token')
     setUser(null)
+    window.location.href = '/login'
   }
 
   // Function to refresh user data

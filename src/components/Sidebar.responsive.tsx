@@ -16,6 +16,7 @@ import { FiChevronDown, FiChevronRight } from 'react-icons/fi'
 import { LuUsers } from 'react-icons/lu'
 import { MdOutlineInventory, MdOutlineTableBar } from 'react-icons/md'
 import { SlBadge } from 'react-icons/sl'
+import { useAuth } from '@/context/AuthContext'
 
 const menuSections = [
   {
@@ -55,7 +56,7 @@ const menuSections = [
         icon: <SettingOutlined />,
       },
       { label: 'Help', href: '/dashboard/help', icon: <BiHelpCircle /> },
-      { label: 'Logout', href: '/dashboard/logout', icon: <LogoutOutlined /> },
+      { label: 'Logout', href: '/login', icon: <LogoutOutlined /> },
     ],
   },
 ]
@@ -75,6 +76,7 @@ const Sidebar: React.FC = () => {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>('MENU')
+  const { logout } = useAuth() // <-- Use AuthContext logout
 
   // Listen for custom event from Navbar to open sidebar
   React.useEffect(() => {
@@ -133,23 +135,37 @@ const Sidebar: React.FC = () => {
                 >
                   {section.items.map((item) => (
                     <div key={item.href}>
-                      <a
-                        href={item.href}
-                        className={`flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold
-                          hover:bg-[#e6f9f0] 
-                          ${pathname === item.href ? 'text-[#1A1A1A]' : 'text-[#4D4D4D]'}
-                        `}
-                      >
-                        {pathname === item.href && (
-                          <p className="h-[35px] absolute left-0 rounded-tr-lg rounded-br-lg w-[6px] shadow-inner shadow-white/[0.5] border-[#04B851]/[0.1] border-r border-t border-b bg-[#04B851]"></p>
-                        )}
-                        <span
-                          className={`text-xl ${pathname === item.href ? 'text-[#04B851]' : 'text-[#4D4D4D]'} ${section.title === 'MENU' && pathname === item.href ? 'font-bold' : ''}`}
+                      {item.label === 'Logout' ? (
+                        <button
+                          className={`flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold hover:bg-[#e6f9f0] text-[#4D4D4D] w-full`}
+                          onClick={() => {
+                            logout()
+                          }}
                         >
-                          {item.icon}
-                        </span>
-                        {item.label}
-                      </a>
+                          <span className="text-xl text-[#4D4D4D]">
+                            {item.icon}
+                          </span>
+                          {item.label}
+                        </button>
+                      ) : (
+                        <a
+                          href={item.href}
+                          className={`flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold
+                            hover:bg-[#e6f9f0] 
+                            ${pathname === item.href ? 'text-[#1A1A1A]' : 'text-[#4D4D4D]'}
+                          `}
+                        >
+                          {pathname === item.href && (
+                            <p className="h-[35px] absolute left-0 rounded-tr-lg rounded-br-lg w-[6px] shadow-inner shadow-white/[0.5] border-[#04B851]/[0.1] border-r border-t border-b bg-[#04B851]"></p>
+                          )}
+                          <span
+                            className={`text-xl ${pathname === item.href ? 'text-[#04B851]' : 'text-[#4D4D4D]'} ${section.title === 'MENU' && pathname === item.href ? 'font-bold' : ''}`}
+                          >
+                            {item.icon}
+                          </span>
+                          {item.label}
+                        </a>
+                      )}
                     </div>
                   ))}
                 </motion.div>
@@ -268,24 +284,39 @@ const Sidebar: React.FC = () => {
                     >
                       {section.items.map((item) => (
                         <div key={item.href}>
-                          <a
-                            href={item.href}
-                            className={`flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold
-                              hover:bg-[#e6f9f0] 
-                              ${pathname === item.href ? 'text-[#1A1A1A]' : 'text-[#4D4D4D]'}
-                            `}
-                            onClick={() => setOpen(false)}
-                          >
-                            {pathname === item.href && (
-                              <p className="h-[35px] absolute left-0 rounded-tr-lg rounded-br-lg w-[6px] shadow-inner shadow-white/[0.5] border-[#04B851]/[0.1] border-r border-t border-b bg-[#04B851]"></p>
-                            )}
-                            <span
-                              className={`text-xl ${pathname === item.href ? 'text-[#04B851]' : 'text-[#4D4D4D]'} ${section.title === 'MENU' && pathname === item.href ? 'font-bold' : ''}`}
+                          {item.label === 'Logout' ? (
+                            <button
+                              className="flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold hover:bg-[#e6f9f0] text-[#4D4D4D] w-full"
+                              onClick={() => {
+                                setOpen(false)
+                                logout()
+                              }}
                             >
-                              {item.icon}
-                            </span>
-                            {item.label}
-                          </a>
+                              <span className="text-xl text-[#4D4D4D]">
+                                {item.icon}
+                              </span>
+                              {item.label}
+                            </button>
+                          ) : (
+                            <a
+                              href={item.href}
+                              className={`flex items-center tracking-tight gap-3 px-3 py-2 rounded transition-colors font-inter-semibold
+                                hover:bg-[#e6f9f0] 
+                                ${pathname === item.href ? 'text-[#1A1A1A]' : 'text-[#4D4D4D]'}
+                              `}
+                              onClick={() => setOpen(false)}
+                            >
+                              {pathname === item.href && (
+                                <p className="h-[35px] absolute left-0 rounded-tr-lg rounded-br-lg w-[6px] shadow-inner shadow-white/[0.5] border-[#04B851]/[0.1] border-r border-t border-b bg-[#04B851]"></p>
+                              )}
+                              <span
+                                className={`text-xl ${pathname === item.href ? 'text-[#04B851]' : 'text-[#4D4D4D]'} ${section.title === 'MENU' && pathname === item.href ? 'font-bold' : ''}`}
+                              >
+                                {item.icon}
+                              </span>
+                              {item.label}
+                            </a>
+                          )}
                         </div>
                       ))}
                     </motion.div>
