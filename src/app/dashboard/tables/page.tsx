@@ -220,7 +220,7 @@ export default function TablesPage() {
           const header = document.createElement('div')
           header.style.marginBottom = '12px'
           header.innerHTML = `
-          <div style="font-weight: 700; font-size: 22px; color: #000; margin-bottom: 4px;">Work Brew Cafe</div>
+          <div style="font-weight: 700; font-size: 22px; color: #000; margin-bottom: 4px;">The Brewery</div>
           <div style="font-weight: 600; font-size: 16px; color: #4b5563;">${tableData.name}</div>
         `
           qrElement.appendChild(header)

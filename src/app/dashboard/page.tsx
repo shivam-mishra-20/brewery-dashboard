@@ -1236,8 +1236,6 @@ export default function Dashboard() {
                         month: item.month,
                         sales: item.revenue, // reusing the sales field for revenue
                       }))}
-                      color="#10b981"
-                      label="Monthly Revenue Trend"
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">

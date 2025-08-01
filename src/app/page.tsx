@@ -7,7 +7,7 @@ import { FiCoffee, FiShield, FiTrendingUp, FiTruck } from 'react-icons/fi'
 export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const tabledata = searchParams.get('tabledata')
+  const tabledata = searchParams?.get('tabledata')
 
   useEffect(() => {
     // If there's tabledata in the URL, redirect to our menu page

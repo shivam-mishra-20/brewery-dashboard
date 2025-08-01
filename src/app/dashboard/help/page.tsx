@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: 'How do I contact support?',
-    a: 'Use the contact options below or email us at support@workbrewcafe.com.',
+    a: 'Use the contact options below or email us at support@thebrewerycafe.com.',
   },
 ]
 
@@ -80,10 +80,10 @@ export default function HelpPage() {
           </h2>
           <div className="flex flex-col gap-3">
             <a
-              href="mailto:support@workbrewcafe.com"
+              href="mailto:support@thebrewerycafe.com"
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#e6f9f0] border border-[#04B851] text-[#04B851] font-semibold shadow hover:bg-[#04B851] hover:text-white transition w-fit"
             >
-              <BsEnvelope /> Email: support@workbrewcafe.com
+              <BsEnvelope /> Email: support@thebrewerycafe.com
             </a>
             <a
               href="https://wa.me/919999999999"

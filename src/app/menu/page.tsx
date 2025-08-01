@@ -49,7 +49,7 @@ function MenuContent() {
   } | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata')
   const [searchTerm, setSearchTerm] = useState('')
   const [showSearch, setShowSearch] = useState(false)
 
@@ -359,8 +359,8 @@ function MenuContent() {
               </button>
             ))}
           </div>
-          <hr className="border-t border-white/20 mt-4" />
         </div>
+        <hr className="border-t border-white/20 py-4" />
 
         {/* Menu items grid */}
         {loadingMenu ? (
@@ -397,7 +397,7 @@ function MenuContent() {
                       </h2>
                       <p className="text-md text-[#FFD700] mb-6 text-center font-serif">
                         <span className="font-semibold text-[#FFC600]">
-                          "{searchTerm}"
+                          &quot;{searchTerm}&quot;
                         </span>{' '}
                         not found.
                         <br />
@@ -431,13 +431,6 @@ function MenuContent() {
                         item.imageURL ||
                         item.image ||
                         '/placeholder-food.jpg'
-
-                      const totalItemQuantity = cart
-                        .filter((cartItem) => cartItem.id === item.id)
-                        .reduce(
-                          (total, cartItem) => total + cartItem.quantity,
-                          0,
-                        )
 
                       return (
                         <div
@@ -846,7 +839,7 @@ function IntroPage() {
 
 function MenuPageContent() {
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata')
 
   // If no tabledata, show intro page
   if (!tableDataParam) {

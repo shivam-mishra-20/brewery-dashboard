@@ -104,7 +104,7 @@ export default function ProductDetailPage() {
   // But for SSR/Next.js, use the segment from the params if available
   // We'll use searchParams.get('id') as fallback, but Next.js should pass params
   // If you want to use params, you can accept them as a prop
-  const tabledata = searchParams.get('tabledata') || ''
+  const tabledata = searchParams?.get('tabledata') || ''
 
   // Handle add-on selection
   const handleAddOnToggle = (name: string) => {

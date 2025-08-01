@@ -24,7 +24,7 @@ interface MenuItem {
 
 function MenuContent() {
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata')
 
   const [activeCategory, setActiveCategory] = useState('all')
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
@@ -398,7 +398,7 @@ function IntroPage() {
         <p className="text-lg text-gray-700 mb-6 mt-3 text-center">
           Your favorite spot for coffee, comfort, and creativity.
         </p>
-        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-primary to-secondary border border-primary/[0.1] shadow-white/[0.5] shadow-inner rounded-xl px-4 py-3 shadow-inner">
+        <div className="flex items-center text-center gap-2 bg-gradient-to-tr from-primary to-secondary border border-primary/[0.1] shadow-white/[0.5] rounded-xl px-4 py-3 shadow-inner">
           <FiTruck className="text-white text-2xl" />
           <span className="font-semibold text-white text-lg">
             Delivery &amp; Takeaway options are coming soon!
@@ -411,7 +411,7 @@ function IntroPage() {
 
 function MenuPageContent() {
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata')
 
   // If no tabledata, show intro page
   if (!tableDataParam) {

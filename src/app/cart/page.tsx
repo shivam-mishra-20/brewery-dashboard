@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -14,16 +13,45 @@ import {
 import { useCart } from '@/context/CartContext'
 import { getAllMenuItems } from '@/services/menuService'
 
+// Add import for decryptTableData
+// import { decryptTableData } from '@/utils/tableEncryption'
+
 export default function CartPage() {
-  const {
-    cart,
-    removeFromCart,
-    clearCart,
-    updateQuantity,
-    updateInstructions,
-  } = useCart()
+  const { cart, removeFromCart, updateQuantity, updateInstructions } = useCart()
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata') || ''
+
+  // Table info state
+  const [tableInfo, setTableInfo] = useState<{
+    tableId: string
+    tableName: string
+    tableNumber: string
+  } | null>(null)
+
+  // Fetch table info (same logic as menu page)
+  useEffect(() => {
+    if (tableDataParam) {
+      import('@/utils/tableEncryption').then(({ decryptTableData }) => {
+        try {
+          const decodedData = decodeURIComponent(tableDataParam)
+          const tableData = decryptTableData(decodedData)
+          if (tableData) {
+            setTableInfo(tableData)
+            sessionStorage.setItem('tableInfo', JSON.stringify(tableData))
+          } else {
+            setTableInfo(null)
+          }
+        } catch {
+          setTableInfo(null)
+        }
+      })
+    } else {
+      const storedTableInfo = sessionStorage.getItem('tableInfo')
+      if (storedTableInfo) {
+        setTableInfo(JSON.parse(storedTableInfo))
+      }
+    }
+  }, [tableDataParam])
 
   const menuHref = tableDataParam
     ? `/menu?tabledata=${encodeURIComponent(tableDataParam)}`
@@ -332,7 +360,7 @@ export default function CartPage() {
             <div className="mb-3 flex items-center justify-between">
               <span className="text-white text-sm">Table Number</span>
               <span className="bg-[#0A4435] text-white px-3 py-1 rounded-md text-sm font-medium">
-                {tableDataParam ? tableDataParam.slice(-2) : '—'}
+                {tableInfo?.tableNumber ? tableInfo.tableNumber : '—'}
               </span>
             </div>
             <div className="mb-2 flex items-center justify-between">

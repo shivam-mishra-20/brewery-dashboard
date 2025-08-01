@@ -9,7 +9,7 @@ export default function Overview() {
   const [activeCategory, setActiveCategory] = useState<string>('Cappuccino')
   const [categories, setCategories] = useState<string[]>([])
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata')
 
   useEffect(() => {
     async function fetchMenu() {

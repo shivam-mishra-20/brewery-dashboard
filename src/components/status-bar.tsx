@@ -21,7 +21,7 @@ export default function StatusBar({
   onSortClick?: () => void
 }) {
   const searchParams = useSearchParams()
-  const tabledata = searchParams.get('tabledata')
+  const tabledata = searchParams?.get('tabledata')
   const tableInfo = tabledata ? decodeTableData(tabledata) : null
 
   return (

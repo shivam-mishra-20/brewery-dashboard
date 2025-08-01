@@ -11,10 +11,7 @@ import {
   FiCheck,
   FiClock,
   FiCoffee,
-  FiCreditCard,
-  FiDollarSign,
   FiInfo,
-  FiPackage,
   FiRefreshCw,
   FiSearch,
   FiShoppingBag,
@@ -57,8 +54,8 @@ interface Order {
 
 function OrdersContent() {
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
-  const searchParam = searchParams.get('search')
+  const tableDataParam = searchParams?.get('tabledata')
+  const searchParam = searchParams?.get('search')
   const [orders, setOrders] = useState<Order[]>([])
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
   const [searchQuery, setSearchQuery] = useState(searchParam || '')
@@ -465,11 +462,6 @@ function OrdersContent() {
     setExpandedOrderId((prevId) => (prevId === orderId ? null : orderId))
   }
 
-  // Helper function to check if order has items
-  const hasOrderItems = (order: Order) => {
-    return order.items && Array.isArray(order.items) && order.items.length > 0
-  }
-
   // Function to manually refresh orders
   const handleManualRefresh = () => {
     fetchOrders()
@@ -658,95 +650,6 @@ function OrdersContent() {
     } finally {
       setLoading(false)
     }
-  }
-
-  // Function to get appropriate status styling
-  const getStatusStyles = (status: OrderStatus) => {
-    switch (status) {
-      case 'pending':
-        return {
-          bg: 'bg-yellow-100',
-          text: 'text-yellow-700',
-          icon: <FiClock className="mr-1" />,
-        }
-      case 'preparing':
-        return {
-          bg: 'bg-blue-100',
-          text: 'text-blue-700',
-          icon: <FiCoffee className="mr-1" />,
-        }
-      case 'ready':
-        return {
-          bg: 'bg-green-100',
-          text: 'text-green-700',
-          icon: <FiPackage className="mr-1" />,
-        }
-      case 'completed':
-        return {
-          bg: 'bg-green-500',
-          text: 'text-white',
-          icon: <FiCheck className="mr-1" />,
-        }
-      case 'cancelled':
-        return {
-          bg: 'bg-red-100',
-          text: 'text-red-700',
-          icon: <FiX className="mr-1" />,
-        }
-      default:
-        return {
-          bg: 'bg-gray-100',
-          text: 'text-gray-700',
-          icon: <FiInfo className="mr-1" />,
-        }
-    }
-  }
-
-  // Function to get payment status styling and label
-  const getPaymentStatusDisplay = (order: Order) => {
-    let label = ''
-    let bg = ''
-    let text = ''
-    let icon = null
-    let extra = ''
-    const isCash = order.paymentMethod === 'cash'
-    // const isOnline = order.paymentMethod === 'online'
-    if (order.paymentStatus === 'paid') {
-      if (isCash) {
-        label = 'Cash Paid'
-        bg = 'bg-green-100'
-        text = 'text-green-700'
-        icon = <FiCheck className="mr-1" />
-      } else {
-        label = 'Online Paid'
-        bg = 'bg-green-100'
-        text = 'text-green-700'
-        icon = <FiCheck className="mr-1" />
-      }
-    } else if (
-      order.paymentStatus === 'pending' ||
-      order.paymentStatus === 'unpaid'
-    ) {
-      if (isCash) {
-        label = 'Cash Pending'
-        bg = 'bg-yellow-100'
-        text = 'text-yellow-700'
-        icon = <FiClock className="mr-1" />
-        // Show cash left to be collected
-        extra = `₹${order.totalAmount.toFixed(2)} left to collect`
-      } else {
-        label = 'Online Pending'
-        bg = 'bg-yellow-100'
-        text = 'text-yellow-700'
-        icon = <FiClock className="mr-1" />
-      }
-    } else {
-      label = 'Unknown'
-      bg = 'bg-gray-100'
-      text = 'text-gray-700'
-      icon = <FiInfo className="mr-1" />
-    }
-    return { label, bg, text, icon, extra }
   }
 
   // Format date to a readable format

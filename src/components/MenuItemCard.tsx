@@ -3,7 +3,7 @@
 import '@/styles/menu-carousel.css'
 import { AnimatePresence, easeInOut, motion } from 'framer-motion'
 import Image from 'next/image'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   BsChevronLeft,
   BsChevronRight,
@@ -55,9 +55,9 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
   const hasAddOns = Boolean(item.addOns && item.addOns.length > 0)
 
   // Carousel control
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % images.length)
-  }
+  }, [images.length])
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + images.length) % images.length)

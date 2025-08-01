@@ -41,7 +41,7 @@ export default function MenuPage() {
   // Load categories on mount
   useEffect(() => {
     loadCategories()
-  }, [])
+  }, [loadCategories])
 
   // Load menu items when selectedCategory changes
   useEffect(() => {

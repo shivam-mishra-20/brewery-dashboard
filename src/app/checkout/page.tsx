@@ -17,7 +17,7 @@ import { PaymentDetails, processPayment } from '@/services/paymentService'
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart()
   const searchParams = useSearchParams()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata')
   const router = useRouter()
 
   const [loading, setLoading] = useState(false)

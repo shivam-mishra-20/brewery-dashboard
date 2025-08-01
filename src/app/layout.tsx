@@ -7,7 +7,7 @@ import { CartProvider } from '@/context/CartContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 
 export const metadata: Metadata = {
-  title: 'Work Brew Cafe',
+  title: 'The Brewery',
   description:
     'Order management, analytics, and operations for cafes & restaurants.',
   icons: {

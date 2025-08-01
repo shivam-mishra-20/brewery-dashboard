@@ -59,7 +59,7 @@ const Navbar: React.FC = () => {
 
   // Initialize search query from URL if present
   useEffect(() => {
-    const search = searchParams.get('search') || searchParams.get('q')
+    const search = searchParams?.get('search') || searchParams?.get('q')
     if (search) {
       setSearchQuery(search)
     }

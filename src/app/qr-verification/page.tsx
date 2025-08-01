@@ -17,7 +17,7 @@ interface TableInfo {
 
 export default function QrCodeVerification() {
   const searchParams = useSearchParams()
-  const encryptedTableDataRaw = searchParams.get('tabledata')
+  const encryptedTableDataRaw = searchParams?.get('tabledata')
   const encryptedTableData = encryptedTableDataRaw
     ? decodeURIComponent(encryptedTableDataRaw)
     : null
@@ -120,7 +120,7 @@ export default function QrCodeVerification() {
       isMounted = false
       if (countdownRef.current) clearInterval(countdownRef.current)
     }
-  }, [router, encryptedTableData])
+  }, [router, encryptedTableData, encryptedTableDataRaw])
 
   const handleContinue = () => {
     // Preserve the original encrypted table data in the URL

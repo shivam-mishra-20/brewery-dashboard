@@ -63,6 +63,10 @@ export const processPayment = async (
       })
 
       if (orderResponse.success) {
+        // Clear cart after successful order creation
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cart')
+        }
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search)
         const tableDataParam = urlParams.get('tabledata') || ''
@@ -100,7 +104,7 @@ export const processPayment = async (
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       amount: paymentDetails.amount * 100, // Razorpay expects amount in lowest currency unit (paise)
       currency: paymentDetails.currency,
-      name: 'Work Brew Café',
+      name: 'The Brewery',
       description: `Order for table ${paymentDetails.tableNumber}`,
       order_id: orderResponse.orderId,
       handler: async function (response: any) {
@@ -149,6 +153,10 @@ export const processPayment = async (
         paymentObject.off('payment.success', handlePaymentSuccess)
         paymentObject.off('payment.error', handlePaymentError)
 
+        // Clear cart after successful payment
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cart')
+        }
         // Resolve with success
         resolve({
           success: true,

@@ -15,7 +15,7 @@ const navItems = [
 export default function BottomNavBar() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
-  const tableDataParam = searchParams.get('tabledata')
+  const tableDataParam = searchParams?.get('tabledata')
   const { cart } = useCart?.() || { cart: [] }
 
   // Calculate cart count
@@ -34,7 +34,7 @@ export default function BottomNavBar() {
       }}
     >
       {navItems.map((item) => {
-        const isActive = pathname.startsWith(item.href)
+        const isActive = pathname?.startsWith(item.href)
         const href = tableDataParam
           ? `${item.href}?tabledata=${encodeURIComponent(tableDataParam)}`
           : item.href

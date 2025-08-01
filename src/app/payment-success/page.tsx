@@ -11,8 +11,8 @@ export default function PaymentSuccessPage() {
   const [countdown, setCountdown] = useState(5)
 
   // Get orderId and tabledata from URL params
-  const orderId = searchParams.get('orderId')
-  const tabledata = searchParams.get('tabledata') || ''
+  const orderId = searchParams?.get('orderId')
+  const tabledata = searchParams?.get('tabledata') || ''
 
   // Redirect to orders page after countdown
   useEffect(() => {

@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 
 export default function TableRedirect() {
   const searchParams = useSearchParams()
-  const tabledata = searchParams.get('tabledata')
+  const tabledata = searchParams?.get('tabledata')
   const router = useRouter()
 
   useEffect(() => {

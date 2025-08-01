@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AiOutlinePlus } from 'react-icons/ai'
 import { BiSearch } from 'react-icons/bi'
 import { GrPowerReset } from 'react-icons/gr'
@@ -29,7 +29,8 @@ export default function SuppliersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const loadSuppliers = async () => {
+  // Wrap loadSuppliers in useCallback to avoid warning
+  const loadSuppliers = useCallback(async () => {
     setIsLoading(true)
     try {
       const allSuppliers = await getAllSuppliers(false) // Get all suppliers including inactive ones
@@ -45,7 +46,7 @@ export default function SuppliersPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [showInactive])
 
   // Load suppliers on mount
   useEffect(() => {

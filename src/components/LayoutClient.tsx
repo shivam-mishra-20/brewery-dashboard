@@ -11,7 +11,7 @@ export default function LayoutClient({
 }) {
   const pathname = usePathname()
   const hideBottomNav =
-    pathname.startsWith('/dashboard') ||
+    pathname?.startsWith('/dashboard') ||
     pathname === '/login' ||
     pathname === '/' ||
     pathname === '/not-found' ||

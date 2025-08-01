@@ -73,7 +73,7 @@ const Sidebar: React.FC = () => {
             width={50}
           />
           <h2 className="text-xl tracking-tighter font-inter-semibold pt-1">
-            Work Brew
+            The Brewery
           </h2>
         </div>
       </div>

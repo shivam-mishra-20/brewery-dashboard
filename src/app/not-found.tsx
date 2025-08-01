@@ -23,7 +23,7 @@ export default function NotFound() {
         </Link>
       </div>
       <div className="mt-10 text-gray-400 text-sm">
-        Work Brew Café Dashboard
+        The Brewery Café Dashboard
       </div>
     </div>
   )

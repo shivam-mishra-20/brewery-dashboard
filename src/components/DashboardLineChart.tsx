@@ -28,13 +28,11 @@ import {
 
 type DashboardLineChartProps = {
   data: Array<{ month: string; sales: number }>
-  color?: string
   label?: string
 }
 
 const DashboardLineChart: React.FC<DashboardLineChartProps> = ({
   data,
-  color = '#04B851',
   label = 'Monthly Sales Trend',
 }) => (
   <div className="w-full px-5 h-full flex flex-col items-start justify-center bg-[#F9FAFB] rounded-2xl">
