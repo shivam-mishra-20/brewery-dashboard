@@ -153,7 +153,7 @@ function LoginPage() {
               </button>
               {/* Sign up link */}
               <div className="text-center mt-4 font-serif text-white text-sm">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <button
                   type="button"
                   className="text-[#FFD700] underline hover:text-[#FFC600] transition"
