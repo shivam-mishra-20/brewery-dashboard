@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import { CiSearch } from 'react-icons/ci'
-import { HiOutlineBell, HiOutlineEnvelope } from 'react-icons/hi2'
+//import { HiOutlineBell, HiOutlineEnvelope } from 'react-icons/hi2'
 import { IoMdClose } from 'react-icons/io'
 import { IoLogInOutline } from 'react-icons/io5'
 import { useAuth } from '@/context/AuthContext'
@@ -101,14 +101,14 @@ const Navbar: React.FC = () => {
           </svg>
         </button>
         <div className="flex gap-3 items-center">
-          <HiOutlineEnvelope
+          {/*<HiOutlineEnvelope
             className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
             style={{ fontSize: 40 }}
           />
           <HiOutlineBell
             className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
             style={{ fontSize: 40 }}
-          />
+          />*/}
           <Image
             src="/avatar.svg"
             alt="User Avatar"
@@ -197,14 +197,14 @@ const Navbar: React.FC = () => {
         </button>
       </form>
       <div className="hidden sm:flex gap-5 flex-row w-auto items-center justify-end order-1 sm:order-2">
-        <HiOutlineEnvelope
+        {/*<HiOutlineEnvelope
           className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
           style={{ fontSize: 48 }}
         />
         <HiOutlineBell
           className="font-bold bg-white p-3 rounded-full text-[#04B851] border border-[#E0E0E0]"
           style={{ fontSize: 48 }}
-        />
+        />*/}
         <div className="flex items-center">
           <Image
             src="/avatar.svg"

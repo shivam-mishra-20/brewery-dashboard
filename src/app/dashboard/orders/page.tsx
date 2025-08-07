@@ -563,11 +563,11 @@ export default function OrdersPage() {
                   <Tag
                     color={
                       selectedOrder.paymentStatus === 'paid'
-                        ? '#04B851'
+                        ? 'green'
                         : selectedOrder.paymentStatus === 'pending'
-                          ? '#F2C94C'
+                          ? 'gold'
                           : selectedOrder.paymentStatus === 'unpaid'
-                            ? '#EB5757'
+                            ? 'red'
                             : 'default'
                     }
                   >
@@ -580,18 +580,86 @@ export default function OrdersPage() {
               </Descriptions.Item>
               <Descriptions.Item label="Payment Method">
                 {selectedOrder.paymentMethod ? (
-                  <Tag
-                    color={
-                      selectedOrder.paymentMethod === 'online'
-                        ? '#039f45'
-                        : selectedOrder.paymentMethod === 'cash'
-                          ? '#F2C94C'
-                          : 'default'
-                    }
-                  >
-                    {selectedOrder.paymentMethod.charAt(0).toUpperCase() +
-                      selectedOrder.paymentMethod.slice(1)}
-                  </Tag>
+                  <>
+                    <Tag
+                      color={
+                        selectedOrder.paymentMethod === 'online'
+                          ? 'blue'
+                          : selectedOrder.paymentMethod === 'cash'
+                            ? 'orange'
+                            : 'default'
+                      }
+                    >
+                      {selectedOrder.paymentMethod.charAt(0).toUpperCase() +
+                        selectedOrder.paymentMethod.slice(1)}
+                    </Tag>
+                    {/* Mark Paid/Unpaid for cash payments */}
+                    {selectedOrder.paymentMethod === 'cash' && (
+                      <Space className="ml-2">
+                        <Button
+                          size="small"
+                          type={
+                            selectedOrder.paymentStatus === 'paid'
+                              ? 'default'
+                              : 'primary'
+                          }
+                          disabled={selectedOrder.paymentStatus === 'paid'}
+                          onClick={async () => {
+                            try {
+                              await updateOrderStatus({
+                                id: selectedOrder.id,
+                                paymentStatus: 'paid',
+                              })
+                              message.success('Marked as Paid')
+                              fetchOrders()
+                              setSelectedOrder({
+                                ...selectedOrder,
+                                paymentStatus: 'paid',
+                              })
+                              window.dispatchEvent(
+                                new Event('order-payment-status-changed'),
+                              )
+                            } catch (err) {
+                              message.error('Failed to update payment status')
+                            }
+                          }}
+                        >
+                          Mark as Paid
+                        </Button>
+                        <Button
+                          size="small"
+                          danger
+                          type={
+                            selectedOrder.paymentStatus === 'unpaid'
+                              ? 'default'
+                              : 'primary'
+                          }
+                          disabled={selectedOrder.paymentStatus === 'unpaid'}
+                          onClick={async () => {
+                            try {
+                              await updateOrderStatus({
+                                id: selectedOrder.id,
+                                paymentStatus: 'unpaid',
+                              })
+                              message.success('Marked as Unpaid')
+                              fetchOrders()
+                              setSelectedOrder({
+                                ...selectedOrder,
+                                paymentStatus: 'unpaid',
+                              })
+                              window.dispatchEvent(
+                                new Event('order-payment-status-changed'),
+                              )
+                            } catch (err) {
+                              message.error('Failed to update payment status')
+                            }
+                          }}
+                        >
+                          Mark as Unpaid
+                        </Button>
+                      </Space>
+                    )}
+                  </>
                 ) : (
                   <Text type="secondary">Not Available</Text>
                 )}

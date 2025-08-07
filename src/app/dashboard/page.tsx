@@ -116,13 +116,14 @@ export default function Dashboard() {
           const pending = orders.filter((o: any) =>
             ['pending', 'preparing', 'ready'].includes(o.status),
           )
+          setPendingOrders(pending) // <-- Now stores all pending orders
 
           // Stats
           setStats({
             totalSales: completed.length,
             activeCustomers: new Set(pending.map((o: any) => o.customerName))
               .size,
-            pendingOrders: pending.length,
+            pendingOrders: pending.length, // <-- This will always match the actual number of pending orders
             revenue: completed.reduce(
               (sum: number, o: any) => sum + (o.totalAmount || 0),
               0,
@@ -144,7 +145,7 @@ export default function Dashboard() {
           )
 
           // Pending
-          setPendingOrders(pending.slice(0, 5))
+          setPendingOrders(pending)
 
           // Active customers with pending orders
           const customerMap = new Map()
@@ -886,7 +887,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => setSalesModal(false)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-[#04B851] to-[#039f45] text-white font-medium shadow-inner shadow-white/[0.5] border border-[#04B851]/10"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-tr from-primary to-secondary text-white font-medium shadow-inner shadow-white/[0.5] border border-[#04B851]/10"
                 >
                   Close
                 </motion.button>
@@ -1088,20 +1089,45 @@ export default function Dashboard() {
                               )}
                             </div>
                             <span className="text-xs text-gray-500">
-                              {order.customerName || 'Guest'} •
+                              {order.customerName || '-'} •
                               {order.createdAt
                                 ? new Date(order.createdAt).toLocaleTimeString()
-                                : ''}
+                                : '-'}
                             </span>
                           </div>
                           <span
                             className={`px-2 py-1 rounded-full text-xs ${
                               order.status === 'ready'
-                                ? 'bg-[#e6f9f0] text-[#2ECC71] border border-[#2ECC71]/30'
-                                : order.status === 'preparing'
-                                  ? 'bg-[#F2C94C]/20 text-[#F2C94C] border border-[#F2C94C]/30'
-                                  : 'bg-[#e6f9f0] text-[#04B851] border border-[#04B851]/30'
+                                ? 'bg-primary text-white'
+                                : 'bg-yellow-100 text-yellow-700'
                             }`}
+                            onClick={async () => {
+                              // Update order status: Ready -> Completed, Pending/Preparing -> Ready
+                              let nextStatus:
+                                | 'pending'
+                                | 'preparing'
+                                | 'ready'
+                                | 'completed'
+                                | 'cancelled' = 'ready'
+                              if (order.status.toLowerCase() === 'ready')
+                                nextStatus = 'completed'
+                              else if (
+                                order.status.toLowerCase() === 'preparing'
+                              )
+                                nextStatus = 'ready'
+                              else if (order.status.toLowerCase() === 'pending')
+                                nextStatus = 'preparing'
+                              // Dynamically import orderService
+                              const { orderService } = await import(
+                                '@/services/orderService'
+                              )
+                              await orderService.updateOrderStatus({
+                                id: order.id,
+                                status: nextStatus,
+                              })
+                              // Refetch dashboard data to update UI immediately
+                              fetchDashboardData()
+                            }}
                           >
                             {order.status.charAt(0).toUpperCase() +
                               order.status.slice(1)}
@@ -1547,4 +1573,6 @@ export default function Dashboard() {
 //       Manage All Orders
 //     </button>
 //   </div>
+// </div>
+// </div>
 // </div>
